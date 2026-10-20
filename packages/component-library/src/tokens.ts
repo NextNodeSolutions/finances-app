@@ -45,13 +45,54 @@ export const spacing: Record<SpacingSize, number> = {
   xl: 24,
 };
 
-type RadiusSize = 'sm' | 'sheet' | 'pill';
+type RadiusSize = 'xs' | 'sm' | 'md' | 'lg' | 'xl' | 'sheet' | 'pill';
 
+// Concentric scale: badges (xs) sit in controls (sm/md), controls sit in
+// cards (lg), cards sit in trays and modals (xl).
 export const radius: Record<RadiusSize, number> = {
-  sm: 4,
+  xs: 4,
+  sm: 6,
+  md: 8,
+  lg: 12,
+  xl: 16,
   sheet: 18,
   pill: 999,
 };
+
+type ElevationLevel =
+  | 'xs'
+  | 'card'
+  | 'raised'
+  | 'popover'
+  | 'modal'
+  | 'buttonPrimary';
+
+// Shadow recipes live in the theme CSS (--shadow-*) so each theme can tune
+// depth for its own background.
+export const elevation: Record<ElevationLevel, string> = {
+  xs: 'var(--shadow-xs)',
+  card: 'var(--shadow-card)',
+  raised: 'var(--shadow-raised)',
+  popover: 'var(--shadow-popover)',
+  modal: 'var(--shadow-modal)',
+  buttonPrimary: 'var(--shadow-buttonPrimary)',
+};
+
+// UI text, money and data columns, and display headings. Custom themes can
+// override any of them through the matching --font-family* variable.
+export const fontFamily = {
+  ui: "var(--font-family, 'Inter Variable', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif)",
+  mono: "var(--font-family-mono, 'Geist Mono Variable', ui-monospace, 'SF Mono', Menlo, Consolas, monospace)",
+  display:
+    "var(--font-family-display, 'Noto Serif Display Variable', 'Iowan Old Style', 'Times New Roman', serif)",
+} as const;
+
+export const motion = {
+  fast: '120ms',
+  base: '160ms',
+  slow: '240ms',
+  ease: 'cubic-bezier(0.2, 0.8, 0.2, 1)',
+} as const;
 
 // Standard component size vocabulary shared by Button, Text and Input.
 // Values are looked up per breakpoint group so components can render
