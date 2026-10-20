@@ -16,8 +16,8 @@
       href="/site.webmanifest"
       crossorigin="use-credentials"
     />
-    <meta name="msapplication-TileColor" content="#5c3dbb" />
-    <meta name="theme-color" content="#5c3dbb" />
+    <meta name="msapplication-TileColor" content="#141413" />
+    <meta name="theme-color" content="#f2f2ef" />
 
     <style type="text/css">
       html,
@@ -25,6 +25,21 @@
         margin: 0;
         padding: 0;
         font-size: 13px;
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
+        text-rendering: optimizeLegibility;
+        font-optical-sizing: auto;
+      }
+
+      body {
+        background-color: var(--color-pageBackground);
+        color: var(--color-pageText);
+        caret-color: var(--color-accent);
+      }
+
+      ::selection {
+        background-color: var(--color-formInputTextSelection);
+        color: inherit;
       }
 
       html,
@@ -62,8 +77,20 @@
       }
 
       *:focus {
-        /* colors.b5 */
-        outline-color: #2b8fed;
+        outline-color: var(--color-focusRing, #4e9de6);
+      }
+
+      :focus-visible {
+        outline-offset: 2px;
+      }
+
+      @media (prefers-reduced-motion: reduce) {
+        *,
+        *::before,
+        *::after {
+          transition-duration: 0.01ms !important;
+          animation-duration: 0.01ms !important;
+        }
       }
 
       /* recharts makes chart surfaces and layers focusable for keyboard
