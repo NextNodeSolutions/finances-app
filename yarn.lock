@@ -243,7 +243,9 @@ __metadata:
     "@codemirror/state": "npm:^6.7.6"
     "@codemirror/view": "npm:^6.43.14"
     "@emotion/css": "npm:^11.13.5"
+    "@fontsource-variable/geist-mono": "npm:^5.2.8"
     "@fontsource-variable/inter": "npm:^5.3.0"
+    "@fontsource-variable/noto-serif-display": "npm:^5.2.8"
     "@fontsource/redacted-script": "npm:^5.3.0"
     "@internationalized/date": "npm:^3.12.4"
     "@lezer/highlight": "npm:^1.2.5"
@@ -4501,10 +4503,24 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@fontsource-variable/geist-mono@npm:^5.2.8":
+  version: 5.3.0
+  resolution: "@fontsource-variable/geist-mono@npm:5.3.0"
+  checksum: 10/c4c3388920f327599885cdd0436fd1557e0dd84bcadd666a6b91b7be669f60c45e6bdc86b7669a06d56909326dae452a0148c46079bb5248a5edb724edf02733
+  languageName: node
+  linkType: hard
+
 "@fontsource-variable/inter@npm:^5.3.0":
   version: 5.3.0
   resolution: "@fontsource-variable/inter@npm:5.3.0"
   checksum: 10/b7d30aa2605cc1b4db5d87ddc06de7b315c7b0e67c919052c8002d11670ee41fc0a0fcb01b7adbe8243bb889230ab61fbc0b0b84d34fd1fd4cf6f6f641a0ff73
+  languageName: node
+  linkType: hard
+
+"@fontsource-variable/noto-serif-display@npm:^5.2.8":
+  version: 5.3.0
+  resolution: "@fontsource-variable/noto-serif-display@npm:5.3.0"
+  checksum: 10/bad3fc08df8bf835b48bcfb5eb732dbfbb93cf2dbe8f0fad9f58a3d94103c25e9ce010dc36174ea8ff3871e2d973bf04dd99a64c843b9fcaafc0079a8e772cda
   languageName: node
   linkType: hard
 
