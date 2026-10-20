@@ -1,292 +1,305 @@
+/* Dark: onyx canvas, graphite surfaces, ivory ink, the same sky accent and
+   signal orange lifted for contrast. */
 :root {
-  --color-pageBackground: var(--palette-gray900);
-  --color-pageBackgroundModalActive: var(--palette-gray800);
-  --color-pageBackgroundTopLeft: var(--palette-navy800);
-  --color-pageBackgroundBottomRight: var(--palette-gray700);
-  --color-pageBackgroundLineTop: var(--palette-purple400);
-  --color-pageBackgroundLineMid: var(--palette-navy900);
-  --color-pageBackgroundLineBottom: var(--palette-navy150);
-  --color-pageText: var(--palette-navy150);
-  --color-pageTextLight: var(--palette-navy300);
-  --color-pageTextSubdued: var(--palette-navy500);
-  --color-pageTextDark: var(--palette-navy100);
-  --color-pageTextPositive: var(--palette-purple200);
-  --color-pageTextLink: var(--palette-purple400);
-  --color-pageTextLinkLight: var(--palette-purple200);
+  --color-pageBackground: var(--palette-onyx900);
+  --color-pageBackgroundModalActive: var(--palette-onyx950);
+  --color-pageBackgroundTopLeft: var(--palette-onyx900);
+  --color-pageBackgroundBottomRight: var(--palette-onyx850);
+  --color-pageBackgroundLineTop: var(--palette-onyx700);
+  --color-pageBackgroundLineMid: var(--palette-onyx900);
+  --color-pageBackgroundLineBottom: var(--palette-onyx850);
+  --color-pageText: var(--palette-onyx100);
+  --color-pageTextLight: var(--palette-onyx300);
+  --color-pageTextSubdued: var(--palette-onyx400);
+  --color-pageTextDark: var(--palette-onyx50);
+  --color-pageTextPositive: var(--palette-sky300);
+  --color-pageTextLink: var(--palette-sky300);
+  --color-pageTextLinkLight: var(--palette-sky200);
 
-  --color-cardBackground: var(--palette-gray800);
-  --color-cardBorder: var(--palette-purple400);
-  --color-cardShadow: var(--palette-navy700);
+  --color-cardBackground: var(--palette-onyx800);
+  --color-cardBorder: var(--palette-onyx650);
+  --color-cardShadow: rgba(0, 0, 0, 0.4);
 
-  --color-tableBackground: var(--palette-navy800);
+  --color-trayBackground: var(--palette-onyx850);
+  --color-trayBorder: var(--palette-onyx650);
+  --color-hairline: var(--palette-onyx650);
+  --color-hairlineSubtle: var(--palette-onyx700);
+  --color-hairlineStrong: var(--palette-onyx600);
+  --color-focusRing: var(--palette-sky400);
+  --color-accent: var(--palette-sky400);
+  --color-accentSubtle: rgba(78, 157, 230, 0.12);
+  --color-accentText: var(--palette-sky300);
+  --color-signal: var(--palette-signal400);
+  --color-signalSubtle: rgba(250, 115, 64, 0.12);
+  --color-signalText: var(--palette-signal300);
+  --color-titlebarBackground: var(--palette-onyx850);
+  --color-titlebarBorder: var(--palette-onyx700);
+
+  --color-tableBackground: var(--palette-onyx800);
   --color-tableRowBackgroundAlternate: var(--color-tableBackground);
-  --color-tableRowBackgroundHover: var(--palette-navy700);
-  --color-tableText: var(--palette-navy150);
+  --color-tableRowBackgroundHover: var(--palette-onyx750);
+  --color-tableText: var(--palette-onyx100);
   --color-tableTextItemAdded: var(--color-tableText);
-  --color-tableTextLight: var(--color-tableText);
-  --color-tableTextSubdued: var(--palette-navy500);
-  --color-tableTextSelected: var(--palette-navy150);
-  --color-tableTextHover: var(--palette-navy400);
-  --color-tableTextInactive: var(--palette-navy500);
-  --color-tableHeaderText: var(--palette-navy300);
-  --color-tableHeaderBackground: var(--palette-navy700);
-  --color-tableBorder: var(--palette-navy600);
-  --color-tableBorderSelected: var(--palette-purple400);
-  --color-tableBorderHover: var(--palette-purple300);
-  --color-tableBorderSeparator: var(--palette-navy400);
-  --color-tableRowBackgroundHighlight: var(--palette-purple800);
-  --color-tableRowBackgroundHighlightText: var(--palette-navy150);
-  --color-tableRowHeaderBackground: var(--palette-navy700);
-  --color-tableRowHeaderText: var(--palette-navy150);
+  --color-tableTextLight: var(--palette-onyx400);
+  --color-tableTextSubdued: var(--palette-onyx500);
+  --color-tableTextSelected: var(--palette-onyx50);
+  --color-tableTextHover: var(--palette-onyx50);
+  --color-tableTextInactive: var(--palette-onyx400);
+  --color-tableHeaderText: var(--palette-onyx300);
+  --color-tableHeaderBackground: var(--palette-onyx850);
+  --color-tableBorder: var(--palette-onyx700);
+  --color-tableBorderSelected: var(--palette-sky400);
+  --color-tableBorderHover: var(--palette-sky500);
+  --color-tableBorderSeparator: var(--palette-onyx600);
+  --color-tableRowBackgroundHighlight: rgba(78, 157, 230, 0.12);
+  --color-tableRowBackgroundHighlightText: var(--palette-onyx50);
+  --color-tableRowHeaderBackground: var(--palette-onyx850);
+  --color-tableRowHeaderText: var(--palette-onyx50);
 
-  --color-numberPositive: var(--palette-green300);
-  --color-numberNegative: var(--palette-red200);
-  --color-numberNeutral: var(--palette-navy500);
+  --color-numberPositive: var(--palette-jade300);
+  --color-numberNegative: var(--palette-garnet300);
+  --color-numberNeutral: var(--palette-onyx500);
   --color-budgetNumberNegative: var(--color-numberNegative);
   --color-budgetNumberZero: var(--color-tableTextSubdued);
   --color-budgetNumberNeutral: var(--color-tableText);
   --color-budgetNumberPositive: var(--color-budgetNumberNeutral);
   --color-templateNumberFunded: var(--color-numberPositive);
-  --color-templateNumberUnderFunded: var(--palette-orange300);
+  --color-templateNumberUnderFunded: var(--palette-amber300);
   --color-toBudgetPositive: var(--color-numberPositive);
-  --color-toBudgetZero: var(--color-numberPositive);
+  --color-toBudgetZero: var(--palette-onyx50);
   --color-toBudgetNegative: var(--color-budgetNumberNegative);
 
-  --color-sidebarBackground: var(--palette-navy900);
-  --color-sidebarItemBackgroundPending: var(--palette-orange200);
-  --color-sidebarItemBackgroundPositive: var(--palette-green500);
-  --color-sidebarItemBackgroundFailed: var(--palette-red300);
-  --color-sidebarItemAccentSelected: var(--palette-purple200);
-  --color-sidebarItemBackgroundHover: var(--palette-navy700);
-  --color-sidebarItemBackgroundSelected: color-mix(
-    in srgb,
-    var(--color-sidebarItemAccentSelected) 22%,
-    transparent
-  );
-  --color-sidebarItemText: var(--palette-navy150);
-  --color-sidebarItemTextUpdated: var(--color-sidebarItemText);
-  --color-sidebarItemTextSelected: var(--palette-purple200);
-  --color-sidebarBudgetName: var(--palette-navy300);
-  --color-sidebarHeaderText: var(--palette-white);
-  --color-sidebarTextSubdued: var(--palette-navy300);
-  --color-sidebarTextMuted: var(--palette-navy500);
-  --color-sidebarTextPositive: var(--color-sidebarItemBackgroundPositive);
-  --color-sidebarTextFailed: var(--color-sidebarItemBackgroundFailed);
-  --color-sidebarBackgroundFailedSubtle: color-mix(
-    in srgb,
-    var(--color-sidebarItemBackgroundFailed) 16%,
-    transparent
-  );
-  --color-sidebarBorder: var(--color-sidebarItemBackgroundHover);
-  --color-sidebarControlBackground: var(--color-sidebarItemBackgroundHover);
-  --color-sidebarBrand: var(--color-sidebarItemAccentSelected);
+  --color-sidebarBackground: var(--palette-onyx850);
+  --color-sidebarItemBackgroundPending: rgba(232, 181, 76, 0.16);
+  --color-sidebarItemBackgroundPositive: var(--palette-jade400);
+  --color-sidebarItemBackgroundFailed: var(--palette-garnet400);
+  --color-sidebarItemBackgroundHover: var(--palette-onyx750);
+  --color-sidebarItemAccentSelected: var(--palette-onyx50);
+  --color-sidebarItemBackgroundSelected: var(--palette-onyx700);
+  --color-sidebarItemText: var(--palette-onyx300);
+  --color-sidebarItemTextUpdated: var(--palette-onyx50);
+  --color-sidebarItemTextSelected: var(--palette-onyx50);
+  --color-sidebarBudgetName: var(--palette-onyx50);
+  --color-sidebarHeaderText: var(--palette-onyx50);
+  --color-sidebarTextSubdued: var(--palette-onyx300);
+  --color-sidebarTextMuted: var(--palette-onyx400);
+  --color-sidebarTextPositive: var(--palette-jade300);
+  --color-sidebarTextFailed: var(--palette-garnet300);
+  --color-sidebarBackgroundFailedSubtle: rgba(223, 90, 78, 0.14);
+  --color-sidebarBorder: var(--palette-onyx700);
+  --color-sidebarControlBackground: var(--palette-onyx750);
+  --color-sidebarBrand: var(--palette-onyx50);
 
-  --color-settingsCardBackground: var(--color-tableBackground);
-  --color-settingsCardBorder: var(--color-tableBorder);
-  --color-settingsCardText: var(--color-tableText);
-  --color-settingsCardTextSubdued: var(--palette-navy300);
-  --color-settingsNavItemText: var(--color-pageText);
-  --color-settingsNavItemBackgroundHover: color-mix(
-    in srgb,
-    var(--color-settingsNavItemText) 8%,
-    transparent
-  );
-  --color-settingsNavItemAccentSelected: var(--palette-purple200);
-  --color-settingsNavItemTextSelected: var(
-    --color-settingsNavItemAccentSelected
-  );
-  --color-settingsNavItemBackgroundSelected: color-mix(
-    in srgb,
-    var(--color-settingsNavItemAccentSelected) 22%,
-    transparent
-  );
+  --color-settingsCardBackground: var(--palette-onyx800);
+  --color-settingsCardBorder: var(--palette-onyx650);
+  --color-settingsCardText: var(--palette-onyx100);
+  --color-settingsCardTextSubdued: var(--palette-onyx300);
+  --color-settingsNavItemText: var(--palette-onyx300);
+  --color-settingsNavItemBackgroundHover: var(--palette-onyx750);
+  --color-settingsNavItemAccentSelected: var(--palette-onyx50);
+  --color-settingsNavItemTextSelected: var(--palette-onyx50);
+  --color-settingsNavItemBackgroundSelected: var(--palette-onyx700);
 
-  --color-menuBackground: var(--palette-navy800);
-  --color-menuItemBackground: var(--palette-navy800);
-  --color-menuItemBackgroundHover: var(--palette-navy500);
-  --color-menuItemText: var(--palette-navy100);
-  --color-menuItemTextHover: var(--palette-navy50);
-  --color-menuItemTextSelected: var(--palette-purple400);
-  --color-menuItemTextHeader: var(--palette-purple200);
-  --color-menuBorder: var(--palette-navy900);
-  --color-menuBorderHover: var(--palette-purple400);
-  --color-menuKeybindingText: var(--palette-purple200);
-  --color-menuAutoCompleteBackground: var(--palette-navy900);
-  --color-menuAutoCompleteBackgroundHover: var(--palette-navy600);
-  --color-menuAutoCompleteText: var(--palette-navy200);
-  --color-menuAutoCompleteTextHeader: var(--palette-purple200);
-  --color-menuAutoCompleteItemText: var(--color-menuItemText);
+  --color-menuBackground: var(--palette-onyx750);
+  --color-menuItemBackground: var(--palette-onyx750);
+  --color-menuItemBackgroundHover: var(--palette-onyx650);
+  --color-menuItemText: var(--palette-onyx100);
+  --color-menuItemTextHover: var(--palette-onyx50);
+  --color-menuItemTextSelected: var(--palette-sky300);
+  --color-menuItemTextHeader: var(--palette-onyx400);
+  --color-menuBorder: var(--palette-onyx650);
+  --color-menuBorderHover: var(--palette-onyx600);
+  --color-menuKeybindingText: var(--palette-onyx400);
+  --color-menuAutoCompleteBackground: var(--palette-onyx750);
+  --color-menuAutoCompleteBackgroundHover: var(--palette-onyx650);
+  --color-menuAutoCompleteText: var(--palette-onyx100);
+  --color-menuAutoCompleteTextHover: var(--palette-sky300);
+  --color-menuAutoCompleteTextHeader: var(--palette-onyx400);
+  --color-menuAutoCompleteItemTextHover: var(--palette-onyx50);
+  --color-menuAutoCompleteItemText: var(--palette-onyx100);
 
-  --color-modalBackground: var(--palette-gray800);
-  --color-modalBorder: var(--palette-navy600);
-  --color-mobileHeaderBackground: var(--palette-purple800);
-  --color-mobileHeaderText: var(--palette-navy150);
-  --color-mobileHeaderTextSubdued: var(--palette-gray200);
-  --color-mobileHeaderTextHover: rgba(200, 200, 200, 0.15);
-  --color-mobilePageBackground: var(--palette-navy700);
-  --color-mobileNavBackground: var(--palette-navy800);
-  --color-mobileNavItem: var(--palette-navy150);
-  --color-mobileNavItemSelected: var(--palette-purple400);
-  --color-mobileAccountShadow: var(--color-cardShadow);
-  --color-mobileAccountText: var(--palette-blue800);
-  --color-mobileTransactionSelected: var(--palette-purple400);
+  --color-modalBackground: var(--palette-onyx800);
+  --color-modalBorder: var(--palette-onyx650);
+  --color-mobileHeaderBackground: var(--palette-onyx850);
+  --color-mobileHeaderText: var(--palette-onyx50);
+  --color-mobileHeaderTextSubdued: var(--palette-onyx300);
+  --color-mobileHeaderTextHover: rgba(255, 255, 255, 0.06);
+  --color-mobilePageBackground: var(--palette-onyx900);
+  --color-mobileNavBackground: var(--palette-onyx850);
+  --color-mobileNavItem: var(--palette-onyx400);
+  --color-mobileNavItemSelected: var(--palette-onyx50);
+  --color-mobileAccountShadow: var(--palette-onyx950);
+  --color-mobileAccountText: var(--palette-onyx50);
+  --color-mobileTransactionSelected: var(--palette-sky400);
 
   --color-mobileViewTheme: var(--color-mobileHeaderBackground);
-  --color-mobileConfigServerViewTheme: var(--palette-purple500);
+  --color-mobileConfigServerViewTheme: var(--palette-onyx850);
 
-  --color-markdownNormal: var(--palette-purple700);
-  --color-markdownDark: var(--palette-purple500);
-  --color-markdownLight: var(--palette-purple800);
+  --color-markdownNormal: rgba(78, 157, 230, 0.16);
+  --color-markdownDark: var(--palette-sky300);
+  --color-markdownLight: rgba(78, 157, 230, 0.08);
 
-  --color-buttonMenuText: var(--palette-navy200);
-  --color-buttonMenuTextHover: var(--color-buttonMenuText);
+  --color-buttonMenuText: var(--palette-onyx300);
+  --color-buttonMenuTextHover: var(--palette-onyx50);
   --color-buttonMenuBackground: transparent;
-  --color-buttonMenuBackgroundHover: rgba(200, 200, 200, 0.25);
-  --color-buttonMenuBorder: var(--palette-navy500);
-  --color-buttonMenuSelectedText: var(--palette-green800);
-  --color-buttonMenuSelectedTextHover: var(--palette-orange800);
-  --color-buttonMenuSelectedBackground: var(--palette-orange200);
-  --color-buttonMenuSelectedBackgroundHover: var(--palette-orange300);
+  --color-buttonMenuBackgroundHover: rgba(255, 255, 255, 0.06);
+  --color-buttonMenuBorder: var(--palette-onyx600);
+  --color-buttonMenuSelectedText: var(--palette-onyx900);
+  --color-buttonMenuSelectedTextHover: var(--palette-onyx900);
+  --color-buttonMenuSelectedBackground: var(--palette-onyx50);
+  --color-buttonMenuSelectedBackgroundHover: var(--palette-onyx100);
   --color-buttonMenuSelectedBorder: var(--color-buttonMenuSelectedBackground);
 
-  --color-buttonPrimaryText: var(--palette-white);
+  --color-buttonPrimaryText: var(--palette-onyx900);
   --color-buttonPrimaryTextHover: var(--color-buttonPrimaryText);
-  --color-buttonPrimaryBackground: var(--palette-purple400);
-  --color-buttonPrimaryBackgroundHover: var(--palette-purple600);
-  --color-buttonPrimaryBorder: var(--color-buttonPrimaryBackground);
-  --color-buttonPrimaryShadow: rgba(0, 0, 0, 0.6);
-  --color-buttonPrimaryDisabledText: var(--palette-navy700);
-  --color-buttonPrimaryDisabledBackground: var(--palette-navy400);
-  --color-buttonPrimaryDisabledBorder: var(
-    --color-buttonPrimaryDisabledBackground
-  );
+  --color-buttonPrimaryBackground: var(--palette-onyx50);
+  --color-buttonPrimaryBackgroundHover: var(--palette-onyx200);
+  --color-buttonPrimaryBorder: var(--palette-onyx50);
+  --color-buttonPrimaryShadow: rgba(0, 0, 0, 0.5);
+  --color-buttonPrimaryDisabledText: var(--palette-onyx500);
+  --color-buttonPrimaryDisabledBackground: var(--palette-onyx700);
+  --color-buttonPrimaryDisabledBorder: var(--palette-onyx650);
 
-  --color-buttonNormalText: var(--palette-navy150);
-  --color-buttonNormalTextHover: var(--palette-navy150);
-  --color-buttonNormalBackground: var(--palette-navy800);
-  --color-buttonNormalBackgroundHover: var(--palette-navy600);
-  --color-buttonNormalBorder: var(--palette-navy300);
-  --color-buttonNormalShadow: rgba(0, 0, 0, 0.4);
-  --color-buttonNormalSelectedText: var(--palette-white);
-  --color-buttonNormalSelectedBackground: var(--palette-purple600);
-  --color-buttonNormalDisabledText: var(--palette-navy500);
-  --color-buttonNormalDisabledBackground: var(--palette-navy800);
-  --color-buttonNormalDisabledBorder: var(--palette-navy500);
+  --color-buttonNormalText: var(--palette-onyx100);
+  --color-buttonNormalTextHover: var(--palette-onyx50);
+  --color-buttonNormalBackground: var(--palette-onyx750);
+  --color-buttonNormalBackgroundHover: var(--palette-onyx700);
+  --color-buttonNormalBorder: var(--palette-onyx600);
+  --color-buttonNormalShadow: rgba(0, 0, 0, 0.3);
+  --color-buttonNormalSelectedText: var(--palette-onyx900);
+  --color-buttonNormalSelectedBackground: var(--palette-onyx50);
+  --color-buttonNormalDisabledText: var(--palette-onyx500);
+  --color-buttonNormalDisabledBackground: var(--palette-onyx800);
+  --color-buttonNormalDisabledBorder: var(--palette-onyx650);
 
-  --color-calendarText: var(--palette-navy50);
-  --color-calendarBackground: var(--palette-navy900);
-  --color-calendarItemText: var(--palette-navy150);
-  --color-calendarItemBackground: var(--palette-navy800);
-  --color-calendarSelectedBackground: var(
-    --color-buttonNormalSelectedBackground
-  );
-  --color-datePickerRangeBackground: var(--palette-purple600);
+  --color-calendarText: var(--palette-onyx100);
+  --color-calendarBackground: var(--palette-onyx750);
+  --color-calendarItemText: var(--palette-onyx100);
+  --color-calendarItemBackground: var(--palette-onyx700);
+  --color-calendarSelectedBackground: var(--palette-sky700);
+  --color-datePickerRangeBackground: rgba(78, 157, 230, 0.18);
 
-  --color-buttonBareText: var(--color-pageText);
-  --color-buttonBareTextHover: var(--color-pageText);
-  --color-buttonBareDisabledText: var(--color-pageTextSubdued);
+  --color-buttonBareText: var(--palette-onyx200);
+  --color-buttonBareTextHover: var(--palette-onyx50);
+  --color-buttonBareDisabledText: var(--palette-onyx500);
   --color-buttonBareBackground: transparent;
   --color-buttonBareDisabledBackground: var(--color-buttonBareBackground);
-  --color-buttonBareBackgroundHover: rgba(200, 200, 200, 0.3);
-  --color-buttonBareBackgroundActive: rgba(200, 200, 200, 0.5);
+  --color-buttonBareBackgroundHover: rgba(255, 255, 255, 0.06);
+  --color-buttonBareBackgroundActive: rgba(255, 255, 255, 0.1);
 
-  --color-noticeBackground: var(--palette-green800);
-  --color-noticeBackgroundLight: var(--palette-green900);
-  --color-noticeBackgroundDark: var(--palette-green500);
-  --color-noticeText: var(--palette-green300);
-  --color-noticeTextLight: var(--palette-green500);
-  --color-noticeTextDark: var(--palette-green150);
-  --color-noticeTextMenu: var(--palette-green500);
-  --color-noticeBorder: var(--palette-green800);
-  --color-warningBackground: var(--palette-orange800);
-  --color-warningText: var(--palette-orange300);
-  --color-warningTextLight: var(--palette-orange500);
-  --color-warningTextDark: var(--palette-orange100);
-  --color-warningBorder: var(--palette-orange500);
-  --color-errorBackground: var(--palette-red800);
-  --color-errorText: var(--palette-red200);
-  --color-errorTextDark: var(--palette-red150);
-  --color-errorTextDarker: var(--color-errorTextDark);
-  --color-errorTextMenu: var(--palette-red200);
-  --color-errorBorder: var(--palette-red500);
-  --color-upcomingBackground: var(--palette-purple700);
-  --color-upcomingText: var(--palette-purple100);
-  --color-upcomingBorder: var(--color-tableBorder);
+  --color-noticeBackground: rgba(55, 165, 117, 0.16);
+  --color-noticeBackgroundLight: rgba(55, 165, 117, 0.1);
+  --color-noticeBackgroundDark: var(--palette-jade500);
+  --color-noticeText: var(--palette-jade300);
+  --color-noticeTextLight: var(--palette-jade400);
+  --color-noticeTextDark: var(--palette-jade200);
+  --color-noticeTextMenu: var(--palette-jade300);
+  --color-noticeTextMenuHover: var(--palette-jade200);
+  --color-noticeBorder: var(--palette-jade700);
+  --color-warningBackground: rgba(250, 115, 64, 0.12);
+  --color-warningText: var(--palette-signal300);
+  --color-warningTextLight: var(--palette-signal400);
+  --color-warningTextDark: var(--palette-signal200);
+  --color-warningBorder: var(--palette-signal700);
+  --color-errorBackground: rgba(223, 90, 78, 0.14);
+  --color-errorText: var(--palette-garnet300);
+  --color-errorTextDark: var(--palette-garnet200);
+  --color-errorTextDarker: var(--palette-garnet150);
+  --color-errorTextMenu: var(--palette-garnet200);
+  --color-errorBorder: var(--palette-garnet500);
+  --color-upcomingBackground: rgba(78, 157, 230, 0.14);
+  --color-upcomingText: var(--palette-sky300);
+  --color-upcomingBorder: var(--palette-sky700);
 
-  --color-formLabelText: var(--palette-purple150);
-  --color-formLabelBackground: var(--palette-blue900);
-  --color-formInputBackground: var(--palette-navy800);
-  --color-formInputBackgroundSelected: var(--palette-navy700);
-  --color-formInputBackgroundSelection: var(--palette-purple400);
-  --color-formInputBorder: var(--palette-navy600);
-  --color-formInputTextReadOnlySelection: var(--palette-navy800);
-  --color-formInputBorderSelected: var(--palette-purple400);
-  --color-formInputText: var(--palette-navy150);
-  --color-formInputTextSelected: var(--palette-black);
-  --color-formInputTextPlaceholder: var(--palette-navy150);
-  --color-formInputTextPlaceholderSelected: var(--palette-navy100);
-  --color-formInputTextSelection: var(--palette-navy800);
-  --color-formInputShadowSelected: var(--palette-purple200);
-  --color-formInputTextHighlight: var(--palette-purple400);
-  --color-checkboxText: var(--color-tableText);
-  --color-checkboxBackgroundSelected: var(--palette-purple300);
-  --color-checkboxBorderSelected: var(--palette-purple300);
-  --color-checkboxShadowSelected: var(--palette-purple500);
-  --color-checkboxToggleBackground: var(--palette-gray700);
-  --color-checkboxToggleBackgroundSelected: var(--palette-purple300);
-  --color-checkboxToggleDisabled: var(--palette-gray400);
+  --color-formLabelText: var(--palette-onyx300);
+  --color-formLabelBackground: var(--palette-onyx700);
+  --color-formInputBackground: var(--palette-onyx850);
+  --color-formInputBackgroundSelected: var(--palette-onyx850);
+  --color-formInputBackgroundSelection: rgba(78, 157, 230, 0.35);
+  --color-formInputBorder: var(--palette-onyx600);
+  --color-formInputTextReadOnlySelection: var(--palette-onyx700);
+  --color-formInputBorderSelected: var(--palette-sky400);
+  --color-formInputText: var(--palette-onyx50);
+  --color-formInputTextSelected: var(--palette-onyx50);
+  --color-formInputTextPlaceholder: var(--palette-onyx400);
+  --color-formInputTextPlaceholderSelected: var(--palette-onyx500);
+  --color-formInputTextSelection: rgba(78, 157, 230, 0.35);
+  --color-formInputShadowSelected: rgba(78, 157, 230, 0.35);
+  --color-formInputTextHighlight: rgba(78, 157, 230, 0.3);
+  --color-checkboxText: var(--palette-onyx900);
+  --color-checkboxBackgroundSelected: var(--palette-onyx50);
+  --color-checkboxBorderSelected: var(--palette-onyx50);
+  --color-checkboxShadowSelected: rgba(78, 157, 230, 0.35);
+  --color-checkboxToggleBackground: var(--palette-onyx600);
+  --color-checkboxToggleBackgroundSelected: var(--palette-onyx50);
+  --color-checkboxToggleDisabled: var(--palette-onyx700);
 
-  --color-pillBackground: var(--palette-navy800);
-  --color-pillBackgroundLight: var(--palette-navy900);
-  --color-pillText: var(--palette-navy200);
-  --color-pillTextHighlighted: var(--palette-purple200);
-  --color-pillBorder: var(--palette-navy700);
-  --color-pillBorderDark: var(--color-pillBorder);
-  --color-pillBackgroundSelected: var(--palette-purple600);
-  --color-pillTextSelected: var(--palette-navy150);
-  --color-pillBorderSelected: var(--palette-purple400);
-  --color-pillTextSubdued: var(--palette-navy500);
+  --color-pillBackground: var(--palette-onyx700);
+  --color-pillBackgroundLight: var(--palette-onyx750);
+  --color-pillText: var(--palette-onyx100);
+  --color-pillTextHighlighted: var(--palette-sky300);
+  --color-pillBorder: var(--palette-onyx650);
+  --color-pillBorderDark: var(--palette-onyx500);
+  --color-pillBackgroundSelected: rgba(78, 157, 230, 0.2);
+  --color-pillTextSelected: var(--palette-sky200);
+  --color-pillBorderSelected: var(--palette-sky400);
+  --color-pillTextSubdued: var(--palette-onyx500);
 
-  --color-reportsRed: var(--palette-red300);
-  --color-reportsBlue: var(--palette-blue400);
-  --color-reportsGreen: var(--palette-green400);
-  --color-reportsGray: var(--palette-gray400);
-  --color-reportsLabel: var(--color-pageText);
-  --color-reportsInnerLabel: var(--palette-navy800);
+  --color-reportsRed: var(--palette-garnet300);
+  --color-reportsBlue: var(--palette-sky400);
+  --color-reportsGreen: var(--palette-jade300);
+  --color-reportsGray: var(--palette-onyx500);
+  --color-reportsLabel: var(--palette-onyx100);
+  --color-reportsInnerLabel: var(--palette-onyx200);
   --color-reportsNumberPositive: var(--color-numberPositive);
   --color-reportsNumberNegative: var(--color-numberNegative);
   --color-reportsNumberNeutral: var(--color-numberNeutral);
-  --color-reportsChartFill: var(--color-reportsNumberPositive);
+  --color-reportsChartFill: var(--palette-sky400);
 
-  --color-noteTagBackground: var(--palette-purple700);
-  --color-noteTagBackgroundHover: var(--palette-purple500);
-  --color-noteTagDefault: var(--palette-purple700);
-  --color-noteTagText: var(--palette-purple100);
+  --color-noteTagBackground: var(--palette-onyx700);
+  --color-noteTagBackgroundHover: var(--palette-onyx650);
+  --color-noteTagDefault: var(--palette-onyx700);
+  --color-noteTagText: var(--palette-onyx50);
 
-  --color-budgetOtherMonth: var(--palette-navy900);
   --color-budgetCurrentMonth: var(--color-tableBackground);
-  --color-budgetHeaderOtherMonth: var(--palette-navy800);
-  --color-budgetHeaderCurrentMonth: var(--color-tableHeaderBackground);
+  --color-budgetOtherMonth: var(--palette-onyx850);
+  --color-budgetHeaderCurrentMonth: var(--palette-onyx850);
+  --color-budgetHeaderOtherMonth: var(--palette-onyx900);
 
-  --color-floatingActionBarBackground: var(--palette-purple800);
-  --color-floatingActionBarBorder: var(--color-floatingActionBarBackground);
-  --color-floatingActionBarText: var(--palette-navy150);
+  --color-floatingActionBarBackground: var(--palette-onyx50);
+  --color-floatingActionBarBorder: var(--palette-onyx50);
+  --color-floatingActionBarText: var(--palette-onyx900);
 
-  --color-tooltipText: var(--palette-navy100);
-  --color-tooltipBackground: var(--palette-navy800);
-  --color-tooltipBorder: var(--palette-navy700);
+  --color-tooltipText: var(--palette-onyx100);
+  --color-tooltipBackground: var(--palette-onyx750);
+  --color-tooltipBorder: var(--palette-onyx650);
 
-  --color-calendarCellBackground: var(--palette-navy900);
+  --color-calendarCellBackground: var(--palette-onyx750);
 
-  --color-overlayBackground: rgba(0, 0, 0, 0.3);
+  --color-overlayBackground: rgba(0, 0, 0, 0.55);
 
-  --color-chartQual1: var(--palette-chartQual1);
-  --color-chartQual2: var(--palette-chartQual2);
-  --color-chartQual3: var(--palette-chartQual3);
-  --color-chartQual4: var(--palette-chartQual4);
-  --color-chartQual5: var(--palette-chartQual5);
-  --color-chartQual6: var(--palette-chartQual6);
-  --color-chartQual7: var(--palette-chartQual7);
-  --color-chartQual8: var(--palette-chartQual8);
-  --color-chartQual9: var(--palette-chartQual9);
+  --color-chartQual1: #5b93cf;
+  --color-chartQual2: #52b48f;
+  --color-chartQual3: #e0a35a;
+  --color-chartQual4: #d9776b;
+  --color-chartQual5: #9a8cd4;
+  --color-chartQual6: #6bb9d6;
+  --color-chartQual7: #c995bb;
+  --color-chartQual8: #a7b676;
+  --color-chartQual9: var(--palette-onyx400);
+
+  --shadow-xs: 0 1px 1px rgba(0, 0, 0, 0.3);
+  --shadow-card:
+    0 1px 2px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.02);
+  --shadow-raised:
+    0 1px 2px rgba(0, 0, 0, 0.35), 0 10px 24px -8px rgba(0, 0, 0, 0.5);
+  --shadow-popover:
+    0 1px 2px rgba(0, 0, 0, 0.4), 0 12px 32px -8px rgba(0, 0, 0, 0.6),
+    inset 0 1px 0 rgba(255, 255, 255, 0.04);
+  --shadow-modal:
+    0 2px 6px rgba(0, 0, 0, 0.4), 0 32px 80px -16px rgba(0, 0, 0, 0.75),
+    inset 0 1px 0 rgba(255, 255, 255, 0.04);
+  --shadow-buttonPrimary:
+    0 1px 2px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.6);
+  --shadow-inset-highlight: inset 0 1px 0 rgba(255, 255, 255, 0.04);
 }
