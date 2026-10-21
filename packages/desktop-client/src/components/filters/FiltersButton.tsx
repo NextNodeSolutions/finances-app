@@ -6,10 +6,8 @@ import { SvgFilter } from '@actual-app/components/icons/v1';
 
 export function FiltersButton({ onPress }: { onPress: () => void }) {
   return (
-    <Button variant="bare" onPress={onPress}>
-      <SvgFilter
-        style={{ width: 12, height: 12, marginRight: 5, flexShrink: 0 }}
-      />{' '}
+    <Button variant="normal" onPress={onPress} style={{ gap: 7 }}>
+      <SvgFilter style={{ width: 11, height: 11, flexShrink: 0 }} />
       <Trans>Filter</Trans>
     </Button>
   );

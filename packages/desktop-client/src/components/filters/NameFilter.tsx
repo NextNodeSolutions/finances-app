@@ -45,7 +45,7 @@ export function NameFilter({
         >
           <SpaceBetween
             style={{
-              padding: 10,
+              padding: 6,
               justifyContent: 'flex-end',
               alignItems: 'center',
             }}
@@ -70,7 +70,7 @@ export function NameFilter({
         </Form>
       )}
       {err && (
-        <SpaceBetween style={{ padding: 10, alignItems: 'center' }}>
+        <SpaceBetween style={{ padding: '4px 6px 6px', alignItems: 'center' }}>
           <Text style={{ color: theme.errorText }}>{err}</Text>
         </SpaceBetween>
       )}

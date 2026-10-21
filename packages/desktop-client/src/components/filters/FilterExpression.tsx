@@ -5,8 +5,10 @@ import { useTranslation } from 'react-i18next';
 import { Button } from '@actual-app/components/button';
 import { SvgDelete } from '@actual-app/components/icons/v0';
 import { Popover } from '@actual-app/components/popover';
+import { styles } from '@actual-app/components/styles';
 import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
+import { radius } from '@actual-app/components/tokens';
 import { View } from '@actual-app/components/view';
 import type { RuleConditionEntity } from '@actual-app/core/types/models';
 
@@ -17,6 +19,11 @@ import { FilterEditor } from './FiltersMenu';
 import { subfieldFromFilter } from './subfieldFromFilter';
 
 let isDatepickerClick = false;
+
+// The delete button and its 1px right margin; the label may take the rest
+// of the pill without being clipped.
+const DELETE_BUTTON_SIZE = 22;
+const DELETE_BUTTON_SPACE = DELETE_BUTTON_SIZE + 1;
 
 type FilterExpressionProps<T extends RuleConditionEntity> = {
   field: T['field'];
@@ -48,11 +55,12 @@ export function FilterExpression<T extends RuleConditionEntity>({
   return (
     <View
       style={{
-        backgroundColor: theme.pillBackground,
-        borderRadius: 4,
+        ...styles.editorPill,
+        padding: 0,
+        border: '1px solid ' + theme.pillBorder,
         flexDirection: 'row',
         alignItems: 'center',
-        marginRight: 10,
+        marginRight: 6,
         marginTop: 10,
         ...style,
       }}
@@ -63,28 +71,32 @@ export function FilterExpression<T extends RuleConditionEntity>({
         isDisabled={customName != null}
         onPress={() => setEditing(true)}
         style={{
-          maxWidth: 'calc(100% - 26px)',
+          maxWidth: `calc(100% - ${DELETE_BUTTON_SPACE}px)`,
           whiteSpace: 'nowrap',
           display: 'block',
+          padding: '3px 2px 3px 8px',
+          borderRadius: `${radius.sm}px 0 0 ${radius.sm}px`,
+          fontSize: 12.5,
         }}
       >
         <div
           style={{
-            paddingBlock: 1,
-            paddingLeft: 5,
-            paddingRight: 2,
             overflow: 'hidden',
             textOverflow: 'ellipsis',
           }}
         >
           {customName ? (
-            <Text style={{ color: theme.pageTextPositive }}>{customName}</Text>
+            <Text style={{ color: theme.pillText, fontWeight: 500 }}>
+              {customName}
+            </Text>
           ) : (
             <>
-              <Text style={{ color: theme.pageTextPositive }}>
+              <Text style={{ color: theme.pillText, fontWeight: 500 }}>
                 {mapField(field, options)}
               </Text>{' '}
-              <Text>{friendlyOp(op, null)}</Text>{' '}
+              <Text style={{ color: theme.pageTextLight }}>
+                {friendlyOp(op, null)}
+              </Text>{' '}
               {!['onbudget', 'offbudget'].includes(op?.toLocaleLowerCase()) && (
                 <Value
                   value={value}
@@ -103,14 +115,20 @@ export function FilterExpression<T extends RuleConditionEntity>({
           )}
         </div>
       </Button>
-      <Button variant="bare" onPress={onDelete} aria-label={t('Delete filter')}>
-        <SvgDelete
-          style={{
-            width: 8,
-            height: 8,
-            margin: 4,
-          }}
-        />
+      <Button
+        variant="bare"
+        onPress={onDelete}
+        aria-label={t('Delete filter')}
+        style={{
+          width: DELETE_BUTTON_SIZE,
+          height: DELETE_BUTTON_SIZE,
+          padding: 0,
+          marginRight: DELETE_BUTTON_SPACE - DELETE_BUTTON_SIZE,
+          borderRadius: radius.xs,
+          color: theme.pageTextLight,
+        }}
+      >
+        <SvgDelete style={{ width: 7, height: 7 }} />
       </Button>
 
       <Popover
@@ -143,8 +161,8 @@ export function FilterExpression<T extends RuleConditionEntity>({
           return true;
         }}
         style={{
-          width: 275,
-          padding: 15,
+          width: 288,
+          padding: 16,
           color: theme.menuItemText,
           zIndex: '2500 !important',
         }}

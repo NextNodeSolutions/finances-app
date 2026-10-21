@@ -12,6 +12,7 @@ import { Navigate, useLocation, useParams } from 'react-router';
 
 import { styles } from '@actual-app/components/styles';
 import { theme } from '@actual-app/components/theme';
+import { tokens } from '@actual-app/components/tokens';
 import { View } from '@actual-app/components/view';
 import { listen, send } from '@actual-app/core/platform/client/connection';
 import * as undo from '@actual-app/core/platform/client/undo';
@@ -95,6 +96,16 @@ import { updateNewTransactions } from '#transactions/transactionsSlice';
 
 import { AccountEmptyMessage } from './AccountEmptyMessage';
 import { AccountHeader } from './Header';
+
+// The title sits as far below the titlebar as on every other desktop page
+// (PAGE_TOP_SPACE in components/Page.tsx), so it does not jump between pages.
+const PAGE_TOP_SPACE = 28;
+const accountPageStyle = {
+  ...styles.page,
+  [`@media (min-width: ${tokens.breakpoint_small})`]: {
+    paddingTop: PAGE_TOP_SPACE,
+  },
+};
 
 type ConditionEntity = Partial<RuleConditionEntity> | TransactionFilterEntity;
 
@@ -1853,7 +1864,7 @@ class AccountInternal extends PureComponent<
             registerDispatch={dispatch => (this.dispatchSelected = dispatch)}
             selectAllFilter={selectAllFilter}
           >
-            <View style={styles.page}>
+            <View style={accountPageStyle}>
               <AccountHeader
                 tableRef={this.table}
                 isNameEditable={isNameEditable ?? false}
@@ -1912,84 +1923,91 @@ class AccountInternal extends PureComponent<
                 onMergeTransactions={this.onMergeTransactions}
               />
 
-              <View style={{ flex: 1 }}>
-                <TransactionList
-                  headerContent={undefined}
-                  // @ts-expect-error - fix me
-                  tableRef={this.table}
-                  account={account}
-                  transactions={transactions}
-                  allTransactions={allTransactions}
-                  loadMoreTransactions={() =>
-                    this.paged && this.paged.fetchNext()
-                  }
-                  accounts={accounts}
-                  category={category}
-                  categoryGroups={categoryGroups}
-                  payees={payees}
-                  balances={allBalances}
-                  showBalances={!!allBalances}
-                  showReconciled={showReconciled}
-                  showCleared={!!showCleared}
-                  showGroup={this.props.showGroup}
-                  showAccount={this.showAccountColumn()}
-                  columnOrder={this.props.columnOrder}
-                  allowReorder={
-                    !!accountId &&
-                    accountId !== 'offbudget' &&
-                    accountId !== 'onbudget' &&
-                    accountId !== 'uncategorized'
-                  }
-                  isAdding={this.state.isAdding}
-                  isNew={this.isNew}
-                  isMatched={this.isMatched}
-                  isFiltered={transactionsFiltered}
-                  dateFormat={dateFormat}
-                  hideFraction={hideFraction}
-                  renderEmpty={() =>
-                    showEmptyMessage ? (
-                      <AccountEmptyMessage
-                        onAdd={() =>
-                          this.props.dispatch(
-                            replaceModal({
-                              modal: { name: 'add-account', options: {} },
-                            }),
-                          )
-                        }
-                      />
-                    ) : !loading ? (
-                      <View
-                        style={{
-                          color: theme.tableText,
-                          marginTop: 20,
-                          textAlign: 'center',
-                          fontStyle: 'italic',
-                        }}
-                      >
-                        <Trans>No transactions</Trans>
-                      </View>
-                    ) : null
-                  }
-                  onSort={this.onSort}
-                  sortField={this.state.sort?.field ?? ''}
-                  ascDesc={this.state.sort?.ascDesc ?? 'asc'}
-                  onChange={this.onTransactionsChange}
-                  onBatchDelete={this.onBatchDelete}
-                  onBatchDuplicate={this.onBatchDuplicate}
-                  onBatchLinkSchedule={this.onBatchLinkSchedule}
-                  onBatchUnlinkSchedule={this.onBatchUnlinkSchedule}
-                  onCreateRule={this.onCreateRule}
-                  onScheduleAction={this.onScheduleAction}
-                  onMakeAsNonSplitTransactions={
-                    this.onMakeAsNonSplitTransactions
-                  }
-                  onRefetch={this.refetchTransactions}
-                  onCloseAddTransaction={() =>
-                    this.setState({ isAdding: false })
-                  }
-                  onCreatePayee={this.onCreatePayee}
-                  onApplyFilter={this.onApplyFilter}
-                />
+              <View
+                style={{
+                  ...styles.pageContent,
+                  flex: 1,
+                  paddingBottom: 20,
+                }}
+              >
+                <View style={styles.tableContainer}>
+                  <TransactionList
+                    headerContent={undefined}
+                    // @ts-expect-error - fix me
+                    tableRef={this.table}
+                    account={account}
+                    transactions={transactions}
+                    allTransactions={allTransactions}
+                    loadMoreTransactions={() =>
+                      this.paged && this.paged.fetchNext()
+                    }
+                    accounts={accounts}
+                    category={category}
+                    categoryGroups={categoryGroups}
+                    payees={payees}
+                    balances={allBalances}
+                    showBalances={!!allBalances}
+                    showReconciled={showReconciled}
+                    showCleared={!!showCleared}
+                    showGroup={this.props.showGroup}
+                    showAccount={this.showAccountColumn()}
+                    columnOrder={this.props.columnOrder}
+                    allowReorder={
+                      !!accountId &&
+                      accountId !== 'offbudget' &&
+                      accountId !== 'onbudget' &&
+                      accountId !== 'uncategorized'
+                    }
+                    isAdding={this.state.isAdding}
+                    isNew={this.isNew}
+                    isMatched={this.isMatched}
+                    isFiltered={transactionsFiltered}
+                    dateFormat={dateFormat}
+                    hideFraction={hideFraction}
+                    renderEmpty={() =>
+                      showEmptyMessage ? (
+                        <AccountEmptyMessage
+                          onAdd={() =>
+                            this.props.dispatch(
+                              replaceModal({
+                                modal: { name: 'add-account', options: {} },
+                              }),
+                            )
+                          }
+                        />
+                      ) : !loading ? (
+                        <View
+                          style={{
+                            color: theme.tableTextLight,
+                            marginTop: 28,
+                            textAlign: 'center',
+                          }}
+                        >
+                          <Trans>No transactions</Trans>
+                        </View>
+                      ) : null
+                    }
+                    onSort={this.onSort}
+                    sortField={this.state.sort?.field ?? ''}
+                    ascDesc={this.state.sort?.ascDesc ?? 'asc'}
+                    onChange={this.onTransactionsChange}
+                    onBatchDelete={this.onBatchDelete}
+                    onBatchDuplicate={this.onBatchDuplicate}
+                    onBatchLinkSchedule={this.onBatchLinkSchedule}
+                    onBatchUnlinkSchedule={this.onBatchUnlinkSchedule}
+                    onCreateRule={this.onCreateRule}
+                    onScheduleAction={this.onScheduleAction}
+                    onMakeAsNonSplitTransactions={
+                      this.onMakeAsNonSplitTransactions
+                    }
+                    onRefetch={this.refetchTransactions}
+                    onCloseAddTransaction={() =>
+                      this.setState({ isAdding: false })
+                    }
+                    onCreatePayee={this.onCreatePayee}
+                    onApplyFilter={this.onApplyFilter}
+                  />
+                </View>
               </View>
             </View>
           </SelectedProviderWithItems>

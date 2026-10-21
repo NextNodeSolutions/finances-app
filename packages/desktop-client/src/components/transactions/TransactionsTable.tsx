@@ -31,20 +31,17 @@ import {
   SvgCheveronDown,
 } from '@actual-app/components/icons/v1';
 import {
-  SvgAlertTriangle,
   SvgArrowsSynchronize,
   SvgCalendar3,
-  SvgCheckCircle1,
   SvgCheckCircleHollow,
-  SvgEditSkull1,
   SvgHyperlink2,
-  SvgLockClosed,
   SvgSubtract,
 } from '@actual-app/components/icons/v2';
 import { Popover } from '@actual-app/components/popover';
 import { styles } from '@actual-app/components/styles';
 import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
+import { elevation, motion, radius } from '@actual-app/components/tokens';
 import { Tooltip } from '@actual-app/components/tooltip';
 import { View } from '@actual-app/components/view';
 import { send } from '@actual-app/core/platform/client/connection';
@@ -96,6 +93,7 @@ import {
   CustomCell,
   DeleteCell,
   Field,
+  HEADER_HEIGHT,
   InputCell,
   Row,
   SelectCell,
@@ -182,9 +180,35 @@ export const DEFAULT_AMOUNT_COLUMN_WIDTHS: AmountColumnWidths = {
 
 // Tabular numerals (styles.tnum) make every digit glyph the same width, so a
 // per-character estimate is a good enough proxy for the pixel width for a
-// formatted amount. This would need to be adjusted with the font size.
-const AMOUNT_COLUMN_CHAR_WIDTH = 7;
+// formatted amount. This would need to be adjusted with the font size
+// (the mono face advances 0.6em, set at MONO_CELL_FONT_SIZE).
+const AMOUNT_COLUMN_CHAR_WIDTH = 7.5;
 const AMOUNT_COLUMN_PADDING = 16;
+
+// Figures (dates, amounts, balances) are set in the mono face, half a point
+// under the body size so they sit at the same optical weight as Inter.
+const MONO_CELL_FONT_SIZE = 12.5;
+const monoCellStyle: CSSProperties = {
+  ...styles.tnum,
+  fontSize: MONO_CELL_FONT_SIZE,
+};
+
+// Secondary text in a row (group, transfer, split labels): upright, in the
+// quiet grey. The ledger sets no italics.
+const quietCellStyle: CSSProperties = {
+  fontWeight: 400,
+  color: theme.tableTextLight,
+};
+
+// The lines of a split read as a sub-ledger under their parent: the payee
+// steps in to the parent's payee text, past its split glyph, and drops to the
+// quiet grey.
+const SPLIT_CHILD_INDENT = 18;
+const childPayeeStyle: CSSProperties = {
+  ...quietCellStyle,
+  // On top of the cell's own 5px inset.
+  paddingLeft: 5 + SPLIT_CHILD_INDENT,
+};
 
 function measureAmountColumnWidth(values: string[], minWidth: number) {
   const maxChars = values.reduce(
@@ -329,6 +353,7 @@ const TransactionHeader = memo(
       },
       cleared: {
         value: '✓',
+        label: <ClearedColumnLabel />,
         width: 38,
         alignItems: 'center',
         tooltip: <ClearedColumnLegend />,
@@ -338,15 +363,14 @@ const TransactionHeader = memo(
 
     return (
       <Row
+        height={HEADER_HEIGHT}
         style={{
-          fontWeight: 300,
+          ...styles.monoLabel,
           zIndex: 200,
           color: theme.tableHeaderText,
           backgroundColor: theme.tableHeaderBackground,
           paddingRight: `${5 + (scrollWidth ?? 0)}px`,
-          borderTopWidth: 1,
-          borderBottomWidth: 1,
-          borderColor: theme.tableBorder,
+          borderBottom: '1px solid ' + theme.hairline,
         }}
         data-testid="transaction-table-header"
       >
@@ -410,56 +434,100 @@ const TransactionHeader = memo(
 
 TransactionHeader.displayName = 'TransactionHeader';
 
-function ClearedColumnLegend() {
-  const legendItems = [
+// The status column is labelled with the same mark its rows use. The check
+// glyph stays in the text content for assistive tech and text matching.
+function ClearedColumnLabel() {
+  return (
+    <>
+      <SvgCheckCircleHollow
+        aria-hidden
+        style={{ width: 11, height: 11, color: 'inherit', flexShrink: 0 }}
+      />
+      <Text style={styles.visuallyHidden}>✓</Text>
+    </>
+  );
+}
+
+// The status column is a quiet margin of ticks. Its glyphs stay in greys;
+// a schedule's signal colour lives on the pill in the category column.
+function getStatusIconColor(status: StatusTypes | null | undefined) {
+  if (status == null) {
+    return theme.tableTextSubdued;
+  }
+  return status === 'reconciled' ? theme.pageTextLight : theme.tableTextLight;
+}
+
+const STATUS_GLYPH_SIZE = 12;
+
+// Uncleared is an empty ring, the slot a tick fills once the transaction is
+// verified; cleared is that ring with the tick.
+function StatusGlyph({ status }: { status: StatusTypes | null | undefined }) {
+  if (status == null) {
+    return (
+      <View
+        aria-hidden
+        style={{
+          width: STATUS_GLYPH_SIZE,
+          height: STATUS_GLYPH_SIZE,
+          borderRadius: radius.pill,
+          border: '1px solid currentColor',
+          flexShrink: 0,
+        }}
+      />
+    );
+  }
+  return createElement(
+    status === 'cleared' ? SvgCheckCircleHollow : getStatusProps(status).Icon,
     {
-      Icon: SvgCheckCircleHollow,
-      color: theme.pageTextSubdued,
-      label: <Trans>Uncleared: not yet verified</Trans>,
+      style: {
+        width: STATUS_GLYPH_SIZE,
+        height: STATUS_GLYPH_SIZE,
+        color: 'currentColor',
+        flexShrink: 0,
+        marginTop: status === 'due' ? -1 : 0,
+      },
     },
+  );
+}
+
+function ClearedColumnLegend() {
+  const legendItems: Array<{ status: StatusTypes | null; label: ReactNode }> = [
+    { status: null, label: <Trans>Uncleared: not yet verified</Trans> },
     {
-      Icon: SvgCheckCircle1,
-      color: theme.noticeTextLight,
+      status: 'cleared',
       label: <Trans>Cleared: verified against your account</Trans>,
     },
     {
-      Icon: SvgLockClosed,
-      color: theme.noticeTextLight,
+      status: 'reconciled',
       label: <Trans>Reconciled: locked after reconciliation</Trans>,
     },
     {
-      Icon: SvgCalendar3,
-      color: theme.pageTextSubdued,
+      status: 'upcoming',
       label: <Trans>Upcoming scheduled transaction</Trans>,
     },
-    {
-      Icon: SvgAlertTriangle,
-      color: theme.warningText,
-      label: <Trans>Due scheduled transaction</Trans>,
-    },
-    {
-      Icon: SvgEditSkull1,
-      color: theme.errorText,
-      label: <Trans>Missed scheduled transaction</Trans>,
-    },
+    { status: 'due', label: <Trans>Due scheduled transaction</Trans> },
+    { status: 'missed', label: <Trans>Missed scheduled transaction</Trans> },
   ];
 
   return (
-    <View style={{ maxWidth: 260, padding: 4 }}>
-      <Text style={{ fontWeight: 600 }}>
+    <View style={{ maxWidth: 270, padding: 2 }}>
+      <Text style={{ fontWeight: 600, marginBottom: 2 }}>
         <Trans>Transaction status</Trans>
       </Text>
-      {legendItems.map(({ Icon, color, label }, index) => (
+      {legendItems.map(({ status, label }, index) => (
         <View
           key={index}
           style={{
             flexDirection: 'row',
             alignItems: 'center',
-            gap: 6,
+            gap: 8,
             marginTop: 6,
+            color: theme.tooltipText,
           }}
         >
-          <Icon style={{ width: 13, height: 13, color, flexShrink: 0 }} />
+          <View style={{ color: getStatusIconColor(status) }}>
+            <StatusGlyph status={status} />
+          </View>
           <Text>{label}</Text>
         </View>
       ))}
@@ -490,20 +558,10 @@ function StatusCell({
 }: StatusCellProps) {
   const isClearedField =
     status === 'cleared' || status === 'reconciled' || status == null;
-  const statusProps = getStatusProps(status);
+  const isToggleable = isClearedField && !isPreview && !isChild;
 
   const statusColor =
-    status === 'cleared'
-      ? theme.noticeTextLight
-      : status === 'reconciled'
-        ? theme.noticeTextLight
-        : status === 'missed'
-          ? theme.errorText
-          : status === 'due'
-            ? theme.warningText
-            : selected
-              ? theme.pageTextLinkLight
-              : theme.pageTextSubdued;
+    status == null && selected ? theme.accentText : getStatusIconColor(status);
 
   function onSelect() {
     if (isClearedField) {
@@ -522,10 +580,18 @@ function StatusCell({
     >
       <CellButton
         style={{
-          padding: 3,
+          padding: 4,
           backgroundColor: 'transparent',
           border: '1px solid transparent',
-          borderRadius: 50,
+          borderRadius: radius.pill,
+          color: statusColor,
+          transition: `color ${motion.base} ${motion.ease}, background-color ${motion.base} ${motion.ease}, box-shadow ${motion.base} ${motion.ease}`,
+          ':hover': isToggleable
+            ? {
+                backgroundColor: theme.buttonBareBackgroundHover,
+                color: theme.pageText,
+              }
+            : null,
           ':focus': {
             ...(isPreview
               ? {
@@ -533,7 +599,7 @@ function StatusCell({
                 }
               : {
                   border: '1px solid ' + theme.formInputBorderSelected,
-                  boxShadow: '0 1px 2px ' + theme.formInputBorderSelected,
+                  boxShadow: '0 0 0 2px ' + theme.formInputShadowSelected,
                 }),
           },
           cursor: isClearedField ? 'pointer' : 'default',
@@ -543,14 +609,7 @@ function StatusCell({
         onEdit={() => onEdit(id, 'cleared')}
         onSelect={onSelect}
       >
-        {createElement(statusProps.Icon, {
-          style: {
-            width: 13,
-            height: 13,
-            color: statusColor,
-            marginTop: status === 'due' ? -1 : 0,
-          },
-        })}
+        <StatusGlyph status={status} />
       </CellButton>
     </Cell>
   );
@@ -558,6 +617,9 @@ function StatusCell({
 
 type HeaderCellProps = {
   value: string;
+  // Rendered in place of the value text when the column is better named by
+  // a mark than a word.
+  label?: ReactNode;
   id: string;
   icon?: 'asc' | 'desc' | 'clickable';
   tooltip?: ReactNode;
@@ -566,6 +628,7 @@ type HeaderCellProps = {
 
 function HeaderCell({
   value,
+  label,
   id,
   width,
   alignItems,
@@ -575,15 +638,20 @@ function HeaderCell({
   tooltip,
   onClick,
 }: HeaderCellProps) {
-  const style = {
-    whiteSpace: 'nowrap' as CSSProperties['whiteSpace'],
+  const isSorted = icon === 'asc' || icon === 'desc';
+  const style: CSSProperties = {
+    ...styles.monoLabel,
+    whiteSpace: 'nowrap',
     overflow: 'hidden',
     textOverflow: 'ellipsis',
-    color: theme.tableHeaderText,
-    fontWeight: 300,
+    color: isSorted ? theme.pageText : theme.tableHeaderText,
+    padding: '4px 5px',
+    borderRadius: radius.sm,
+    gap: 4,
     marginLeft,
     marginRight,
   };
+  const sortIconStyle = { width: 8, height: 8, flexShrink: 0 };
 
   return (
     <CustomCell
@@ -598,16 +666,12 @@ function HeaderCell({
       unexposedContent={({ value: cellValue }) => {
         const content = onClick ? (
           <Button variant="bare" onPress={onClick} style={style}>
-            <UnexposedCellContent value={cellValue} />
-            {icon === 'asc' && (
-              <SvgArrowDown width={10} height={10} style={{ marginLeft: 5 }} />
-            )}
-            {icon === 'desc' && (
-              <SvgArrowUp width={10} height={10} style={{ marginLeft: 5 }} />
-            )}
+            {label ?? <UnexposedCellContent value={cellValue} />}
+            {icon === 'asc' && <SvgArrowDown style={sortIconStyle} />}
+            {icon === 'desc' && <SvgArrowUp style={sortIconStyle} />}
           </Button>
         ) : (
-          <Text style={style}>{cellValue}</Text>
+          <Text style={style}>{label ?? cellValue}</Text>
         );
 
         return tooltip ? (
@@ -682,12 +746,12 @@ function PayeeCell({
         bare
         style={{
           alignSelf: 'stretch',
-          borderRadius: 4,
+          borderRadius: radius.sm,
           border: '1px solid transparent', // so it doesn't shift on hover
           ':hover': isPreview
             ? {}
             : {
-                border: '1px solid ' + theme.buttonNormalBorder,
+                border: '1px solid ' + theme.hairlineStrong,
               },
         }}
         disabled={isPreview}
@@ -711,10 +775,10 @@ function PayeeCell({
             flexDirection: 'row',
             alignItems: 'center',
             alignSelf: 'stretch',
-            borderRadius: 4,
+            borderRadius: radius.sm,
             flex: 1,
             padding: 4,
-            color: theme.pageTextSubdued,
+            color: theme.tableTextLight,
           }}
         >
           <PayeeIcons
@@ -726,42 +790,36 @@ function PayeeCell({
           <SvgSplit
             style={{
               color: 'inherit',
-              width: 14,
-              height: 14,
-              marginRight: 5,
+              width: 12,
+              height: 12,
+              marginRight: 6,
               flexShrink: 0,
             }}
           />
           <Text
             style={{
-              fontStyle: 'italic',
-              fontWeight: 300,
+              fontWeight: 400,
               userSelect: 'none',
               overflow: 'hidden',
               textOverflow: 'ellipsis',
               whiteSpace: 'nowrap',
               minWidth: 0,
               borderBottom: importedPayee
-                ? `1px dashed ${theme.pageTextSubdued}`
+                ? `1px dashed ${theme.hairlineStrong}`
                 : 'none',
             }}
           >
             {importedPayee ? (
               <Tooltip
                 content={
-                  <View style={{ padding: 10 }}>
-                    <Text style={{ fontWeight: 'bold' }}>
+                  <View style={{ gap: 2 }}>
+                    <Text style={{ fontWeight: 600 }}>
                       <Trans>Imported Payee</Trans>
                     </Text>
-                    <Text style={{ fontWeight: 'normal' }}>
-                      {importedPayee}
-                    </Text>
+                    <Text style={{ fontWeight: 400 }}>{importedPayee}</Text>
                   </View>
                 }
-                style={{
-                  ...styles.tooltip,
-                  borderRadius: '0px 5px 5px 0px',
-                }}
+                style={styles.tooltip}
                 placement="bottom"
                 triggerProps={{ delay: 750 }}
               >
@@ -805,7 +863,7 @@ function PayeeCell({
             {...props}
             style={
               importedPayee
-                ? { borderBottom: `1px dashed ${theme.pageTextSubdued}` }
+                ? { borderBottom: `1px dashed ${theme.hairlineStrong}` }
                 : {}
             }
           />
@@ -830,19 +888,14 @@ function PayeeCell({
               {importedPayee ? (
                 <Tooltip
                   content={
-                    <View style={{ padding: 10 }}>
-                      <Text style={{ fontWeight: 'bold' }}>
+                    <View style={{ gap: 2 }}>
+                      <Text style={{ fontWeight: 600 }}>
                         <Trans>Imported Payee</Trans>
                       </Text>
-                      <Text style={{ fontWeight: 'normal' }}>
-                        {importedPayee}
-                      </Text>
+                      <Text style={{ fontWeight: 400 }}>{importedPayee}</Text>
                     </View>
                   }
-                  style={{
-                    ...styles.tooltip,
-                    borderRadius: '0px 5px 5px 0px',
-                  }}
+                  style={styles.tooltip}
                   placement="bottom"
                   triggerProps={{ delay: 750 }}
                 >
@@ -889,11 +942,13 @@ function PayeeCell({
 const payeeIconButtonStyle = {
   marginLeft: -5,
   marginRight: 2,
-  width: 23,
-  height: 23,
-  color: 'inherit',
+  width: 22,
+  height: 22,
+  padding: 0,
+  borderRadius: radius.sm,
+  color: theme.tableTextLight,
 };
-const scheduleIconStyle = { width: 13, height: 13 };
+const scheduleIconStyle = { width: 12, height: 12 };
 const transferIconStyle = { width: 10, height: 10 };
 
 type PayeeIconsProps = {
@@ -1374,6 +1429,17 @@ const Transaction = memo(function Transaction({
     : null;
   const backgroundFocus = focusedField === 'select';
   const amountStyle = hideFraction ? { letterSpacing: -0.5 } : null;
+  // A split parent's amount is the total of its children.
+  const amountValueStyle: CSSProperties = {
+    ...monoCellStyle,
+    ...(isParent && { fontWeight: 500 }),
+    ...amountStyle,
+    ...valueStyle,
+  };
+  const amountInputStyle: CSSProperties = {
+    ...monoCellStyle,
+    textAlign: 'right',
+  };
 
   const runningBalance = !isTemporaryId(id) ? balance : balance + amount;
 
@@ -1615,11 +1681,7 @@ const Transaction = memo(function Transaction({
             key={columnId}
             /* Date blank placeholder for Child transaction */
             width={110}
-            style={{
-              width: 110,
-              backgroundColor: theme.tableRowBackgroundHover,
-              border: 0, // known z-order issue, bottom border for parent transaction hidden
-            }}
+            style={{ width: 110 }}
           />
         ) : (
           <CustomCell
@@ -1630,7 +1692,11 @@ const Transaction = memo(function Transaction({
             textAlign="flex"
             exposed={focusedField === 'date'}
             value={date}
-            valueStyle={valueStyle}
+            valueStyle={{
+              ...monoCellStyle,
+              color: theme.tableTextLight,
+              ...valueStyle,
+            }}
             formatter={date =>
               date ? formatDate(parseISO(date), dateFormat) : ''
             }
@@ -1654,7 +1720,11 @@ const Transaction = memo(function Transaction({
               <DateSelect
                 value={date || ''}
                 dateFormat={dateFormat}
-                inputProps={{ onBlur, onKeyDown, style: inputStyle }}
+                inputProps={{
+                  onBlur,
+                  onKeyDown,
+                  style: { ...inputStyle, ...monoCellStyle },
+                }}
                 shouldSaveFromKey={shouldSaveFromKey}
                 clearOnBlur
                 onUpdate={onUpdate}
@@ -1675,11 +1745,7 @@ const Transaction = memo(function Transaction({
           <Field
             key={columnId}
             /* Account blank placeholder for Child transaction */
-            style={{
-              flex: 1,
-              backgroundColor: theme.tableRowBackgroundHover,
-              border: 0,
-            }}
+            style={{ flex: 1 }}
           />
         ) : (
           <CustomCell
@@ -1741,7 +1807,9 @@ const Transaction = memo(function Transaction({
               payee =>
                 !payee.transfer_acct || payee.transfer_acct !== accountId,
             )}
-            valueStyle={valueStyle}
+            valueStyle={
+              isChild ? { ...childPayeeStyle, ...valueStyle } : valueStyle
+            }
             transaction={transaction}
             transferAccountsByTransaction={transferAccountsByTransaction}
             importedPayee={importedPayee}
@@ -1775,11 +1843,7 @@ const Transaction = memo(function Transaction({
             key={columnId}
             name="group"
             width="flex"
-            style={{
-              fontStyle: 'italic',
-              color: theme.pageTextSubdued,
-              fontWeight: 300,
-            }}
+            style={quietCellStyle}
             value={
               categoryId
                 ? (getGroupByCatId(categoryGroups)[categoryId]?.name ?? '')
@@ -1824,24 +1888,39 @@ const Transaction = memo(function Transaction({
                           ? theme.formLabelBackground
                           : theme.upcomingBackground,
                   margin: '0 5px',
-                  padding: '3px 7px',
-                  borderRadius: 4,
-                  overflow: 'hidden',
-                  textOverflow: 'ellipsis',
-                  display: 'inline-block',
+                  padding: '2px 8px',
+                  borderRadius: radius.sm,
+                  fontSize: 11.5,
+                  fontWeight: 500,
+                  lineHeight: '16px',
+                  flexDirection: 'row',
+                  alignItems: 'center',
+                  gap: 6,
+                  // The status must stay readable: the empty split button
+                  // beside it gives up its room first.
+                  flexShrink: 0,
                   whiteSpace: 'nowrap',
                 }}
               >
-                {titleFirst(getStatusLabel(previewStatus ?? ''))}
+                <View
+                  style={{
+                    width: 6,
+                    height: 6,
+                    borderRadius: radius.pill,
+                    backgroundColor: 'currentColor',
+                    flexShrink: 0,
+                  }}
+                />
+                <Text>{titleFirst(getStatusLabel(previewStatus ?? ''))}</Text>
               </View>
             )}
             <CellButton
               bare
               style={{
-                borderRadius: 4,
+                borderRadius: radius.sm,
                 border: '1px solid transparent', // so it doesn't shift on hover
                 ':hover': {
-                  border: '1px solid ' + theme.buttonNormalBorder,
+                  border: '1px solid ' + theme.hairlineStrong,
                 },
               }}
               disabled={isTemporaryId(transaction.id)}
@@ -1853,19 +1932,20 @@ const Transaction = memo(function Transaction({
                   flexDirection: 'row',
                   alignItems: 'center',
                   alignSelf: 'stretch',
-                  borderRadius: 4,
+                  borderRadius: radius.sm,
                   flex: 1,
                   padding: 4,
-                  color: theme.pageTextSubdued,
+                  gap: 4,
+                  color: theme.tableTextLight,
                 }}
               >
                 {isParent && (
                   <SvgCheveronDown
                     style={{
                       color: 'inherit',
-                      width: 14,
-                      height: 14,
-                      transition: 'transform .08s',
+                      width: 12,
+                      height: 12,
+                      flexShrink: 0,
                       transform: expanded ? 'rotateZ(0)' : 'rotateZ(-90deg)',
                     }}
                   />
@@ -1873,8 +1953,8 @@ const Transaction = memo(function Transaction({
                 {!isPreview && (
                   <Text
                     style={{
-                      fontStyle: 'italic',
-                      fontWeight: 300,
+                      fontWeight: 500,
+                      fontSize: 12,
                       userSelect: 'none',
                     }}
                   >
@@ -1904,15 +1984,8 @@ const Transaction = memo(function Transaction({
                   : ''
             }
             valueStyle={valueStyle}
-            style={{
-              fontStyle: 'italic',
-              color: theme.pageTextSubdued,
-              fontWeight: 300,
-            }}
-            inputProps={{
-              readOnly: true,
-              style: { fontStyle: 'italic' },
-            }}
+            style={quietCellStyle}
+            inputProps={{ readOnly: true }}
           />
         ) : (
           <CustomCell
@@ -1935,9 +2008,8 @@ const Transaction = memo(function Transaction({
               !categoryId
                 ? {
                     // uncategorized transaction
-                    fontStyle: 'italic',
-                    fontWeight: 300,
-                    color: theme.formInputTextHighlight,
+                    fontWeight: 400,
+                    color: theme.pageTextLink,
                   }
                 : valueStyle
             }
@@ -1995,19 +2067,16 @@ const Transaction = memo(function Transaction({
               // reformat value so since we might have kept decimals
               value ? amountToCurrency(currencyToAmount(value) || 0) : ''
             }
-            valueStyle={valueStyle}
+            valueStyle={amountValueStyle}
             textAlign="right"
             title={debit}
             onExpose={name => !isPreview && onEdit(id, name)}
-            style={{
-              ...(isParent && { fontStyle: 'italic' }),
-              ...styles.tnum,
-              ...amountStyle,
-            }}
+            style={styles.tnum}
             inputProps={{
               value:
                 debit === '' && credit === '' ? amountToCurrency(0) : debit,
               onUpdate: onUpdate.bind(null, 'debit'),
+              style: amountInputStyle,
               'data-1p-ignore': true,
             }}
             privacyFilter={{
@@ -2030,18 +2099,15 @@ const Transaction = memo(function Transaction({
               // reformat value so since we might have kept decimals
               value ? amountToCurrency(currencyToAmount(value) || 0) : ''
             }
-            valueStyle={valueStyle}
+            valueStyle={amountValueStyle}
             textAlign="right"
             title={credit}
             onExpose={name => !isPreview && onEdit(id, name)}
-            style={{
-              ...(isParent && { fontStyle: 'italic' }),
-              ...styles.tnum,
-              ...amountStyle,
-            }}
+            style={styles.tnum}
             inputProps={{
               value: credit,
               onUpdate: onUpdate.bind(null, 'credit'),
+              style: amountInputStyle,
               'data-1p-ignore': true,
             }}
             privacyFilter={{
@@ -2061,12 +2127,16 @@ const Transaction = memo(function Transaction({
                 : integerToCurrency(runningBalance)
             }
             valueStyle={{
+              ...monoCellStyle,
+              ...amountStyle,
               color:
                 runningBalance < 0
                   ? theme.numberNegative
-                  : theme.numberPositive,
+                  : runningBalance > 0
+                    ? theme.numberPositive
+                    : theme.tableTextSubdued,
             }}
-            style={{ ...styles.tnum, ...amountStyle }}
+            style={styles.tnum}
             width={amountColumnWidths.balance}
             textAlign="right"
             privacyFilter
@@ -2138,10 +2208,7 @@ const Transaction = memo(function Transaction({
             ? { color: theme.tableRowBackgroundHighlightText }
             : { color: theme.tableText }),
           ...style,
-          ...(isPreview && {
-            color: theme.tableTextInactive,
-            fontStyle: 'italic',
-          }),
+          ...(isPreview && { color: theme.tableTextInactive }),
           ...(_unmatched && { opacity: 0.5 }),
           ...(isBeingDragged && { opacity: 0.5 }),
         }}
@@ -2156,7 +2223,7 @@ const Transaction = memo(function Transaction({
               maxWidth: 'none',
               maxHeight: 'none !important',
               minWidth: 375,
-              padding: 5,
+              padding: '6px 6px 6px 10px',
             }}
             shouldFlip={false}
             placement="bottom end"
@@ -2177,18 +2244,24 @@ const Transaction = memo(function Transaction({
           <View
             style={{
               backgroundColor: theme.tableBackground,
-              borderRadius: 4,
+              borderRadius: radius.md,
               padding: '8px 16px',
-              boxShadow: '0 2px 8px rgba(0, 0, 0, 0.3)',
+              boxShadow: elevation.popover,
               width: '50vw',
               minWidth: 500,
               flexDirection: 'row',
               alignItems: 'center',
-              border: '1px solid ' + theme.tableBorder,
-              opacity: 0.8,
+              border: '1px solid ' + theme.hairline,
+              opacity: 0.9,
             }}
           >
-            <Text style={{ color: theme.tableText, width: '10%' }}>
+            <Text
+              style={{
+                ...monoCellStyle,
+                color: theme.tableTextLight,
+                width: '10%',
+              }}
+            >
               {date ? formatDate(parseISO(date), dateFormat) : ''}
             </Text>
             <Text
@@ -2206,8 +2279,7 @@ const Transaction = memo(function Transaction({
             </Text>
             <Text
               style={{
-                color: isParent ? theme.tableTextSubdued : theme.tableText,
-                fontStyle: isParent ? 'italic' : undefined,
+                color: isParent ? theme.tableTextLight : theme.tableText,
                 width: '30%',
                 paddingLeft: 16,
                 overflow: 'hidden',
@@ -2225,6 +2297,7 @@ const Transaction = memo(function Transaction({
             </Text>
             <Text
               style={{
+                ...monoCellStyle,
                 color: theme.tableText,
                 width: '10%',
                 paddingLeft: 16,
@@ -2239,6 +2312,23 @@ const Transaction = memo(function Transaction({
     </View>
   );
 });
+
+// Tags keep the colour their owner gave them; the ledger sets their shape so
+// they sit in a 32px row like the status pills do. A tag wider than its cell
+// ends in an ellipsis inside its own rounded shape.
+const tagPillStyle: CSSProperties = {
+  display: 'inline-block',
+  maxWidth: '100%',
+  overflow: 'hidden',
+  textOverflow: 'ellipsis',
+  whiteSpace: 'nowrap',
+  verticalAlign: 'middle',
+  borderRadius: radius.sm,
+  padding: '1px 7px',
+  fontSize: 11.5,
+  fontWeight: 500,
+  lineHeight: '16px',
+};
 
 type NotesCellProps = {
   note: string;
@@ -2298,7 +2388,7 @@ function NotesCell({
       width="flex"
       name="notes"
       value={displayedNote}
-      valueStyle={valueStyle}
+      valueStyle={{ ...valueStyle, '& div > button': tagPillStyle }}
       formatter={value =>
         NotesTagFormatter({ notes: value, onNotesTagClick: onClickTag })
       }
@@ -2311,7 +2401,7 @@ function NotesCell({
       unexposedContent={props => (
         <Tooltip
           content={
-            <View style={{ padding: 10, maxWidth: 400 }}>
+            <View style={{ maxWidth: 400 }}>
               <Text style={{ whiteSpace: 'pre-wrap' }}>
                 <NotesTagFormatter
                   notes={displayedNote}
@@ -2365,15 +2455,21 @@ function TransactionError({
             style={{
               flexDirection: 'row',
               alignItems: 'center',
-              padding: '0 5px',
-              gap: 5,
+              padding: '0 2px',
+              gap: 8,
               ...style,
             }}
             data-testid="transaction-error"
           >
-            <Text style={{ whiteSpace: 'nowrap' }}>
+            <Text style={{ whiteSpace: 'nowrap', color: theme.pageTextLight }}>
               <Trans>Amount left:</Trans>{' '}
-              <Text style={{ fontWeight: 500 }}>
+              <Text
+                style={{
+                  ...monoCellStyle,
+                  fontWeight: 500,
+                  color: theme.signalText,
+                }}
+              >
                 {integerToCurrency(
                   isDeposit ? error.difference : -error.difference,
                 )}
@@ -2382,6 +2478,7 @@ function TransactionError({
             <View style={{ flex: 1 }} />
             <Button
               variant="normal"
+              size="small"
               onPress={onDistributeRemainder}
               data-testid="distribute-split-button"
             >
@@ -2389,7 +2486,7 @@ function TransactionError({
             </Button>
             <Button
               variant="primary"
-              style={{ padding: '4px 10px' }}
+              size="small"
               onPress={onAddSplit}
               data-testid="add-split-button"
             >
@@ -2498,9 +2595,9 @@ function NewTransaction({
   return (
     <View
       style={{
-        borderBottom: '1px solid ' + theme.tableBorderHover,
-        paddingBottom: 6,
-        backgroundColor: theme.tableBackground,
+        borderBottom: '1px solid ' + theme.hairline,
+        paddingBottom: 8,
+        backgroundColor: theme.tableRowHeaderBackground,
       }}
       data-testid="new-transaction"
       onKeyDown={e => {
@@ -2551,12 +2648,13 @@ function NewTransaction({
           flexDirection: 'row',
           alignItems: 'center',
           justifyContent: 'flex-end',
-          marginTop: 6,
-          marginRight: 20,
+          gap: 8,
+          marginTop: 8,
+          marginRight: 12,
         }}
       >
         <Button
-          style={{ marginRight: 10, padding: '4px 10px' }}
+          size="small"
           onPress={() => onClose()}
           data-testid="cancel-button"
           ref={cancelButtonRef}
@@ -2565,7 +2663,7 @@ function NewTransaction({
         </Button>
         {isFuture && (
           <Button
-            style={{ marginRight: 10, padding: '4px 10px' }}
+            size="small"
             onPress={onSchedule}
             data-testid="schedule-button"
             ref={scheduleButtonRef}
@@ -2585,7 +2683,8 @@ function NewTransaction({
         ) : (
           <Button
             variant="primary"
-            style={{ padding: '4px 10px' }}
+            size="small"
+            style={{ paddingInline: 14 }}
             onPress={handleAddClick}
             data-testid="add-button"
             ref={addButtonRef}
@@ -2997,8 +3096,8 @@ function TransactionTableInner({
               left: 0,
               right: 0,
               height: 20,
-              backgroundColor: theme.errorText,
-              boxShadow: '0 0 6px rgba(0, 0, 0, .20)',
+              backgroundColor: theme.tableBackground,
+              boxShadow: elevation.raised,
             }}
           />
         )}

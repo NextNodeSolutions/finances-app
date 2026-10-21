@@ -380,7 +380,16 @@ function ConfigureField<T extends RuleConditionEntity>({
                 padding: 0,
               }}
             >
-              <View style={{ flexGrow: 1 }}>{titleFirst(mapField(field))}</View>
+              <View
+                style={{
+                  flexGrow: 1,
+                  fontSize: 13,
+                  fontWeight: 600,
+                  color: theme.pageText,
+                }}
+              >
+                {titleFirst(mapField(field))}
+              </View>
             </View>
           )}
         </SpaceBetween>
@@ -396,8 +405,8 @@ function ConfigureField<T extends RuleConditionEntity>({
       </View>
 
       <SpaceBetween
-        gap={5}
-        style={{ alignItems: 'flex-start', marginBottom: 15 }}
+        gap={6}
+        style={{ alignItems: 'flex-start', marginBottom: 14 }}
       >
         {type === 'boolean' ? (
           <>
@@ -809,8 +818,8 @@ export function FilterButton<T extends RuleConditionEntity>({
           return true;
         }}
         style={{
-          width: 275,
-          padding: 15,
+          width: 288,
+          padding: 16,
           color: theme.menuItemText,
           zIndex: '2500 !important',
         }}

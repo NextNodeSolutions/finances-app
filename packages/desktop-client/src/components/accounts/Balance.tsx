@@ -4,8 +4,10 @@ import { useTranslation } from 'react-i18next';
 
 import { Button } from '@actual-app/components/button';
 import { SvgArrowButtonRight1 } from '@actual-app/components/icons/v2';
+import { styles } from '@actual-app/components/styles';
 import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
+import { motion, radius } from '@actual-app/components/tokens';
 import { View } from '@actual-app/components/view';
 import { q } from '@actual-app/core/shared/query';
 import type { Query } from '@actual-app/core/shared/query';
@@ -27,31 +29,40 @@ type DetailedBalanceProps = {
   name: string;
   balance: number;
   isExactBalance?: boolean;
+  valueColor?: string;
 };
 
+// One reading on the instrument strip beside the headline balance: a small
+// mono label over a hairline divider, then the figure.
 function DetailedBalance({
   name,
   balance,
   isExactBalance = true,
+  valueColor = theme.pageText,
 }: DetailedBalanceProps) {
   const format = useFormat();
   return (
-    <Text
+    <View
       style={{
-        borderRadius: 4,
-        padding: '4px 6px',
-        color: theme.pillText,
-        backgroundColor: theme.pillBackground,
+        flexDirection: 'row',
+        alignItems: 'baseline',
+        gap: 8,
+        paddingLeft: 16,
+        borderLeft: '1px solid ' + theme.hairline,
       }}
     >
-      {name}{' '}
+      <Text style={{ ...styles.monoLabel, color: theme.tableHeaderText }}>
+        {name}
+      </Text>
       <PrivacyFilter>
-        <FinancialText style={{ fontWeight: 600 }}>
+        <FinancialText
+          style={{ fontSize: 13, fontWeight: 500, color: valueColor }}
+        >
           {!isExactBalance && '~ '}
           {format(balance, 'financial')}
         </FinancialText>
       </PrivacyFilter>
-    </Text>
+    </View>
   );
 }
 
@@ -127,6 +138,7 @@ export function SelectedBalance({
       name={t('Selected balance:')}
       balance={balance}
       isExactBalance={isExactBalance}
+      valueColor={theme.accentText}
     />
   );
 }
@@ -202,9 +214,9 @@ export function Balances({
         flexDirection: 'row',
         flexWrap: 'wrap',
         alignItems: 'center',
-        marginTop: -5,
-        marginLeft: -5,
-        gap: 10,
+        marginLeft: -8,
+        rowGap: 6,
+        columnGap: 16,
       }}
     >
       <Button
@@ -213,8 +225,8 @@ export function Balances({
         variant="bare"
         onPress={onToggleExtraBalances}
         style={{
-          paddingTop: 1,
-          paddingBottom: 1,
+          padding: '0 8px',
+          borderRadius: radius.md,
         }}
       >
         <CellValue
@@ -230,14 +242,18 @@ export function Balances({
             <CellValueText
               {...props}
               style={{
-                fontSize: 22,
-                fontWeight: 400,
+                ...styles.display,
+                fontSize: 30,
+                lineHeight: '36px',
+                fontWeight: 300,
+                letterSpacing: '-0.015em',
+                // A balance is a stock, not a gain: ink unless it is owed.
                 color:
                   props.value < 0
                     ? theme.numberNegative
-                    : props.value > 0
-                      ? theme.numberPositive
-                      : theme.pageTextSubdued,
+                    : props.value === 0
+                      ? theme.pageTextSubdued
+                      : theme.pageText,
               }}
             />
           )}
@@ -245,11 +261,12 @@ export function Balances({
 
         <SvgArrowButtonRight1
           style={{
-            width: 10,
-            height: 10,
+            width: 9,
+            height: 9,
             marginLeft: 10,
-            color: theme.pillText,
+            color: theme.pageTextSubdued,
             transform: showExtraBalances ? 'rotateZ(180deg)' : 'rotateZ(0)',
+            transition: `opacity ${motion.base} ${motion.ease}`,
             opacity:
               isButtonHovered || selectedItems.size > 0 || showExtraBalances
                 ? 1

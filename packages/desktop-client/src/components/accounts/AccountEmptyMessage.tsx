@@ -18,18 +18,26 @@ export function AccountEmptyMessage({ onAdd }: AccountEmptyMessageProps) {
         flex: 1,
         alignItems: 'center',
         borderTopWidth: 1,
-        borderColor: theme.tableBorder,
+        borderColor: theme.hairline,
       }}
     >
       <View
         style={{
-          width: 550,
-          marginTop: 75,
-          fontSize: 15,
+          maxWidth: 520,
+          marginTop: 80,
+          paddingInline: 16,
+          fontSize: 14,
           alignItems: 'center',
         }}
       >
-        <Text style={{ textAlign: 'center', lineHeight: '1.4em' }}>
+        <Text
+          style={{
+            textAlign: 'center',
+            lineHeight: '22px',
+            textWrap: 'pretty',
+            '& strong': { fontWeight: 600, color: theme.pageText },
+          }}
+        >
           <Trans>
             <strong>Let's add your first account.</strong> Accounts hold your
             transactions, like everyday spending, savings, credit cards, or
@@ -40,7 +48,7 @@ export function AccountEmptyMessage({ onAdd }: AccountEmptyMessageProps) {
 
         <Button
           variant="primary"
-          style={{ marginTop: 20 }}
+          style={{ marginTop: 24 }}
           autoFocus
           onPress={onAdd}
         >
@@ -48,7 +56,7 @@ export function AccountEmptyMessage({ onAdd }: AccountEmptyMessageProps) {
         </Button>
 
         <View
-          style={{ marginTop: 20, fontSize: 13, color: theme.tableTextLight }}
+          style={{ marginTop: 16, fontSize: 12.5, color: theme.tableTextLight }}
         >
           <Trans>You can add more accounts at any time from the sidebar.</Trans>
         </View>

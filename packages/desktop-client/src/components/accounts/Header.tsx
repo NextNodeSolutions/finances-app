@@ -24,6 +24,7 @@ import { Popover } from '@actual-app/components/popover';
 import { SpaceBetween } from '@actual-app/components/space-between';
 import { styles } from '@actual-app/components/styles';
 import { theme } from '@actual-app/components/theme';
+import { motion, radius } from '@actual-app/components/tokens';
 import { Tooltip } from '@actual-app/components/tooltip';
 import { View } from '@actual-app/components/view';
 import { tsToRelativeTime } from '@actual-app/core/shared/util';
@@ -55,6 +56,18 @@ import type { TableRef } from './Account';
 import { Balances } from './Balance';
 import { BalanceHistoryGraph } from './BalanceHistoryGraph';
 import { ReconcileMenu, ReconcilingMessage } from './Reconcile';
+
+// Icon-only toolbar actions: a square bare button with the glyph in the
+// secondary ink.
+const toolbarIconButtonStyle = {
+  width: 30,
+  height: 30,
+  padding: 0,
+  borderRadius: radius.md,
+  color: theme.pageTextLight,
+};
+const toolbarIconStyle = { width: 14, height: 14 };
+const toolbarLabelIconStyle = { width: 12, height: 12, flexShrink: 0 };
 
 type AccountHeaderProps = {
   tableRef: TableRef;
@@ -272,27 +285,28 @@ export function AccountHeader({
 
   return (
     <>
-      <View style={{ ...styles.pageContent, paddingBottom: 10, flexShrink: 0 }}>
+      <View style={{ ...styles.pageContent, paddingBottom: 14, flexShrink: 0 }}>
         <View
           style={{
             flexDirection: 'column',
-            marginTop: 2,
             justifyContent: 'space-between',
-            gap: 10,
+            gap: 12,
           }}
         >
           <View
             style={{
               flexGrow: 1,
               alignItems: 'flex-start',
-              gap: 10,
+              // The title and the headline figure read as two lines, title
+              // first.
+              gap: 8,
             }}
           >
             <View
               style={{
                 flexDirection: 'row',
                 alignItems: 'center',
-                gap: 3,
+                gap: 10,
               }}
             >
               {!!account?.bank && (
@@ -330,43 +344,45 @@ export function AccountHeader({
             }}
           />
         </View>
-        <SpaceBetween gap={10} style={{ marginTop: 12 }}>
+        <SpaceBetween gap={8} style={{ marginTop: 20 }}>
+          {!showEmptyMessage && (
+            <Button
+              variant="normal"
+              onPress={onAddTransaction}
+              style={{ gap: 7 }}
+            >
+              <SvgAdd style={{ width: 10, height: 10, flexShrink: 0 }} />
+              <Trans>Add New</Trans>
+            </Button>
+          )}
+
+          {account && !account.closed && (
+            <Button variant="normal" onPress={onImport} style={{ gap: 7 }}>
+              <SvgDownloadThickBottom style={toolbarLabelIconStyle} />
+              <Trans>Import</Trans>
+            </Button>
+          )}
+
           {canSync && (
             <Button
-              variant="bare"
+              variant="normal"
               onPress={onSync}
               isDisabled={isServerOffline}
+              style={{ gap: 7 }}
             >
               <AnimatedRefresh
-                width={13}
-                height={13}
+                width={12}
+                height={12}
                 animating={
                   account
                     ? accountsSyncing.includes(account.id)
                     : accountsSyncing.length > 0
                 }
-              />{' '}
+              />
               {isServerOffline ? t('Bank Sync Offline') : t('Bank Sync')}
             </Button>
           )}
 
-          {account && !account.closed && (
-            <Button variant="bare" onPress={onImport}>
-              <SvgDownloadThickBottom
-                width={13}
-                height={13}
-                style={{ marginRight: 4 }}
-              />{' '}
-              <Trans>Import</Trans>
-            </Button>
-          )}
-
-          {!showEmptyMessage && (
-            <Button variant="bare" onPress={onAddTransaction}>
-              <SvgAdd width={10} height={10} style={{ marginRight: 3 }} />
-              <Trans>Add New</Trans>
-            </Button>
-          )}
           <View style={{ flexShrink: 0 }}>
             {/* @ts-expect-error fix me */}
             <FilterButton onApply={onApplyFilter} />
@@ -378,6 +394,19 @@ export function AccountHeader({
             value={search}
             onChange={onSearch}
             ref={searchInput}
+            width={240}
+            height={30}
+            style={{
+              borderColor: theme.formInputBorder,
+              borderRadius: radius.md,
+              backgroundColor: theme.formInputBackground,
+              transition: `border-color ${motion.base} ${motion.ease}, box-shadow ${motion.base} ${motion.ease}`,
+              ':hover': { borderColor: theme.hairlineStrong },
+              ':focus-within': {
+                borderColor: theme.formInputBorderSelected,
+                boxShadow: '0 0 0 3px ' + theme.formInputShadowSelected,
+              },
+            }}
           />
           {workingHard ? (
             <View>
@@ -438,19 +467,19 @@ export function AccountHeader({
                   ref={reconcileRef}
                   variant="bare"
                   aria-label={t('Reconcile')}
-                  style={{ padding: 6 }}
+                  style={toolbarIconButtonStyle}
                   onPress={() => {
                     setReconcileOpen(true);
                   }}
                 >
                   <View>
-                    <SvgLockClosed width={14} height={14} />
+                    <SvgLockClosed style={toolbarIconStyle} />
                   </View>
                 </Button>
                 <Popover
                   placement="bottom"
                   triggerRef={reconcileRef}
-                  style={{ width: 275 }}
+                  style={{ width: 288, padding: 14 }}
                   isOpen={reconcileOpen}
                   onOpenChange={() => setReconcileOpen(false)}
                 >
@@ -470,7 +499,7 @@ export function AccountHeader({
                 ? t('Collapse split transactions')
                 : t('Expand split transactions')
             }
-            style={{ padding: 6 }}
+            style={toolbarIconButtonStyle}
             onPress={onToggleSplits}
           >
             <View
@@ -481,20 +510,22 @@ export function AccountHeader({
               }
             >
               {splitsExpanded.state.mode === 'collapse' ? (
-                <SvgArrowsShrink3 style={{ width: 14, height: 14 }} />
+                <SvgArrowsShrink3 style={toolbarIconStyle} />
               ) : (
-                <SvgArrowsExpand3 style={{ width: 14, height: 14 }} />
+                <SvgArrowsExpand3 style={toolbarIconStyle} />
               )}
             </View>
           </Button>
           {account ? (
             <View style={{ flex: '0 0 auto' }}>
               <DialogTrigger>
-                <Button variant="bare" aria-label={t('Account menu')}>
+                <Button
+                  variant="bare"
+                  aria-label={t('Account menu')}
+                  style={toolbarIconButtonStyle}
+                >
                   <SvgDotsHorizontalTriple
-                    width={15}
-                    height={15}
-                    style={{ transform: 'rotateZ(90deg)' }}
+                    style={{ ...toolbarIconStyle, transform: 'rotateZ(90deg)' }}
                   />
                 </Button>
 
@@ -515,15 +546,17 @@ export function AccountHeader({
           ) : (
             <View style={{ flex: '0 0 auto' }}>
               <DialogTrigger>
-                <Button variant="bare" aria-label={t('Account menu')}>
+                <Button
+                  variant="bare"
+                  aria-label={t('Account menu')}
+                  style={toolbarIconButtonStyle}
+                >
                   <SvgDotsHorizontalTriple
-                    width={15}
-                    height={15}
-                    style={{ transform: 'rotateZ(90deg)' }}
+                    style={{ ...toolbarIconStyle, transform: 'rotateZ(90deg)' }}
                   />
                 </Button>
 
-                <Popover>
+                <Popover style={{ minWidth: 240 }}>
                   <Dialog>
                     <Menu
                       slot="close"
@@ -599,10 +632,10 @@ function AccountSyncSidebar({
           : isAccountFailedSync(account)
             ? theme.sidebarItemBackgroundFailed
             : theme.sidebarItemBackgroundPositive,
-        marginRight: '4px',
-        width: 8,
-        height: 8,
-        borderRadius: 8,
+        width: 7,
+        height: 7,
+        borderRadius: radius.pill,
+        flexShrink: 0,
       }}
     />
   );
@@ -642,13 +675,18 @@ function AccountNameField({
               onUpdate={handleSave}
               onEscape={() => setEditingName(false)}
               style={{
-                fontSize: 25,
-                fontWeight: 500,
+                ...styles.display,
+                fontSize: 28,
+                lineHeight: '34px',
+                color: theme.pageText,
                 marginTop: -3,
-                marginBottom: -4,
-                marginLeft: -6,
-                paddingTop: 2,
-                paddingBottom: 2,
+                marginBottom: -3,
+                marginLeft: -9,
+                paddingTop: 1,
+                paddingBottom: 1,
+                paddingLeft: 8,
+                paddingRight: 8,
+                borderRadius: radius.md,
                 width: Math.max(20, accountName.length) + 'ch',
               }}
             />
@@ -666,7 +704,7 @@ function AccountNameField({
             gap: 3,
             '& .hover-visible': {
               opacity: 0,
-              transition: 'opacity .25s',
+              transition: `opacity ${motion.base} ${motion.ease}`,
             },
             '&:hover .hover-visible': {
               opacity: 1,
@@ -675,10 +713,11 @@ function AccountNameField({
         >
           <View
             style={{
-              fontSize: 25,
-              fontWeight: 500,
-              marginRight: 5,
-              marginBottom: -1,
+              ...styles.display,
+              fontSize: 28,
+              lineHeight: '34px',
+              color: theme.pageText,
+              marginRight: 6,
             }}
             data-testid="account-name"
           >

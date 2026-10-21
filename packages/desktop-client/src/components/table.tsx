@@ -1,7 +1,9 @@
 // @ts-strict-ignore
 import React, {
+  createContext,
   forwardRef,
   useCallback,
+  useContext,
   useImperativeHandle,
   useLayoutEffect,
   useMemo,
@@ -33,7 +35,9 @@ import { styles } from '@actual-app/components/styles';
 import type { CSSProperties } from '@actual-app/components/styles';
 import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
+import { elevation, motion, radius } from '@actual-app/components/tokens';
 import { View } from '@actual-app/components/view';
+import { css } from '@emotion/css';
 
 import { useFormat } from '#hooks/useFormat';
 import type { FormatType } from '#hooks/useFormat';
@@ -59,6 +63,12 @@ import {
 } from './PrivacyFilter';
 
 export const ROW_HEIGHT = 32;
+// The header band sits a little taller than the rows it labels.
+export const HEADER_HEIGHT = 36;
+
+// Cells and fields rendered inside a TableHeader set their text as small
+// mono column labels instead of body text.
+const TableHeaderContext = createContext(false);
 
 function fireBlur(onBlur, e) {
   if (document.hasFocus()) {
@@ -82,6 +92,8 @@ export const Field = forwardRef<HTMLDivElement, FieldProps>(function Field(
   { width, name, truncate = true, children, style, contentStyle, ...props },
   ref,
 ) {
+  const isHeader = useContext(TableHeaderContext);
+
   return (
     <View
       innerRef={ref}
@@ -90,8 +102,8 @@ export const Field = forwardRef<HTMLDivElement, FieldProps>(function Field(
         ...(width === 'flex' ? { flex: 1, flexBasis: 0 } : { width }),
         borderTopWidth: 1,
         borderBottomWidth: 1,
-        borderColor: theme.tableBorder,
-        ...styles.smallText,
+        borderColor: isHeader ? theme.hairline : theme.tableBorder,
+        ...(isHeader ? null : styles.smallText),
         ...style,
       }}
       data-testid={name}
@@ -184,6 +196,7 @@ export function Cell({
 }: CellProps) {
   const mouseCoords = useRef(null);
   const viewRef = useRef(null);
+  const isHeader = useContext(TableHeaderContext);
 
   useProperFocus(viewRef, focused !== undefined ? focused : exposed);
 
@@ -195,7 +208,7 @@ export function Cell({
     justifyContent: 'center',
     borderTopWidth: 1,
     borderBottomWidth: 1,
-    borderColor: theme.tableBorder,
+    borderColor: isHeader ? theme.hairline : theme.tableBorder,
     alignItems,
   };
 
@@ -221,7 +234,7 @@ export function Cell({
               flex: 1,
               padding: '0 5px',
               alignItems: 'center',
-              ...styles.smallText,
+              ...(isHeader ? null : styles.smallText),
               ...valueStyle,
             }}
             // Can't use click because we only want to expose the cell if
@@ -258,6 +271,7 @@ export function Cell({
       exposed,
       children,
       plain,
+      isHeader,
       valueStyle,
       onExpose,
       name,
@@ -310,13 +324,21 @@ export const Row = forwardRef<HTMLDivElement, RowProps>(function Row(
   );
 });
 
+// Editing a cell swaps its text for a white field with a focus ring; the
+// field fills the cell so the row keeps its rhythm.
 const inputCellStyle = {
-  padding: '5px 3px',
+  padding: '5px 4px',
   margin: '0 1px',
+  borderRadius: radius.sm,
+  backgroundColor: theme.formInputBackground,
+  borderColor: theme.formInputBorderSelected,
+  boxShadow: '0 0 0 2px ' + theme.formInputShadowSelected,
 };
 
 const readonlyInputStyle = {
   backgroundColor: 'transparent',
+  borderColor: 'transparent',
+  boxShadow: 'none',
   '::selection': { backgroundColor: theme.formInputTextReadOnlySelection },
 };
 
@@ -577,7 +599,7 @@ export const CellButton = forwardRef<HTMLDivElement, CellButtonProps>(
           flexDirection: 'row',
           alignItems: 'center',
           cursor: 'default',
-          transition: 'box-shadow .15s',
+          transition: `box-shadow ${motion.base} ${motion.ease}, background-color ${motion.base} ${motion.ease}, border-color ${motion.base} ${motion.ease}`,
           backgroundColor: bare
             ? 'transparent'
             : disabled // always use disabled before primary since we can have a disabled primary button
@@ -600,12 +622,10 @@ export const CellButton = forwardRef<HTMLDivElement, CellButtonProps>(
               : primary
                 ? theme.buttonPrimaryText
                 : theme.buttonNormalText,
-          ':focus': bare
-            ? null
-            : {
-                outline: 0,
-                boxShadow: `1px 1px 2px ${theme.buttonNormalShadow}`,
-              },
+          ':focus': {
+            outline: 0,
+            boxShadow: '0 0 0 2px ' + theme.formInputShadowSelected,
+          },
           ...style,
         }}
         onFocus={() => onEdit && onEdit()}
@@ -642,7 +662,7 @@ export function SelectCell({
   style,
   onSelect,
   onEdit,
-  icon = <SvgCheckmark width={6} height={6} />,
+  icon = <SvgCheckmark width={7} height={7} />,
   buttonProps = {},
   ...props
 }: SelectCellProps) {
@@ -662,21 +682,23 @@ export function SelectCell({
       {() => (
         <CellButton
           style={{
-            width: 12,
-            height: 12,
+            width: 13,
+            height: 13,
             justifyContent: 'center',
             alignItems: 'center',
-            borderRadius: 3,
+            borderRadius: radius.xs,
             border: selected
               ? '1px solid ' + theme.checkboxBorderSelected
               : '1px solid ' + theme.formInputBorder,
             color: theme.checkboxText,
             backgroundColor: selected
               ? theme.checkboxBackgroundSelected
-              : theme.tableBackground,
+              : theme.formInputBackground,
+            boxShadow: selected ? 'none' : elevation.xs,
+            ':hover': selected ? null : { borderColor: theme.hairlineStrong },
             ':focus': {
               border: '1px solid ' + theme.checkboxBorderSelected,
-              boxShadow: '0 1px 2px ' + theme.checkboxShadowSelected,
+              boxShadow: '0 0 0 2px ' + theme.checkboxShadowSelected,
             },
           }}
           onEdit={onEdit}
@@ -791,6 +813,7 @@ type TableHeaderProps = Omit<ComponentProps<typeof Row>, 'headers'> & {
 export function TableHeader({
   headers,
   children,
+  height = HEADER_HEIGHT,
   ...rowProps
 }: TableHeaderProps) {
   return (
@@ -800,31 +823,34 @@ export function TableHeader({
         flexShrink: 0,
       }}
     >
-      <Row
-        collapsed
-        {...rowProps}
-        style={{
-          color: theme.tableHeaderText,
-          backgroundColor: theme.tableHeaderBackground,
-          zIndex: 200,
-          fontWeight: 500,
-          ...rowProps.style,
-        }}
-      >
-        {headers
-          ? headers.map(header => {
-              return (
-                <Cell
-                  key={header.name}
-                  value={header.name}
-                  width={header.width}
-                  style={header.style}
-                  valueStyle={header.valueStyle}
-                />
-              );
-            })
-          : children}
-      </Row>
+      <TableHeaderContext.Provider value>
+        <Row
+          collapsed
+          height={height}
+          {...rowProps}
+          style={{
+            color: theme.tableHeaderText,
+            backgroundColor: theme.tableHeaderBackground,
+            zIndex: 200,
+            ...styles.monoLabel,
+            ...rowProps.style,
+          }}
+        >
+          {headers
+            ? headers.map(header => {
+                return (
+                  <Cell
+                    key={header.name}
+                    value={header.name}
+                    width={header.width}
+                    style={header.style}
+                    valueStyle={header.valueStyle}
+                  />
+                );
+              })
+            : children}
+        </Row>
+      </TableHeaderContext.Provider>
     </View>
   );
 }
@@ -858,14 +884,14 @@ export function SelectedItemsButton<Name extends string>({
       <Button
         ref={triggerRef}
         variant="bare"
-        style={{ color: theme.pageTextPositive }}
+        className={selectionChipClassName}
         onPress={() => setMenuOpen(true)}
         data-testid={id + '-select-button'}
       >
         <SvgExpandArrow
-          width={8}
-          height={8}
-          style={{ marginRight: 5, color: theme.pageText }}
+          width={7}
+          height={7}
+          style={{ marginRight: 7, color: 'inherit', flexShrink: 0 }}
         />
         {buttonLabel}
       </Button>
@@ -892,6 +918,22 @@ export function SelectedItemsButton<Name extends string>({
     </View>
   );
 }
+
+// The selection count reads as a quiet accent chip: selection is the one
+// job the sky accent has.
+const selectionChipClassName = css({
+  color: theme.accentText,
+  backgroundColor: theme.accentSubtle,
+  fontWeight: 500,
+  padding: '5px 10px',
+  borderRadius: radius.md,
+  transition: `background-color ${motion.base} ${motion.ease}`,
+  '&[data-hovered], &[data-pressed]': {
+    color: theme.accentText,
+    backgroundColor: theme.tableRowBackgroundHighlight,
+    boxShadow: 'inset 0 0 0 1px ' + theme.tableBorderSelected,
+  },
+});
 
 const rowStyle: CSSProperties = {
   position: 'absolute',
@@ -1134,8 +1176,7 @@ export const Table = forwardRef(
           style={{
             justifyContent: 'center',
             alignItems: 'center',
-            fontStyle: 'italic',
-            color: theme.tableText,
+            color: theme.tableTextLight,
             flex: 1,
           }}
         >
@@ -1175,13 +1216,15 @@ export const Table = forwardRef(
       >
         {headers && (
           <TableHeader
-            height={rowHeight}
+            height={Math.max(rowHeight, HEADER_HEIGHT)}
             {...(Array.isArray(headers) ? { headers } : { children: headers })}
           />
         )}
         <View
           style={{
-            flex: `1 1 ${rowHeight * Math.max(2, items.length)}px`,
+            // Rows overlap by their 1px border (see itemSize below), so a
+            // short list ends flush with its last row.
+            flex: `1 1 ${(rowHeight - 1) * Math.max(2, items.length)}px`,
             backgroundColor,
           }}
         >

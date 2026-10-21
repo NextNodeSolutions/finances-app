@@ -5,6 +5,7 @@ import { Button } from '@actual-app/components/button';
 import { SvgExpandArrow } from '@actual-app/components/icons/v0';
 import { Popover } from '@actual-app/components/popover';
 import { Text } from '@actual-app/components/text';
+import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 import { send, sendCatch } from '@actual-app/core/platform/client/connection';
 import type {
@@ -167,7 +168,7 @@ export function SavedFilterMenuButton({
         <Button
           ref={triggerRef}
           variant="bare"
-          style={{ marginTop: 10 }}
+          style={{ marginTop: 10, color: theme.pageTextLight, fontSize: 12.5 }}
           onPress={() => {
             setMenuOpen(true);
           }}
@@ -188,7 +189,9 @@ export function SavedFilterMenuButton({
               <Trans>(modified)</Trans>&nbsp;
             </Text>
           )}
-          <SvgExpandArrow width={8} height={8} style={{ marginRight: 5 }} />
+          <SvgExpandArrow
+            style={{ width: 7, height: 7, marginLeft: 2, flexShrink: 0 }}
+          />
         </Button>
       )}
 
