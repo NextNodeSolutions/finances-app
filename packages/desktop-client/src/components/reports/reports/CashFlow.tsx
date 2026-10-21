@@ -24,7 +24,11 @@ import { FinancialText } from '#components/FinancialText';
 import { MobileBackButton } from '#components/mobile/MobileBackButton';
 import { MobilePageHeader, Page, PageHeader } from '#components/Page';
 import { PrivacyFilter } from '#components/PrivacyFilter';
-import { Change } from '#components/reports/Change';
+import {
+  explainerStyle,
+  reportHeadlineStyle,
+  reportPanelStyle,
+} from '#components/reports/chart-theme';
 import { CashFlowGraph } from '#components/reports/graphs/CashFlowGraph';
 import { Header } from '#components/reports/Header';
 import { LoadingIndicator } from '#components/reports/LoadingIndicator';
@@ -308,7 +312,7 @@ function CashFlowInner({ widget }: CashFlowInnerProps) {
       </Header>
       <View
         style={{
-          backgroundColor: theme.tableBackground,
+          ...reportPanelStyle,
           padding: 20,
           paddingTop: 0,
           flex: '1 0 auto',
@@ -322,15 +326,25 @@ function CashFlowInner({ widget }: CashFlowInnerProps) {
             color: theme.pageText,
           }}
         >
+          <Text style={{ marginBottom: 8 }}>
+            <PrivacyFilter>
+              <FinancialText as={Block} style={reportHeadlineStyle}>
+                {format(
+                  totalIncome + totalExpenses + totalTransfers,
+                  'financial-with-sign',
+                )}
+              </FinancialText>
+            </PrivacyFilter>
+          </Text>
           <AlignedText
-            style={{ marginBottom: 5, minWidth: 160 }}
+            style={{ marginBottom: 2, minWidth: 200, fontSize: 12 }}
             left={
-              <Block>
+              <Block style={{ color: theme.pageTextLight }}>
                 <Trans>Income:</Trans>
               </Block>
             }
             right={
-              <FinancialText style={{ fontWeight: 600 }}>
+              <FinancialText style={{ fontWeight: 500 }}>
                 <PrivacyFilter>
                   {format(totalIncome, 'financial')}
                 </PrivacyFilter>
@@ -339,14 +353,14 @@ function CashFlowInner({ widget }: CashFlowInnerProps) {
           />
 
           <AlignedText
-            style={{ marginBottom: 5, minWidth: 160 }}
+            style={{ marginBottom: 2, minWidth: 200, fontSize: 12 }}
             left={
-              <Block>
+              <Block style={{ color: theme.pageTextLight }}>
                 <Trans>Expenses:</Trans>
               </Block>
             }
             right={
-              <FinancialText style={{ fontWeight: 600 }}>
+              <FinancialText style={{ fontWeight: 500 }}>
                 <PrivacyFilter>
                   {format(totalExpenses, 'financial')}
                 </PrivacyFilter>
@@ -355,25 +369,20 @@ function CashFlowInner({ widget }: CashFlowInnerProps) {
           />
 
           <AlignedText
-            style={{ marginBottom: 5, minWidth: 160 }}
+            style={{ marginBottom: 2, minWidth: 200, fontSize: 12 }}
             left={
-              <Block>
+              <Block style={{ color: theme.pageTextLight }}>
                 <Trans>Transfers:</Trans>
               </Block>
             }
             right={
-              <FinancialText style={{ fontWeight: 600 }}>
+              <FinancialText style={{ fontWeight: 500 }}>
                 <PrivacyFilter>
                   {format(totalTransfers, 'financial')}
                 </PrivacyFilter>
               </FinancialText>
             }
           />
-          <Text style={{ fontWeight: 600 }}>
-            <PrivacyFilter>
-              <Change amount={totalIncome + totalExpenses + totalTransfers} />
-            </PrivacyFilter>
-          </Text>
         </View>
 
         <CashFlowGraph
@@ -382,12 +391,7 @@ function CashFlowInner({ widget }: CashFlowInnerProps) {
           showBalance={showBalance}
         />
 
-        <View
-          style={{
-            marginTop: 30,
-            userSelect: 'none',
-          }}
-        >
+        <View style={explainerStyle}>
           <Trans>
             <Paragraph>
               <strong>How is cash flow calculated?</strong>

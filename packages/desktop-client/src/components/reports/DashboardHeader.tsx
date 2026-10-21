@@ -5,11 +5,20 @@ import { Button } from '@actual-app/components/button';
 import { SvgPencil1 } from '@actual-app/components/icons/v2';
 import { InitialFocus } from '@actual-app/components/initial-focus';
 import { Input } from '@actual-app/components/input';
+import { styles } from '@actual-app/components/styles';
+import type { CSSProperties } from '@actual-app/components/styles';
 import { theme } from '@actual-app/components/theme';
+import { motion } from '@actual-app/components/tokens';
 import { View } from '@actual-app/components/view';
 import type { DashboardPageEntity } from '@actual-app/core/types/models';
 
 import { useRenameDashboardPageMutation } from '#reports/mutations';
+
+const pageTitleStyle: CSSProperties = {
+  ...styles.display,
+  fontSize: 28,
+  lineHeight: '34px',
+};
 
 type DashboardHeaderProps = {
   dashboard: DashboardPageEntity;
@@ -44,11 +53,10 @@ export function DashboardHeader({ dashboard }: DashboardHeaderProps) {
         flexDirection: 'row',
         alignItems: 'center',
         whiteSpace: 'nowrap',
-        marginLeft: 20,
-        gap: 3,
+        gap: 8,
         '& .hover-visible': {
           opacity: 0,
-          transition: 'opacity .25s',
+          transition: `opacity ${motion.base} ${motion.ease}`,
         },
         '&:hover .hover-visible': {
           opacity: 1,
@@ -63,8 +71,7 @@ export function DashboardHeader({ dashboard }: DashboardHeaderProps) {
     >
       <View
         style={{
-          fontSize: 25,
-          fontWeight: 500,
+          ...pageTitleStyle,
           flexGrow: 0,
           flexShrink: 0,
           flexBasis: 'auto',
@@ -80,8 +87,7 @@ export function DashboardHeader({ dashboard }: DashboardHeaderProps) {
             onUpdate={handleSaveName}
             onEscape={() => setEditingName(false)}
             style={{
-              fontSize: 25,
-              fontWeight: 500,
+              ...pageTitleStyle,
               marginTop: -3,
               marginBottom: -4,
               paddingTop: 2,
@@ -93,9 +99,8 @@ export function DashboardHeader({ dashboard }: DashboardHeaderProps) {
         <>
           <View
             style={{
-              fontSize: 25,
-              fontWeight: 500,
-              marginRight: 5,
+              ...pageTitleStyle,
+              color: theme.pageTextLight,
               flexGrow: 0,
               flexShrink: 1,
               flexBasis: 'auto',
@@ -113,13 +118,14 @@ export function DashboardHeader({ dashboard }: DashboardHeaderProps) {
             className="hover-visible"
             style={{
               marginRight: 5,
+              padding: 6,
             }}
             onPress={() => setEditingName(true)}
           >
             <SvgPencil1
               style={{
-                width: 11,
-                height: 11,
+                width: 12,
+                height: 12,
                 flexGrow: 0,
                 flexShrink: 0,
                 flexBasis: 'auto',

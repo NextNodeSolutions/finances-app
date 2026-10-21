@@ -86,11 +86,11 @@ export function ReportTableTotals({
 
   const totalsStyle: CSSProperties = {
     borderTopWidth: 1,
-    borderColor: theme.tableBorder,
+    borderColor: theme.hairlineStrong,
     justifyContent: 'center',
     color: theme.tableRowHeaderText,
     backgroundColor: theme.tableRowHeaderBackground,
-    fontWeight: 600,
+    fontWeight: 500,
     ...style,
   };
 

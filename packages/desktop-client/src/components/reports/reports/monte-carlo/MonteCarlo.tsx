@@ -4,7 +4,10 @@ import { useParams } from 'react-router';
 
 import { Button } from '@actual-app/components/button';
 import { useResponsive } from '@actual-app/components/hooks/useResponsive';
-import { ModeButton } from '@actual-app/components/mode-button';
+import {
+  ModeButton,
+  ModeButtonGroup,
+} from '@actual-app/components/mode-button';
 import { Paragraph } from '@actual-app/components/paragraph';
 import { Select } from '@actual-app/components/select';
 import { styles } from '@actual-app/components/styles';
@@ -19,6 +22,10 @@ import { LabeledCheckbox } from '#components/forms/LabeledCheckbox';
 import { MobileBackButton } from '#components/mobile/MobileBackButton';
 import { MobilePageHeader, Page, PageHeader } from '#components/Page';
 import { PrivacyFilter } from '#components/PrivacyFilter';
+import {
+  reportHeadlineStyle,
+  reportSectionStyle,
+} from '#components/reports/chart-theme';
 import { MonteCarloCashflowGraph } from '#components/reports/graphs/MonteCarloCashflowGraph';
 import { MonteCarloGraph } from '#components/reports/graphs/MonteCarloGraph';
 import type { MonteCarloGraphView } from '#components/reports/graphs/MonteCarloGraphTooltip';
@@ -365,7 +372,7 @@ export function MonteCarlo() {
         {/* Headline stats */}
         <View
           style={{
-            backgroundColor: theme.tableBackground,
+            ...reportSectionStyle,
             padding: 20,
             flexShrink: 0,
             gap: 15,
@@ -384,13 +391,10 @@ export function MonteCarlo() {
               <Text style={GROUP_HEADING_STYLE}>
                 <Trans>Success rate</Trans>
               </Text>
-              <Text
-                style={{
-                  ...styles.veryLargeText,
-                  color: successColor,
-                }}
-              >
-                <FinancialText as="span">{`${successPercent}%`}</FinancialText>
+              <Text style={{ color: successColor }}>
+                <FinancialText as="span" style={reportHeadlineStyle}>
+                  {`${successPercent}%`}
+                </FinancialText>
               </Text>
             </View>
             <View style={{ gap: 4 }}>
@@ -460,7 +464,7 @@ export function MonteCarlo() {
         {/* Portfolio performance chart / simulation runs table */}
         <View
           style={{
-            backgroundColor: theme.tableBackground,
+            ...reportSectionStyle,
             padding: 20,
             paddingBottom: resultsView === 'chart' ? 10 : 20,
             ...(resultsView === 'chart' && { height: 470 }),
@@ -492,7 +496,7 @@ export function MonteCarlo() {
                   <Trans>Simulation runs</Trans>
                 )}
               </Text>
-              <View style={{ flexDirection: 'row', gap: 5 }}>
+              <ModeButtonGroup>
                 <ModeButton
                   selected={resultsView === 'chart'}
                   onSelect={() => setResultsView('chart')}
@@ -517,7 +521,7 @@ export function MonteCarlo() {
                 >
                   <Trans>Runs</Trans>
                 </ModeButton>
-              </View>
+              </ModeButtonGroup>
             </View>
             {resultsView === 'chart' && (
               <Select
@@ -669,7 +673,7 @@ export function MonteCarlo() {
         {/* Depletion histogram */}
         <View
           style={{
-            backgroundColor: theme.tableBackground,
+            ...reportSectionStyle,
             padding: 20,
             flexShrink: 0,
           }}
@@ -739,7 +743,7 @@ export function MonteCarlo() {
         {/* Description */}
         <View
           style={{
-            backgroundColor: theme.tableBackground,
+            ...reportSectionStyle,
             padding: 20,
             userSelect: 'none',
             flexShrink: 0,

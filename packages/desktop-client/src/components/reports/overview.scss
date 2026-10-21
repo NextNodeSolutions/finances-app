@@ -8,11 +8,26 @@
   z-index: 1;
 }
 
+// Drop target while dragging a card: a quiet accent outline, card radius.
 .react-grid-item.react-grid-placeholder {
-  background-color: #8719e0;
+  background-color: var(--color-accentSubtle);
+  border: 1px dashed var(--color-focusRing);
+  border-radius: 12px;
+  opacity: 1;
+}
+
+// Resize grip: a small hairline corner, inset to sit inside the card radius.
+.react-grid-item > .react-resizable-handle {
+  right: 4px;
+  bottom: 4px;
 }
 
 .react-grid-item > .react-resizable-handle::after {
-  border-right: 2px solid var(--color-pageTextLight);
-  border-bottom: 2px solid var(--color-pageTextLight);
+  right: 4px;
+  bottom: 4px;
+  width: 6px;
+  height: 6px;
+  border-right: 1.5px solid var(--color-pageTextSubdued);
+  border-bottom: 1.5px solid var(--color-pageTextSubdued);
+  border-bottom-right-radius: 2px;
 }

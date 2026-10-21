@@ -49,6 +49,7 @@ import {
   useUpdateDashboardWidgetsMutation,
 } from '#reports/mutations';
 
+import { reportPageGutter } from './chart-theme';
 import { NON_DRAGGABLE_AREA_CLASS_NAME } from './constants';
 import { DashboardHeader } from './DashboardHeader';
 import './overview.scss';
@@ -69,6 +70,15 @@ import { NetWorthCard } from './reports/NetWorthCard';
 import { SankeyCard } from './reports/SankeyCard';
 import { SpendingCard } from './reports/SpendingCard';
 import { SummaryCard } from './reports/SummaryCard';
+
+// Generous gutters between cards. With the page's own padding, the grid
+// padding puts the cards on the page title's gutter.
+const GRID_GAP: readonly [number, number] = [16, 16];
+const PAGE_PADDING = 10;
+const GRID_PADDING: readonly [number, number] = [
+  reportPageGutter - PAGE_PADDING,
+  12,
+];
 
 function getWidgetMinHeight(widget: DashboardWidgetEntity) {
   switch (widget.type) {
@@ -501,8 +511,11 @@ export function Overview({ dashboard }: OverviewProps) {
             style={{
               flexDirection: 'row',
               justifyContent: 'space-between',
-              marginRight: 15,
               alignItems: 'center',
+              minHeight: 34,
+              marginLeft: reportPageGutter,
+              marginRight: reportPageGutter,
+              marginBottom: 8,
             }}
           >
             <DashboardHeader dashboard={dashboard} />
@@ -511,8 +524,8 @@ export function Overview({ dashboard }: OverviewProps) {
               style={{
                 flexDirection: 'row',
                 justifyContent: 'space-between',
-                gap: 5,
-                alignItems: 'stretch',
+                gap: 8,
+                alignItems: 'center',
               }}
             >
               {currentBreakpoint === 'desktop' && (
@@ -525,11 +538,12 @@ export function Overview({ dashboard }: OverviewProps) {
 
                   <View
                     style={{
-                      height: 'auto',
-                      borderLeft: `1.5px solid ${theme.pillBorderDark}`,
-                      borderRadius: 0.75,
-                      marginLeft: 7,
-                      marginRight: 7,
+                      alignSelf: 'stretch',
+                      borderLeft: `1px solid ${theme.hairlineStrong}`,
+                      marginTop: 4,
+                      marginBottom: 4,
+                      marginLeft: 4,
+                      marginRight: 4,
                     }}
                   />
 
@@ -681,9 +695,12 @@ export function Overview({ dashboard }: OverviewProps) {
                   <DialogTrigger>
                     <Button variant="bare" aria-label={t('Menu')}>
                       <SvgDotsHorizontalTriple
-                        width={15}
-                        height={15}
-                        style={{ transform: 'rotateZ(90deg)' }}
+                        width={14}
+                        height={14}
+                        style={{
+                          transform: 'rotateZ(90deg)',
+                          color: theme.pageTextLight,
+                        }}
                       />
                     </Button>
                     <Popover>
@@ -745,7 +762,7 @@ export function Overview({ dashboard }: OverviewProps) {
           </View>
         )
       }
-      padding={10}
+      padding={PAGE_PADDING}
     >
       {isImporting ? (
         <LoadingIndicator message={t('Import is running...')} />
@@ -763,6 +780,8 @@ export function Overview({ dashboard }: OverviewProps) {
                 gridConfig={{
                   cols: currentBreakpoint === 'desktop' ? 12 : 1,
                   rowHeight: 100,
+                  margin: GRID_GAP,
+                  containerPadding: GRID_PADDING,
                 }}
                 dragConfig={{
                   enabled: currentBreakpoint === 'desktop' && isEditing,

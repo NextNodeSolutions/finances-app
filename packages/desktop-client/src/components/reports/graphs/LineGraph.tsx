@@ -4,7 +4,6 @@ import type { CSSProperties } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { AlignedText } from '@actual-app/components/aligned-text';
-import { theme } from '@actual-app/components/theme';
 import type {
   balanceTypeOpType,
   DataEntity,
@@ -23,7 +22,16 @@ import {
 } from 'recharts';
 
 import { FinancialText } from '#components/FinancialText';
-import { useRechartsAnimation } from '#components/reports/chart-theme';
+import {
+  chartActiveDot,
+  chartEndMargin,
+  chartGrid,
+  chartLineWidth,
+  chartTooltipSurface,
+  chartXAxis,
+  chartYAxis,
+  useRechartsAnimation,
+} from '#components/reports/chart-theme';
 import { Container } from '#components/reports/Container';
 import { getCustomTick } from '#components/reports/getCustomTick';
 import { numberFormatterTooltip } from '#components/reports/numberFormatter';
@@ -90,13 +98,7 @@ const CustomTooltip = ({
     return (
       <div
         className={css({
-          zIndex: 1000,
-          pointerEvents: 'none',
-          borderRadius: 2,
-          boxShadow: '0 1px 6px rgba(0, 0, 0, .20)',
-          backgroundColor: theme.menuBackground,
-          color: theme.menuItemText,
-          padding: 10,
+          ...chartTooltipSurface,
         })}
       >
         <div>
@@ -226,7 +228,12 @@ export function LineGraph({
               width={width}
               height={height}
               data={data.intervalData}
-              margin={{ top: 10, right: 10, left: leftMargin, bottom: 10 }}
+              margin={{
+                top: 10,
+                right: compact ? 10 : chartEndMargin,
+                left: leftMargin,
+                bottom: 10,
+              }}
               style={{ cursor: pointer }}
             >
               {showTooltip && (
@@ -243,24 +250,17 @@ export function LineGraph({
                   isAnimationActive={false}
                 />
               )}
-              {!compact && <CartesianGrid strokeDasharray="3 3" />}
-              {!compact && (
-                <XAxis
-                  dataKey="date"
-                  tick={{ fill: theme.pageText }}
-                  tickLine={{ stroke: theme.pageText }}
-                />
-              )}
+              {!compact && <CartesianGrid {...chartGrid} />}
+              {!compact && <XAxis {...chartXAxis} dataKey="date" />}
               {!compact && (
                 <YAxis
+                  {...chartYAxis}
                   tickFormatter={value =>
                     getCustomTick(
                       format(value, 'financial-no-decimals'),
                       privacyMode,
                     )
                   }
-                  tick={{ fill: theme.pageText }}
-                  tickLine={{ stroke: theme.pageText }}
                   tickSize={0}
                 />
               )}
@@ -278,13 +278,14 @@ export function LineGraph({
                 return (
                   <Line
                     key={index}
-                    strokeWidth={2}
+                    strokeWidth={chartLineWidth}
                     type="monotone"
                     dataKey={entry.dataKey}
                     stroke={entry.color}
                     {...animationProps}
                     activeDot={{
-                      r: entry.dataKey === tooltip && !compact ? 8 : 3,
+                      ...chartActiveDot,
+                      r: entry.dataKey === tooltip && !compact ? 5 : 3,
                       onMouseEnter: () => {
                         setTooltip(entry.dataKey);
                         if (groupBy !== 'Interval') {

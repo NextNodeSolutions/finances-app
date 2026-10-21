@@ -1,13 +1,16 @@
 import type { ComponentProps, ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 
-import { Button } from '@actual-app/components/button';
 import { DateRangePicker } from '@actual-app/components/date-range-picker';
 import type {
   DateRangeGranularity,
   DateRangePreset,
 } from '@actual-app/components/date-range-picker';
 import { useResponsive } from '@actual-app/components/hooks/useResponsive';
+import {
+  ModeButton,
+  ModeButtonGroup,
+} from '@actual-app/components/mode-button';
 import { SpaceBetween } from '@actual-app/components/space-between';
 import { View } from '@actual-app/components/view';
 import * as monthUtils from '@actual-app/core/shared/months';
@@ -71,6 +74,11 @@ type HeaderProps = {
     }
 );
 
+// Anything other than a static range follows the calendar.
+function isLiveMode(mode: TimeFrame['mode']): boolean {
+  return mode !== 'static';
+}
+
 export function Header({
   start,
   end,
@@ -100,6 +108,12 @@ export function Header({
   const language = useLanguage();
   const dateFormat = useDateFormat() || 'MM/dd/yyyy';
 
+  // Static pins the dates; Live slides the window forward with time.
+  const modeOptions: Array<{ mode: TimeFrame['mode']; label: string }> = [
+    { mode: 'static', label: t('Static') },
+    { mode: 'sliding-window', label: t('Live') },
+  ];
+
   const presets: DateRangePreset[] = buildDateRangePresets({
     t,
     onSelectRange: range => onChangeDates(...range),
@@ -115,7 +129,8 @@ export function Header({
     <View
       style={{
         padding: 20,
-        paddingTop: 15,
+        paddingTop: 12,
+        paddingBottom: 16,
         flexShrink: 0,
       }}
     >
@@ -127,21 +142,28 @@ export function Header({
       >
         <SpaceBetween gap={isNarrowWidth ? 5 : undefined}>
           {mode && !hideModeToggle && (
-            <Button
-              variant={mode === 'static' ? 'normal' : 'primary'}
-              onPress={() => {
-                const newMode = mode === 'static' ? 'sliding-window' : 'static';
-                const [newStart, newEnd] = calculateTimeRange({
-                  start,
-                  end,
-                  mode: newMode,
-                });
+            <ModeButtonGroup>
+              {modeOptions.map(option => (
+                <ModeButton
+                  key={option.mode}
+                  selected={isLiveMode(mode) === isLiveMode(option.mode)}
+                  onSelect={() => {
+                    if (isLiveMode(mode) === isLiveMode(option.mode)) {
+                      return;
+                    }
+                    const [newStart, newEnd] = calculateTimeRange({
+                      start,
+                      end,
+                      mode: option.mode,
+                    });
 
-                onChangeDates(newStart, newEnd, newMode);
-              }}
-            >
-              {mode === 'static' ? t('Static') : t('Live')}
-            </Button>
+                    onChangeDates(newStart, newEnd, option.mode);
+                  }}
+                >
+                  {option.label}
+                </ModeButton>
+              ))}
+            </ModeButtonGroup>
           )}
 
           <DateRangePicker
@@ -208,7 +230,7 @@ export function Header({
       </View>
 
       {filters && filters.length > 0 && (
-        <View style={{ marginTop: 5 }}>
+        <View style={{ marginTop: 10 }}>
           <AppliedFilters
             conditions={filters}
             onUpdate={onUpdateFilter}

@@ -2,10 +2,8 @@ import React, { useEffect, useEffectEvent, useMemo, useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 import { useLocation, useParams } from 'react-router';
 
-import { AlignedText } from '@actual-app/components/aligned-text';
 import { Block } from '@actual-app/components/block';
 import { useResponsive } from '@actual-app/components/hooks/useResponsive';
-import { styles } from '@actual-app/components/styles';
 import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
@@ -29,6 +27,10 @@ import { FinancialText } from '#components/FinancialText';
 import { MobileBackButton } from '#components/mobile/MobileBackButton';
 import { MobilePageHeader, Page, PageHeader } from '#components/Page';
 import { PrivacyFilter } from '#components/PrivacyFilter';
+import {
+  reportHeadlineStyle,
+  reportPanelStyle,
+} from '#components/reports/chart-theme';
 import { ChooseGraph } from '#components/reports/ChooseGraph';
 import {
   defaultsGraphList,
@@ -881,7 +883,7 @@ function CustomReportInner({
                 <Text>
                   <Trans>Custom Report:</Trans>
                 </Text>{' '}
-                <Text style={{ marginLeft: 5, color: theme.pageTextPositive }}>
+                <Text style={{ marginLeft: 5, color: theme.pageTextLight }}>
                   {
                     {
                       name:
@@ -965,9 +967,8 @@ function CustomReportInner({
           {(conditions.length > 0 || hasWarning) && (
             <View
               style={{
-                marginBottom: 10,
-                marginLeft: 5,
-                marginRight: 5,
+                marginBottom: 12,
+                marginRight: 20,
                 gap: 10,
                 flexShrink: 0,
               }}
@@ -1020,7 +1021,9 @@ function CustomReportInner({
           <View
             id="custom-report-content"
             style={{
-              backgroundColor: theme.tableBackground,
+              ...reportPanelStyle,
+              marginLeft: isNarrowWidth ? 20 : 0,
+              minWidth: 0,
               flexDirection: 'row',
               flex: 1,
             }}
@@ -1028,34 +1031,33 @@ function CustomReportInner({
             <View
               style={{
                 flex: 1,
-                padding: 10,
+                padding: 20,
               }}
             >
               {graphType !== 'TableGraph' && data && (
                 <View
                   style={{
-                    alignItems: 'flex-end',
-                    paddingTop: 10,
+                    flexDirection: 'row',
+                    alignItems: 'baseline',
+                    justifyContent: 'flex-end',
+                    gap: 10,
+                    marginBottom: 12,
                   }}
                 >
-                  <View
+                  <Block
                     style={{
-                      ...styles.mediumText,
+                      fontSize: 13,
                       fontWeight: 500,
-                      marginBottom: 5,
+                      color: theme.pageTextLight,
                     }}
                   >
-                    <AlignedText
-                      left={<Block>{balanceType}:</Block>}
-                      right={
-                        <FinancialText>
-                          <PrivacyFilter>
-                            {format(data[balanceTypeOp], 'financial')}
-                          </PrivacyFilter>
-                        </FinancialText>
-                      }
-                    />
-                  </View>
+                    {balanceType}:
+                  </Block>
+                  <FinancialText style={reportHeadlineStyle}>
+                    <PrivacyFilter>
+                      {format(data[balanceTypeOp], 'financial')}
+                    </PrivacyFilter>
+                  </FinancialText>
                 </View>
               )}
               <View style={{ flex: 1, overflow: 'auto' }}>
@@ -1084,9 +1086,9 @@ function CustomReportInner({
             {(viewLegend || viewSummary) && data && !isNarrowWidth && (
               <View
                 style={{
-                  padding: 10,
+                  padding: 20,
                   minWidth: 300,
-                  textAlign: 'center',
+                  borderLeft: `1px solid ${theme.hairlineSubtle}`,
                 }}
               >
                 {viewSummary && (

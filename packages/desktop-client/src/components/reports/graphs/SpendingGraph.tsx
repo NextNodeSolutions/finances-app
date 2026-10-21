@@ -11,13 +11,24 @@ import {
   Area,
   AreaChart,
   CartesianGrid,
+  ReferenceLine,
   Tooltip,
   XAxis,
   YAxis,
 } from 'recharts';
 
 import { FinancialText } from '#components/FinancialText';
-import { useRechartsAnimation } from '#components/reports/chart-theme';
+import {
+  chartActiveDot,
+  chartBaselineColor,
+  chartEndMargin,
+  chartGrid,
+  chartLineWidth,
+  chartTooltipSurface,
+  chartXAxis,
+  chartYAxis,
+  useRechartsAnimation,
+} from '#components/reports/chart-theme';
 import { Container } from '#components/reports/Container';
 import { numberFormatterTooltip } from '#components/reports/numberFormatter';
 import { useFormat } from '#hooks/useFormat';
@@ -25,6 +36,10 @@ import type { FormatType } from '#hooks/useFormat';
 import { usePrivacyMode } from '#hooks/usePrivacyMode';
 
 import { computePadding } from './util/computePadding';
+
+// One ink line over a whisper of tint; the comparison is a thin dashed rule.
+const THIS_MONTH_FILL_OPACITY = 0.05;
+const COMPARISON_LINE_WIDTH = 1;
 
 type PayloadItem = {
   value: number;
@@ -69,13 +84,7 @@ const CustomTooltip = ({
     return (
       <div
         className={css({
-          zIndex: 1000,
-          pointerEvents: 'none',
-          borderRadius: 2,
-          boxShadow: '0 1px 6px rgba(0, 0, 0, .20)',
-          backgroundColor: theme.menuBackground,
-          color: theme.menuItemText,
-          padding: 10,
+          ...chartTooltipSurface,
         })}
       >
         <div>
@@ -221,6 +230,18 @@ export function SpendingGraph({
     return Number(obj.day) >= 28 ? '28+' : obj.day;
   };
 
+  // While the month runs, a hairline marks today where this month's line
+  // stops.
+  const todayIndex = data.intervalData.reduce(
+    (lastIndex, item, index) =>
+      item.months[compare]?.cumulative != null ? index : lastIndex,
+    -1,
+  );
+  const todayLabel =
+    todayIndex >= 0 && todayIndex < data.intervalData.length - 1
+      ? getDate(data.intervalData[todayIndex])
+      : null;
+
   return (
     <Container
       style={{
@@ -239,7 +260,7 @@ export function SpendingGraph({
               data={data.intervalData}
               margin={{
                 top: 0,
-                right: 0,
+                right: compact ? 0 : chartEndMargin,
                 left: computePadding(
                   data.intervalData
                     .map(item => getVal(item, maxYAxis ? compare : selection))
@@ -249,23 +270,18 @@ export function SpendingGraph({
                 bottom: 0,
               }}
             >
-              {compact ? null : (
-                <CartesianGrid strokeDasharray="3 3" vertical={false} />
-              )}
-              {compact ? null : (
-                <XAxis
-                  dataKey={val => getDate(val)}
-                  tick={{ fill: theme.pageText }}
-                  tickLine={{ stroke: theme.pageText }}
-                />
-              )}
+              {compact ? null : <CartesianGrid {...chartGrid} />}
+              <XAxis
+                {...chartXAxis}
+                dataKey={val => getDate(val)}
+                hide={compact}
+              />
               {compact ? null : (
                 <YAxis
+                  {...chartYAxis}
                   dataKey={val => getVal(val, maxYAxis ? compare : selection)}
                   domain={[0, 'auto']}
                   tickFormatter={tickFormatter}
-                  tick={{ fill: theme.pageText }}
-                  tickLine={{ stroke: theme.pageText }}
                   tickSize={0}
                 />
               )}
@@ -292,7 +308,7 @@ export function SpendingGraph({
                   <stop
                     offset={gradientOffset()}
                     stopColor={theme.reportsChartFill}
-                    stopOpacity={0.2}
+                    stopOpacity={THIS_MONTH_FILL_OPACITY}
                   />
                 </linearGradient>
                 <linearGradient
@@ -314,14 +330,13 @@ export function SpendingGraph({
                 type="linear"
                 dot={false}
                 activeDot={{
+                  ...chartActiveDot,
                   fill: theme.reportsChartFill,
-                  fillOpacity: 1,
-                  r: 10,
                 }}
                 {...animationProps}
                 dataKey={val => getVal(val, compare)}
                 stroke={`url(#stroke${balanceTypeOp})`}
-                strokeWidth={3}
+                strokeWidth={chartLineWidth}
                 fill={`url(#fill${balanceTypeOp})`}
                 fillOpacity={1}
               />
@@ -331,12 +346,19 @@ export function SpendingGraph({
                 activeDot={false}
                 {...animationProps}
                 dataKey={val => getVal(val, selection)}
-                stroke={theme.reportsGray}
-                strokeDasharray="10 10"
-                strokeWidth={3}
-                fill={theme.reportsGray}
-                fillOpacity={0.2}
+                stroke={theme.pageTextSubdued}
+                strokeDasharray="3 3"
+                strokeWidth={COMPARISON_LINE_WIDTH}
+                fill="none"
               />
+              {todayLabel && (
+                <ReferenceLine
+                  x={todayLabel}
+                  stroke={chartBaselineColor}
+                  strokeDasharray="3 3"
+                  strokeWidth={1}
+                />
+              )}
             </AreaChart>
           </div>
         )

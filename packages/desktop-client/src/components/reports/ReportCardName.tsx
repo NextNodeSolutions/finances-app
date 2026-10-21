@@ -2,9 +2,18 @@ import React from 'react';
 
 import { InitialFocus } from '@actual-app/components/initial-focus';
 import { Input } from '@actual-app/components/input';
-import { styles } from '@actual-app/components/styles';
+import type { CSSProperties } from '@actual-app/components/styles';
+import { theme } from '@actual-app/components/theme';
 
 import { NON_DRAGGABLE_AREA_CLASS_NAME } from './constants';
+
+const cardTitleStyle: CSSProperties = {
+  fontSize: 13,
+  lineHeight: '18px',
+  fontWeight: 600,
+  letterSpacing: '-0.005em',
+  color: theme.pageText,
+};
 
 type ReportCardNameProps = {
   name: string;
@@ -29,7 +38,7 @@ export const ReportCardName = ({
           onUpdate={onChange}
           onEscape={onClose}
           style={{
-            ...styles.mediumText,
+            ...cardTitleStyle,
             marginTop: -6,
             marginBottom: -1,
             marginLeft: -6,
@@ -46,8 +55,8 @@ export const ReportCardName = ({
         display: 'block',
         margin: 0,
         padding: 0,
-        ...styles.mediumText,
-        marginBottom: 5,
+        ...cardTitleStyle,
+        marginBottom: 2,
       }}
     >
       {name}

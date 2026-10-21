@@ -28,6 +28,10 @@ import { MobileBackButton } from '#components/mobile/MobileBackButton';
 import { MobilePageHeader, Page, PageHeader } from '#components/Page';
 import { PrivacyFilter } from '#components/PrivacyFilter';
 import { Change } from '#components/reports/Change';
+import {
+  explainerStyle,
+  reportPanelStyle,
+} from '#components/reports/chart-theme';
 import { BudgetAnalysisGraph } from '#components/reports/graphs/BudgetAnalysisGraph';
 import { Header } from '#components/reports/Header';
 import { LoadingIndicator } from '#components/reports/LoadingIndicator';
@@ -469,7 +473,7 @@ function BudgetAnalysisInternal({ widget }: BudgetAnalysisInternalProps) {
         >
           <View
             style={{
-              backgroundColor: theme.tableBackground,
+              ...reportPanelStyle,
               padding: 20,
               paddingTop: 0,
               flex: '1 0 auto',
@@ -576,7 +580,7 @@ function BudgetAnalysisInternal({ widget }: BudgetAnalysisInternalProps) {
                 balanceOnly={!showCategories}
                 isConcise={isConcise}
               />
-              <View style={{ marginTop: 30 }}>
+              <View style={explainerStyle}>
                 <Trans>
                   <Paragraph>
                     <strong>Understanding the Chart</strong>

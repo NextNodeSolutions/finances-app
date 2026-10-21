@@ -15,7 +15,15 @@ import {
 } from 'recharts';
 
 import { FinancialText } from '#components/FinancialText';
-import { useRechartsAnimation } from '#components/reports/chart-theme';
+import {
+  chartEndMargin,
+  chartGrid,
+  chartLineWidth,
+  chartTooltipSurface,
+  chartXAxis,
+  chartYAxis,
+  useRechartsAnimation,
+} from '#components/reports/chart-theme';
 import { Container } from '#components/reports/Container';
 import { useFormat } from '#hooks/useFormat';
 import { usePrivacyMode } from '#hooks/usePrivacyMode';
@@ -44,13 +52,7 @@ function CustomTooltip({ active, payload }: CustomTooltipProps) {
     return (
       <div
         className={css({
-          zIndex: 1000,
-          pointerEvents: 'none',
-          borderRadius: 2,
-          boxShadow: '0 1px 6px rgba(0, 0, 0, .20)',
-          backgroundColor: theme.menuBackground,
-          color: theme.menuItemText,
-          padding: 10,
+          ...chartTooltipSurface,
         })}
       >
         <div>
@@ -183,24 +185,14 @@ export function CrossoverGraph({
           data={graphData.data}
           margin={{
             top: compact ? 0 : 15,
-            right: 0,
+            right: compact ? 0 : chartEndMargin,
             left: compact ? 0 : 20,
             bottom: compact ? 0 : 10,
           }}
         >
-          {!compact && <CartesianGrid strokeDasharray="3 3" />}
-          <XAxis
-            dataKey="x"
-            hide={compact}
-            tick={{ fill: theme.pageText }}
-            tickLine={{ stroke: theme.pageText }}
-          />
-          <YAxis
-            hide={compact}
-            tickFormatter={tickFormatter}
-            tick={{ fill: theme.pageText }}
-            tickLine={{ stroke: theme.pageText }}
-          />
+          {!compact && <CartesianGrid {...chartGrid} />}
+          <XAxis {...chartXAxis} dataKey="x" hide={compact} />
+          <YAxis {...chartYAxis} hide={compact} tickFormatter={tickFormatter} />
           {showTooltip && (
             <Tooltip content={<CustomTooltip />} isAnimationActive={false} />
           )}
@@ -216,7 +208,7 @@ export function CrossoverGraph({
             dataKey="investmentIncome"
             dot={false}
             stroke={theme.reportsNumberPositive}
-            strokeWidth={2}
+            strokeWidth={chartLineWidth}
             {...animationProps}
           />
           <Line
@@ -224,7 +216,7 @@ export function CrossoverGraph({
             dataKey="expenses"
             dot={false}
             stroke={theme.reportsNumberNegative}
-            strokeWidth={2}
+            strokeWidth={chartLineWidth}
             {...animationProps}
           />
           <Line
@@ -232,8 +224,8 @@ export function CrossoverGraph({
             dataKey="adjustedExpenses"
             dot={false}
             stroke={theme.reportsNumberNegative}
-            strokeWidth={2}
-            strokeDasharray="5 5"
+            strokeWidth={chartLineWidth}
+            strokeDasharray="4 4"
             {...animationProps}
           />
         </LineChart>

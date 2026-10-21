@@ -10,7 +10,14 @@ import {
   YAxis,
 } from 'recharts';
 
-import { useRechartsAnimation } from '#components/reports/chart-theme';
+import {
+  chartEndMargin,
+  chartGrid,
+  chartLineWidth,
+  chartXAxis,
+  chartYAxis,
+  useRechartsAnimation,
+} from '#components/reports/chart-theme';
 import { Container } from '#components/reports/Container';
 import type {
   FanChartDataPoint,
@@ -79,7 +86,7 @@ export function MonteCarloGraph({
           data={data}
           margin={{
             top: compact ? 0 : 15,
-            right: 0,
+            right: compact ? 0 : chartEndMargin,
             left: compact
               ? 0
               : computePadding(
@@ -89,19 +96,9 @@ export function MonteCarloGraph({
             bottom: compact ? 0 : 10,
           }}
         >
-          {!compact && <CartesianGrid strokeDasharray="3 3" />}
-          <XAxis
-            dataKey="age"
-            hide={compact}
-            tick={{ fill: theme.pageText }}
-            tickLine={{ stroke: theme.pageText }}
-          />
-          <YAxis
-            hide={compact}
-            tickFormatter={tickFormatter}
-            tick={{ fill: theme.pageText }}
-            tickLine={{ stroke: theme.pageText }}
-          />
+          {!compact && <CartesianGrid {...chartGrid} />}
+          <XAxis {...chartXAxis} dataKey="age" hide={compact} />
+          <YAxis {...chartYAxis} hide={compact} tickFormatter={tickFormatter} />
           {showTooltip && (
             <Tooltip
               content={<MonteCarloGraphTooltip view={view} />}
@@ -131,7 +128,7 @@ export function MonteCarloGraph({
                 dataKey="p50"
                 dot={false}
                 stroke={theme.reportsChartFill}
-                strokeWidth={2}
+                strokeWidth={chartLineWidth}
                 {...animationProps}
               />
             </>
@@ -140,7 +137,7 @@ export function MonteCarloGraph({
               type="monotone"
               dataKey={VIEW_DATA_KEYS[view]}
               stroke={theme.reportsChartFill}
-              strokeWidth={2}
+              strokeWidth={chartLineWidth}
               fill={theme.reportsChartFill}
               fillOpacity={0.08}
               {...animationProps}

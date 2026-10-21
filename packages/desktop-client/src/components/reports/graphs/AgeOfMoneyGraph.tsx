@@ -14,7 +14,15 @@ import {
   YAxis,
 } from 'recharts';
 
-import { useRechartsAnimation } from '#components/reports/chart-theme';
+import {
+  chartActiveDot,
+  chartGrid,
+  chartLineWidth,
+  chartTooltipSurface,
+  chartXAxis,
+  chartYAxis,
+  useRechartsAnimation,
+} from '#components/reports/chart-theme';
 import { Container } from '#components/reports/Container';
 import { usePrivacyMode } from '#hooks/usePrivacyMode';
 
@@ -37,13 +45,7 @@ function CustomTooltip({ active, payload }: CustomTooltipProps) {
     return (
       <div
         className={css({
-          zIndex: 1000,
-          pointerEvents: 'none',
-          borderRadius: 2,
-          boxShadow: '0 1px 6px rgba(0, 0, 0, .20)',
-          backgroundColor: theme.menuBackground,
-          color: theme.menuItemText,
-          padding: 10,
+          ...chartTooltipSurface,
         })}
       >
         <div style={{ marginBottom: 5 }}>
@@ -126,21 +128,12 @@ export function AgeOfMoneyGraph({
                   />
                 </linearGradient>
               </defs>
-              {!compact && (
-                <CartesianGrid strokeDasharray="3 3" vertical={false} />
-              )}
-              {!compact && (
-                <XAxis
-                  dataKey="date"
-                  tick={{ fill: theme.reportsLabel, fontSize: 12 }}
-                  tickLine={{ stroke: theme.reportsLabel }}
-                />
-              )}
+              {!compact && <CartesianGrid {...chartGrid} />}
+              {!compact && <XAxis {...chartXAxis} dataKey="date" />}
               {!compact && (
                 <YAxis
+                  {...chartYAxis}
                   tickFormatter={value => (privacyMode ? '•••' : `${value}d`)}
-                  tick={{ fill: theme.reportsLabel, fontSize: 12 }}
-                  tickLine={{ stroke: theme.reportsLabel }}
                   domain={[0, yAxisMax]}
                 />
               )}
@@ -154,7 +147,7 @@ export function AgeOfMoneyGraph({
                 <ReferenceLine
                   y={targetReferenceAge}
                   stroke={theme.reportsGreen}
-                  strokeDasharray="5 5"
+                  strokeDasharray="4 4"
                   label={{
                     value: t('30 days'),
                     position: 'insideTopRight',
@@ -167,11 +160,11 @@ export function AgeOfMoneyGraph({
                 type="monotone"
                 dataKey="ageOfMoney"
                 stroke={theme.reportsChartFill}
-                strokeWidth={2}
+                strokeWidth={chartLineWidth}
                 fill={`url(#${gradientId})`}
                 fillOpacity={1}
                 dot={!compact && data.length <= 90}
-                activeDot={{ r: 6, fill: theme.reportsChartFill }}
+                activeDot={{ ...chartActiveDot, fill: theme.reportsChartFill }}
                 {...animationProps}
               />
             </AreaChart>

@@ -13,6 +13,7 @@ import {
   SvgQueue,
   SvgTag,
 } from '@actual-app/components/icons/v1';
+import { ModeButtonGroup } from '@actual-app/components/mode-button';
 import { SpaceBetween } from '@actual-app/components/space-between';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
@@ -87,140 +88,136 @@ export function ReportTopbar({
       style={{
         flexDirection: 'row',
         alignItems: 'center',
-        marginBottom: 10,
+        gap: 12,
+        marginBottom: 12,
+        paddingRight: 20,
         flexShrink: 0,
         overflowY: 'auto',
       }}
     >
-      <GraphButton
-        selected={customReportItems.graphType === 'TableGraph'}
-        title={t('Data Table')}
-        onSelect={() => {
-          onChangeGraph('TableGraph');
-        }}
-        style={{ marginRight: 15 }}
-        disabled={isItemDisabled('TableGraph')}
-      >
-        <SvgQueue width={15} height={15} />
-      </GraphButton>
-      <GraphButton
-        title={
-          customReportItems.mode === 'total'
-            ? t('Bar Graph')
-            : t('Stacked Bar Graph')
-        }
-        selected={
-          customReportItems.graphType === 'BarGraph' ||
-          customReportItems.graphType === 'StackedBarGraph'
-        }
-        onSelect={() => {
-          onChangeGraph(
+      <ModeButtonGroup style={{ alignSelf: 'center' }}>
+        <GraphButton
+          selected={customReportItems.graphType === 'TableGraph'}
+          title={t('Data Table')}
+          onSelect={() => {
+            onChangeGraph('TableGraph');
+          }}
+          disabled={isItemDisabled('TableGraph')}
+        >
+          <SvgQueue width={14} height={14} />
+        </GraphButton>
+        <GraphButton
+          title={
+            customReportItems.mode === 'total'
+              ? t('Bar Graph')
+              : t('Stacked Bar Graph')
+          }
+          selected={
+            customReportItems.graphType === 'BarGraph' ||
+            customReportItems.graphType === 'StackedBarGraph'
+          }
+          onSelect={() => {
+            onChangeGraph(
+              customReportItems.mode === 'total'
+                ? 'BarGraph'
+                : 'StackedBarGraph',
+            );
+          }}
+          disabled={isItemDisabled(
             customReportItems.mode === 'total' ? 'BarGraph' : 'StackedBarGraph',
-          );
-        }}
-        style={{ marginRight: 15 }}
-        disabled={isItemDisabled(
-          customReportItems.mode === 'total' ? 'BarGraph' : 'StackedBarGraph',
-        )}
-      >
-        <SvgChartBar width={15} height={15} />
-      </GraphButton>
-      <GraphButton
-        title={t('Line Graph')}
-        selected={customReportItems.graphType === 'LineGraph'}
-        onSelect={() => {
-          onChangeGraph('LineGraph');
-        }}
-        style={{ marginRight: 15 }}
-        disabled={isItemDisabled('LineGraph')}
-      >
-        <SvgChart width={15} height={15} />
-      </GraphButton>
-      <GraphButton
-        title={t('Area Graph')}
-        selected={customReportItems.graphType === 'AreaGraph'}
-        onSelect={() => {
-          onChangeGraph('AreaGraph');
-        }}
-        style={{ marginRight: 15 }}
-        disabled={isItemDisabled('AreaGraph')}
-      >
-        <SvgChartArea width={15} height={15} />
-      </GraphButton>
-      <GraphButton
-        title={t('Donut Graph')}
-        selected={customReportItems.graphType === 'DonutGraph'}
-        onSelect={() => {
-          onChangeGraph('DonutGraph');
-        }}
-        style={{ marginRight: 15 }}
-        disabled={isItemDisabled('DonutGraph')}
-      >
-        <SvgChartPie width={15} height={15} />
-      </GraphButton>
+          )}
+        >
+          <SvgChartBar width={14} height={14} />
+        </GraphButton>
+        <GraphButton
+          title={t('Line Graph')}
+          selected={customReportItems.graphType === 'LineGraph'}
+          onSelect={() => {
+            onChangeGraph('LineGraph');
+          }}
+          disabled={isItemDisabled('LineGraph')}
+        >
+          <SvgChart width={14} height={14} />
+        </GraphButton>
+        <GraphButton
+          title={t('Area Graph')}
+          selected={customReportItems.graphType === 'AreaGraph'}
+          onSelect={() => {
+            onChangeGraph('AreaGraph');
+          }}
+          disabled={isItemDisabled('AreaGraph')}
+        >
+          <SvgChartArea width={14} height={14} />
+        </GraphButton>
+        <GraphButton
+          title={t('Donut Graph')}
+          selected={customReportItems.graphType === 'DonutGraph'}
+          onSelect={() => {
+            onChangeGraph('DonutGraph');
+          }}
+          disabled={isItemDisabled('DonutGraph')}
+        >
+          <SvgChartPie width={14} height={14} />
+        </GraphButton>
+      </ModeButtonGroup>
       <View
         style={{
           width: 1,
-          height: 30,
-          backgroundColor: theme.pillBorderDark,
-          marginRight: 15,
+          height: 18,
+          backgroundColor: theme.hairlineStrong,
           flexShrink: 0,
         }}
       />
-      <GraphButton
-        selected={viewLegend}
-        onSelect={() => {
-          onChangeViews('viewLegend');
-        }}
-        style={{ marginRight: 15 }}
-        title={t('Show Legend')}
-        disabled={isItemDisabled('ShowLegend')}
-      >
-        <SvgListBullet width={15} height={15} />
-      </GraphButton>
-      <GraphButton
-        selected={viewSummary}
-        onSelect={() => {
-          onChangeViews('viewSummary');
-        }}
-        style={{ marginRight: 15 }}
-        title={t('Show Summary')}
-      >
-        <SvgCalculator width={15} height={15} />
-      </GraphButton>
-      <GraphButton
-        selected={viewLabels}
-        onSelect={() => {
-          onChangeViews('viewLabels');
-        }}
-        style={{ marginRight: 15 }}
-        title={t('Show Labels')}
-        disabled={isItemDisabled('ShowLabels')}
-      >
-        <SvgTag width={15} height={15} />
-      </GraphButton>
+      <ModeButtonGroup style={{ alignSelf: 'center' }}>
+        <GraphButton
+          selected={viewLegend}
+          onSelect={() => {
+            onChangeViews('viewLegend');
+          }}
+          title={t('Show Legend')}
+          disabled={isItemDisabled('ShowLegend')}
+        >
+          <SvgListBullet width={14} height={14} />
+        </GraphButton>
+        <GraphButton
+          selected={viewSummary}
+          onSelect={() => {
+            onChangeViews('viewSummary');
+          }}
+          title={t('Show Summary')}
+        >
+          <SvgCalculator width={14} height={14} />
+        </GraphButton>
+        <GraphButton
+          selected={viewLabels}
+          onSelect={() => {
+            onChangeViews('viewLabels');
+          }}
+          title={t('Show Labels')}
+          disabled={isItemDisabled('ShowLabels')}
+        >
+          <SvgTag width={14} height={14} />
+        </GraphButton>
+      </ModeButtonGroup>
       <View
         style={{
           width: 1,
-          height: 30,
-          backgroundColor: theme.pillBorderDark,
-          marginRight: 15,
+          height: 18,
+          backgroundColor: theme.hairlineStrong,
           flexShrink: 0,
         }}
       />
       <SnapshotButton
-        style={{ marginRight: 15 }}
         title={t('Download Snapshot')}
         onSelect={downloadSnapshot}
       >
-        <SvgCamera width={15} height={15} />
+        <SvgCamera width={14} height={14} />
       </SnapshotButton>
       <View
         style={{
           width: 1,
-          height: 30,
-          backgroundColor: theme.pillBorderDark,
-          marginRight: 15,
+          height: 18,
+          backgroundColor: theme.hairlineStrong,
           flexShrink: 0,
         }}
       />

@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next';
 import ReactMarkdown from 'react-markdown';
 
 import { Menu } from '@actual-app/components/menu';
+import { styles } from '@actual-app/components/styles';
 import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
@@ -25,6 +26,15 @@ const remarkPlugins = [sequentialNewlinesPlugin, remarkGfm, remarkBreaks];
 
 const markdownStyles = css(markdownBaseStyles, {
   paddingRight: 20,
+  fontSize: 13,
+  lineHeight: '20px',
+  color: theme.pageTextLight,
+  '& h1, & h2, & h3': {
+    ...styles.display,
+    fontWeight: 400,
+    color: theme.pageText,
+  },
+  '& strong': { fontWeight: 600, color: theme.pageText },
   '& table': {
     display: 'inline-table',
     ':not(:last-child)': {
@@ -107,7 +117,7 @@ export function MarkdownCard({
       <View
         style={{
           flex: 1,
-          paddingTop: 5,
+          paddingTop: 6,
           paddingLeft: 20,
           overflowY: 'auto',
           height: '100%',

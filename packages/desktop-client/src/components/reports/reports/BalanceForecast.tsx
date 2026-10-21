@@ -5,7 +5,6 @@ import { useParams } from 'react-router';
 
 import { Button } from '@actual-app/components/button';
 import { Select } from '@actual-app/components/select';
-import { styles } from '@actual-app/components/styles';
 import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
@@ -17,6 +16,7 @@ import type {
   TimeFrame,
 } from '@actual-app/core/types/models';
 import type { ForecastSource } from '@actual-app/core/types/models/forecast';
+import { css } from '@emotion/css';
 import * as d from 'date-fns';
 import {
   CartesianGrid,
@@ -32,6 +32,15 @@ import {
 import { FinancialText } from '#components/FinancialText';
 import { Page, PageHeader } from '#components/Page';
 import { PrivacyFilter } from '#components/PrivacyFilter';
+import {
+  chartGrid,
+  chartLineWidth,
+  chartTooltipSurface,
+  chartXAxis,
+  chartYAxis,
+  reportHeadlineStyle,
+  reportPanelStyle,
+} from '#components/reports/chart-theme';
 import { Container } from '#components/reports/Container';
 import { getCustomTick } from '#components/reports/getCustomTick';
 import { computePadding } from '#components/reports/graphs/util/computePadding';
@@ -419,7 +428,7 @@ function BalanceForecastInner({ widget }: BalanceForecastInnerProps) {
 
       <View
         style={{
-          backgroundColor: theme.tableBackground,
+          ...reportPanelStyle,
           padding: 20,
           paddingTop: 0,
           flex: '1 0 auto',
@@ -441,18 +450,19 @@ function BalanceForecastInner({ widget }: BalanceForecastInnerProps) {
           >
             <FinancialText
               style={{
-                ...styles.largeText,
-                fontWeight: 400,
-                marginBottom: 5,
+                ...reportHeadlineStyle,
+                marginBottom: 4,
                 color:
-                  endingPoint.balance < 0 ? theme.errorText : theme.pageText,
+                  endingPoint.balance < 0
+                    ? theme.reportsNumberNegative
+                    : theme.pageText,
               }}
             >
               <PrivacyFilter>
                 {format(endingPoint.balance, 'financial')}
               </PrivacyFilter>
             </FinancialText>
-            <View style={{ color: theme.pageTextLight }}>
+            <View style={{ color: theme.pageTextLight, fontSize: 13 }}>
               <Trans>Ending Balance</Trans>: {endingPoint.date}
             </View>
             {lowestPoint && lowestPoint.date !== endingPoint.date ? (
@@ -523,11 +533,10 @@ function BalanceForecastInner({ widget }: BalanceForecastInnerProps) {
                           )}
                         </linearGradient>
                       </defs>
-                      <CartesianGrid strokeDasharray="3 3" />
+                      <CartesianGrid {...chartGrid} />
                       <XAxis
+                        {...chartXAxis}
                         dataKey="date"
-                        tick={{ fill: theme.pageText }}
-                        tickLine={{ stroke: theme.pageText }}
                         interval={
                           granularity === 'Daily'
                             ? Math.ceil(chartData.length / 10)
@@ -544,10 +553,9 @@ function BalanceForecastInner({ widget }: BalanceForecastInnerProps) {
                         }}
                       />
                       <YAxis
+                        {...chartYAxis}
                         domain={['auto', 'auto']}
                         tickFormatter={formatYTick}
-                        tick={{ fill: theme.pageText }}
-                        tickLine={{ stroke: theme.pageText }}
                         tickSize={0}
                       />
                       <Tooltip
@@ -555,17 +563,7 @@ function BalanceForecastInner({ widget }: BalanceForecastInnerProps) {
                         content={({ active, payload }) => {
                           if (active && payload && payload.length) {
                             return (
-                              <div
-                                style={{
-                                  zIndex: 1000,
-                                  pointerEvents: 'none',
-                                  borderRadius: 2,
-                                  boxShadow: '0 1px 6px rgba(0, 0, 0, .20)',
-                                  backgroundColor: theme.menuBackground,
-                                  color: theme.menuItemText,
-                                  padding: 10,
-                                }}
-                              >
+                              <div className={css(chartTooltipSurface)}>
                                 <div style={{ marginBottom: 5 }}>
                                   <strong>{payload[0].payload.date}</strong>
                                 </div>
@@ -602,7 +600,7 @@ function BalanceForecastInner({ widget }: BalanceForecastInnerProps) {
                         type="monotone"
                         dataKey="balance"
                         stroke="url(#balance-forecast-line-gradient)"
-                        strokeWidth={2}
+                        strokeWidth={chartLineWidth}
                         dot={false}
                         activeDot={{ r: 6 }}
                         opacity={isUpdatingForecast ? 0.45 : 1}

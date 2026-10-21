@@ -3,7 +3,6 @@ import type { ReactElement } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { Block } from '@actual-app/components/block';
-import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 import { send } from '@actual-app/core/platform/client/connection';
 import * as monthUtils from '@actual-app/core/shared/months';
@@ -11,6 +10,11 @@ import type { SankeyWidget } from '@actual-app/core/types/models';
 import * as d from 'date-fns';
 import { debounce } from 'es-toolkit/compat';
 
+import {
+  cardChartInset,
+  cardHeaderStyle,
+  cardSupportingStyle,
+} from '#components/reports/chart-theme';
 import { SankeyGraph } from '#components/reports/graphs/SankeyGraph';
 import { LoadingIndicator } from '#components/reports/LoadingIndicator';
 import { ReportCard } from '#components/reports/ReportCard';
@@ -218,7 +222,7 @@ export function SankeyCard({
       onRename={() => setNameMenuOpen(true)}
     >
       <View style={{ flex: 1 }}>
-        <View style={{ flexDirection: 'row', padding: 20 }}>
+        <View style={cardHeaderStyle}>
           <View style={{ flex: 1 }}>
             <ReportCardName
               name={meta?.name || t('Sankey')}
@@ -232,14 +236,12 @@ export function SankeyCard({
               }}
               onClose={() => setNameMenuOpen(false)}
             />
-            <Block style={{ color: theme.pageTextSubdued }}>
-              {dateDescription}
-            </Block>
+            <Block style={cardSupportingStyle}>{dateDescription}</Block>
           </View>
         </View>
 
         {compactData ? (
-          <View ref={containerRef} style={{ flexGrow: 1 }}>
+          <View ref={containerRef} style={{ flexGrow: 1, ...cardChartInset }}>
             <SankeyGraph
               data={compactData}
               showPercentages={meta?.showPercentages}

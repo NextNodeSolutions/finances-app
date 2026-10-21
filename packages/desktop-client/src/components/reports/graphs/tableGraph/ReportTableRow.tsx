@@ -308,7 +308,7 @@ export const ReportTableRow = memo(
             }
             textAlign="right"
             style={{
-              fontWeight: 600,
+              fontWeight: 500,
               minWidth: compact ? 50 : 85,
               backgroundColor: style?.backgroundColor,
               ...(colorized && { color: getAmountColor(item[balanceTypeOp]) }),
@@ -354,7 +354,7 @@ export const ReportTableRow = memo(
             }
             textAlign="right"
             style={{
-              fontWeight: 600,
+              fontWeight: 500,
               minWidth: compact ? 50 : 85,
               backgroundColor: style?.backgroundColor,
               ...(colorized && { color: getAmountColor(average) }),

@@ -4,8 +4,10 @@ import type { CSSProperties, ReactNode } from 'react';
 import { Button } from '@actual-app/components/button';
 import { styles } from '@actual-app/components/styles';
 import { Text } from '@actual-app/components/text';
-import { theme } from '@actual-app/components/theme';
 import { Tooltip } from '@actual-app/components/tooltip';
+import { css } from '@emotion/css';
+
+import { getSegmentStyle } from './chart-theme';
 
 type SnapshotButtonProps = {
   selected?: boolean;
@@ -30,12 +32,13 @@ export function SnapshotButton({
     >
       <Button
         variant="bare"
-        style={{
-          ...(selected && {
-            backgroundColor: theme.buttonBareBackgroundHover,
-          }),
+        className={css({
+          ...getSegmentStyle(Boolean(selected)),
+          width: 30,
+          height: 26,
+          padding: 0,
           ...style,
-        }}
+        })}
         onPress={onSelect}
         aria-label={title}
       >

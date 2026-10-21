@@ -1,5 +1,6 @@
 import React, { useMemo } from 'react';
 
+import { styles } from '@actual-app/components/styles';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 import { amountToInteger } from '@actual-app/core/shared/util';
@@ -9,7 +10,10 @@ import { useFormat } from '#hooks/useFormat';
 
 import { ReportCardValueSkeleton } from './ReportCardValueSkeleton';
 
-const FONT_SIZE_SCALE_FACTOR = 1.6;
+// Matches SummaryNumber: about two thirds of the card width, capped.
+const FONT_SIZE_SCALE_FACTOR = 1.15;
+const MIN_SIZED_LENGTH = 8;
+const MAX_FONT_SIZE = 44;
 const CONTAINER_MARGIN = 8;
 
 type FormulaResultProps = {
@@ -49,11 +53,14 @@ export function FormulaResult({
 
   const lines = displayValue.split(/\r?\n/);
   const lineCount = lines.length;
-  const longestLineLength = Math.max(...lines.map(line => line.length), 1);
+  const longestLineLength = Math.max(
+    ...lines.map(line => line.length),
+    MIN_SIZED_LENGTH,
+  );
   const fontSize =
     fontSizeMode === 'static'
       ? `${staticFontSize}px`
-      : `min(${(FONT_SIZE_SCALE_FACTOR * 100) / longestLineLength}cqi, calc((100cqb - ${CONTAINER_MARGIN * 2}px) / ${lineCount}))`;
+      : `min(${(FONT_SIZE_SCALE_FACTOR * 100) / longestLineLength}cqi, calc((100cqb - ${CONTAINER_MARGIN * 2}px) / ${lineCount}), ${MAX_FONT_SIZE}px)`;
 
   // Determine color
   const color = customColor
@@ -75,6 +82,9 @@ export function FormulaResult({
             width: '100%',
             height: '100%',
             maxWidth: '100%',
+            ...styles.display,
+            fontWeight: 300,
+            letterSpacing: '-0.015em',
             fontSize,
             lineHeight: 1,
             margin: `${CONTAINER_MARGIN}px 0`,

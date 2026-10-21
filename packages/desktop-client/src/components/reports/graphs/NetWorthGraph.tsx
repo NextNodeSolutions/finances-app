@@ -12,6 +12,7 @@ import {
   Area,
   AreaChart,
   CartesianGrid,
+  ReferenceLine,
   Tooltip,
   XAxis,
   YAxis,
@@ -20,6 +21,13 @@ import type { TooltipContentProps } from 'recharts';
 
 import { FinancialText } from '#components/FinancialText';
 import {
+  chartBaselineColor,
+  chartEndMargin,
+  chartGrid,
+  chartLineWidth,
+  chartTooltipSurface,
+  chartXAxis,
+  chartYAxis,
   getColorScale,
   useRechartsAnimation,
 } from '#components/reports/chart-theme';
@@ -32,8 +40,14 @@ import type { UseFormatResult } from '#hooks/useFormat';
 import { usePrivacyMode } from '#hooks/usePrivacyMode';
 
 import { computePadding } from './util/computePadding';
+import { getNiceScale } from './util/getNiceScale';
 
 const PARSE_REFERENCE_DATE = new Date(0);
+// Amounts are in cents and the axis shows whole units.
+const WHOLE_UNIT_STEP = 100;
+// The area is a whisper of tint, strongest far from zero and gone at it.
+const POSITIVE_FILL_OPACITY = 0.07;
+const NEGATIVE_FILL_OPACITY = 0.08;
 
 type NetWorthDataPoint = {
   x: string;
@@ -57,13 +71,7 @@ function TrendTooltip({ active, payload, style }: TrendTooltipProps) {
       <div
         className={css([
           {
-            zIndex: 1000,
-            pointerEvents: 'none',
-            borderRadius: 2,
-            boxShadow: '0 1px 6px rgba(0, 0, 0, .20)',
-            backgroundColor: theme.menuBackground,
-            color: theme.menuItemText,
-            padding: 10,
+            ...chartTooltipSurface,
           },
           style,
         ])}
@@ -136,13 +144,8 @@ function StackedTooltip({
       <div
         className={css([
           {
-            zIndex: 1000,
+            ...chartTooltipSurface,
             pointerEvents: 'auto',
-            borderRadius: 2,
-            boxShadow: '0 1px 6px rgba(0, 0, 0, .20)',
-            backgroundColor: theme.menuBackground,
-            color: theme.menuItemText,
-            padding: 10,
             fontSize: 12,
             maxHeight: '80vh',
             overflowY: 'auto',
@@ -275,10 +278,15 @@ export function NetWorthGraph({
   };
 
   // Trend Mode Logic
-  const gradientOffset = () => {
-    const dataMax = Math.max(...graphData.data.map(i => i.y));
-    const dataMin = Math.min(...graphData.data.map(i => i.y));
+  const dataMax = Math.max(...graphData.data.map(i => i.y));
+  const dataMin = Math.min(...graphData.data.map(i => i.y));
+  const trendScale =
+    mode === 'trend' && !compact
+      ? getNiceScale(dataMin, dataMax, WHOLE_UNIT_STEP)
+      : null;
+  const crossesZero = dataMin < 0 && dataMax > 0;
 
+  const gradientOffset = () => {
     if (dataMax <= 0) {
       return 0;
     }
@@ -369,7 +377,7 @@ export function NetWorthGraph({
               data={graphData.data}
               margin={{
                 top: 0,
-                right: 0,
+                right: compact ? 0 : chartEndMargin,
                 left: compact
                   ? 0
                   : computePadding(
@@ -384,24 +392,31 @@ export function NetWorthGraph({
                 setIsTooltipActive(true)
               }
             >
-              {compact ? null : (
-                <CartesianGrid strokeDasharray="3 3" vertical={false} />
-              )}
+              {compact ? null : <CartesianGrid {...chartGrid} />}
               <XAxis
+                {...chartXAxis}
                 dataKey="x"
                 hide={compact}
-                tick={{ fill: theme.pageText }}
-                tickLine={{ stroke: theme.pageText }}
                 ticks={weeklyTicks}
               />
               <YAxis
+                {...chartYAxis}
                 dataKey={mode === 'trend' ? 'y' : undefined}
-                domain={mode === 'trend' ? ['auto', 'auto'] : undefined}
+                domain={
+                  trendScale?.domain ??
+                  (mode === 'trend' ? ['auto', 'auto'] : undefined)
+                }
+                ticks={trendScale?.ticks}
                 hide={compact}
                 tickFormatter={tickFormatter}
-                tick={{ fill: theme.pageText }}
-                tickLine={{ stroke: theme.pageText }}
               />
+              {mode === 'trend' && crossesZero && (
+                <ReferenceLine
+                  y={0}
+                  stroke={chartBaselineColor}
+                  strokeWidth={1}
+                />
+              )}
               {effectiveShowTooltip && mode === 'trend' && (
                 <Tooltip
                   content={props => <TrendTooltip {...props} style={style} />}
@@ -428,14 +443,24 @@ export function NetWorthGraph({
               <defs>
                 <linearGradient id={gradientId} x1="0" y1="0" x2="0" y2="1">
                   <stop
+                    offset={0}
+                    stopColor={theme.reportsChartFill}
+                    stopOpacity={POSITIVE_FILL_OPACITY}
+                  />
+                  <stop
                     offset={off}
                     stopColor={theme.reportsChartFill}
-                    stopOpacity={0.2}
+                    stopOpacity={0}
                   />
                   <stop
                     offset={off}
                     stopColor={theme.reportsNumberNegative}
-                    stopOpacity={0.2}
+                    stopOpacity={0}
+                  />
+                  <stop
+                    offset={1}
+                    stopColor={theme.reportsNumberNegative}
+                    stopOpacity={NEGATIVE_FILL_OPACITY}
                   />
                 </linearGradient>
               </defs>
@@ -448,7 +473,7 @@ export function NetWorthGraph({
                   {...animationProps}
                   dataKey="y"
                   stroke={theme.reportsChartFill}
-                  strokeWidth={2}
+                  strokeWidth={chartLineWidth}
                   fill={`url(#${gradientId})`}
                   fillOpacity={1}
                   connectNulls
@@ -462,8 +487,8 @@ export function NetWorthGraph({
                     stackId="1"
                     stroke={colors[account.id]}
                     fill={colors[account.id]}
-                    fillOpacity={0.5}
-                    strokeWidth={2}
+                    fillOpacity={0.35}
+                    strokeWidth={chartLineWidth}
                     {...animationProps}
                     connectNulls
                     onMouseEnter={() => setHoveredAccountId(account.id)}

@@ -23,7 +23,15 @@ import {
 import type { LabelProps } from 'recharts';
 
 import { FinancialText } from '#components/FinancialText';
-import { useRechartsAnimation } from '#components/reports/chart-theme';
+import {
+  chartActiveDot,
+  chartEndMargin,
+  chartGrid,
+  chartTooltipSurface,
+  chartXAxis,
+  chartYAxis,
+  useRechartsAnimation,
+} from '#components/reports/chart-theme';
 import { Container } from '#components/reports/Container';
 import { useAccounts } from '#hooks/useAccounts';
 import { useCategories } from '#hooks/useCategories';
@@ -67,13 +75,7 @@ const CustomTooltip = ({
     return (
       <div
         className={css({
-          zIndex: 1000,
-          pointerEvents: 'none',
-          borderRadius: 2,
-          boxShadow: '0 1px 6px rgba(0, 0, 0, .20)',
-          backgroundColor: theme.menuBackground,
-          color: theme.menuItemText,
-          padding: 10,
+          ...chartTooltipSurface,
         })}
       >
         <div>
@@ -278,31 +280,24 @@ export function AreaGraph({
               style={{ cursor: pointer }}
               margin={{
                 top: 0,
-                right: labelsMargin,
+                right: compact
+                  ? labelsMargin
+                  : Math.max(labelsMargin, chartEndMargin),
                 left: leftMargin,
                 bottom: 10,
               }}
             >
-              {compact ? null : (
-                <CartesianGrid strokeDasharray="3 3" vertical={false} />
-              )}
-              {compact ? null : (
-                <XAxis
-                  dataKey="date"
-                  tick={{ fill: theme.pageText }}
-                  tickLine={{ stroke: theme.pageText }}
-                />
-              )}
+              {compact ? null : <CartesianGrid {...chartGrid} />}
+              {compact ? null : <XAxis {...chartXAxis} dataKey="date" />}
               {compact ? null : (
                 <YAxis
+                  {...chartYAxis}
                   dataKey={balanceTypeOp}
                   domain={[
                     viewLabels ? labelsMin : 'auto',
                     viewLabels ? labelsMax : 'auto',
                   ]}
                   tickFormatter={tickFormatter}
-                  tick={{ fill: theme.pageText }}
-                  tickLine={{ stroke: theme.pageText }}
                   tickSize={0}
                 />
               )}
@@ -360,7 +355,8 @@ export function AreaGraph({
                 type="linear"
                 dot={false}
                 activeDot={{
-                  r: pointer && !compact ? 8 : 3,
+                  ...chartActiveDot,
+                  r: pointer && !compact ? 5 : 3,
                   onMouseEnter: () => setPointer('pointer'),
                   onMouseLeave: () => setPointer(''),
                   onClick: (_, dot: unknown) => {

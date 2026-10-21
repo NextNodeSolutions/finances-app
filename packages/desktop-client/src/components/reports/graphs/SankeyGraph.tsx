@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import type { CSSProperties } from 'react';
 
 import { theme } from '@actual-app/components/theme';
+import { fontFamily } from '@actual-app/components/tokens';
 import { css, keyframes } from '@emotion/css';
 import { t } from 'i18next';
 import {
@@ -13,6 +14,7 @@ import {
 } from 'recharts';
 import type { SankeyData } from 'recharts/types/chart/Sankey';
 
+import { chartTooltipSurface } from '#components/reports/chart-theme';
 import { Container } from '#components/reports/Container';
 import { useFormat } from '#hooks/useFormat';
 import { usePrivacyMode } from '#hooks/usePrivacyMode';
@@ -86,7 +88,7 @@ function SankeyLink({
   }
   const linkColor = payload.color ?? theme.reportsGray;
   const strokeWidth = linkWidth;
-  const strokeOpacity = isHovered ? 1 : 0.6;
+  const strokeOpacity = isHovered ? 0.6 : 0.32;
   // use the link's midpoint so it eases in with the columns it spans
   const fraction = (sourceX + targetX) / 2 / containerWidth;
 
@@ -144,26 +146,12 @@ function SankeyNode({
 
   const fillColor = payload.color ?? theme.reportsBlue;
 
-  const renderText = (
-    text: string,
-    yOffset: number,
-    fontSize = 13,
-    opacity = 1,
-    fontFamily?: string,
-    yBase = y,
-  ) => (
-    <text
-      textAnchor={isOut ? 'end' : 'start'}
-      x={isOut ? x - 6 : x + width + 6}
-      y={yBase + yOffset}
-      fontSize={fontSize}
-      strokeOpacity={opacity}
-      fill={theme.pageText}
-      fontFamily={fontFamily}
-    >
-      {text}
-    </text>
-  );
+  const labelX = isOut ? x - 8 : x + width + 8;
+  const labelAnchor = isOut ? 'end' : 'start';
+  const valueText =
+    showPercentages && payload.percentageLabel
+      ? payload.percentageLabel
+      : format(payload.value, 'financial');
 
   return (
     <Layer
@@ -175,17 +163,34 @@ function SankeyNode({
             : hiddenClass
       }
     >
-      <Rectangle x={x} y={y} width={width} height={height} fill={fillColor} />
-      {renderText(payload.name || '', height / 2)}
-      {renderText(
-        showPercentages && payload.percentageLabel
-          ? payload.percentageLabel
-          : format(payload.value, 'financial'),
-        height / 2 + 13,
-        11,
-        0.5,
-        privacyMode ? t('Redacted Script') : undefined,
-      )}
+      <Rectangle
+        x={x}
+        y={y}
+        width={width}
+        height={height}
+        radius={2}
+        fill={fillColor}
+      />
+      <text
+        textAnchor={labelAnchor}
+        x={labelX}
+        y={y + height / 2}
+        fontSize={12}
+        fontWeight={500}
+        fill={theme.pageText}
+      >
+        {payload.name || ''}
+      </text>
+      <text
+        textAnchor={labelAnchor}
+        x={labelX}
+        y={y + height / 2 + 14}
+        fontSize={10.5}
+        fill={theme.pageTextSubdued}
+        fontFamily={privacyMode ? t('Redacted Script') : fontFamily.mono}
+      >
+        {valueText}
+      </text>
     </Layer>
   );
 }
@@ -291,13 +296,7 @@ export function SankeyGraph({
                     return (
                       <div
                         className={css({
-                          zIndex: 1000,
-                          pointerEvents: 'none',
-                          borderRadius: 2,
-                          boxShadow: '0 1px 6px rgba(0, 0, 0, .20)',
-                          backgroundColor: theme.menuBackground,
-                          color: theme.menuItemText,
-                          padding: 10,
+                          ...chartTooltipSurface,
                         })}
                       >
                         <div style={{ lineHeight: 1.4 }}>

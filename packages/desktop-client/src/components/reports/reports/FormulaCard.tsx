@@ -7,6 +7,7 @@ import type {
   FormulaWidget,
 } from '@actual-app/core/types/models';
 
+import { cardHeaderStyle } from '#components/reports/chart-theme';
 import { FormulaResult } from '#components/reports/FormulaResult';
 import { ReportCard } from '#components/reports/ReportCard';
 import { ReportCardName } from '#components/reports/ReportCardName';
@@ -98,7 +99,14 @@ export function FormulaCard({
     >
       <View style={{ flex: 1, overflow: 'hidden' }}>
         {showTitle && (
-          <View style={{ flexGrow: 0, flexShrink: 0, padding: 20 }}>
+          <View
+            style={{
+              ...cardHeaderStyle,
+              flexDirection: 'column',
+              flexGrow: 0,
+              flexShrink: 0,
+            }}
+          >
             <ReportCardName
               name={meta?.name || t('Formula')}
               isEditing={nameMenuOpen}

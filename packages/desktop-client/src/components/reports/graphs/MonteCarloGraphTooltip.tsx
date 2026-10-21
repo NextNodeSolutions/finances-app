@@ -1,10 +1,10 @@
 import { useTranslation } from 'react-i18next';
 
-import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 import { css } from '@emotion/css';
 
 import { FinancialText } from '#components/FinancialText';
+import { chartTooltipSurface } from '#components/reports/chart-theme';
 import { useFormat } from '#hooks/useFormat';
 
 export type MonteCarloGraphView =
@@ -92,13 +92,7 @@ export function MonteCarloGraphTooltip({
     return (
       <div
         className={css({
-          zIndex: 1000,
-          pointerEvents: 'none',
-          borderRadius: 2,
-          boxShadow: '0 1px 6px rgba(0, 0, 0, .20)',
-          backgroundColor: theme.menuBackground,
-          color: theme.menuItemText,
-          padding: 10,
+          ...chartTooltipSurface,
         })}
       >
         <div style={{ marginBottom: 10 }}>

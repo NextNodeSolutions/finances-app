@@ -1,6 +1,7 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 
+import { styles } from '@actual-app/components/styles';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 
@@ -10,7 +11,13 @@ import { useFormat } from '#hooks/useFormat';
 
 import { ReportCardValueSkeleton } from './ReportCardValueSkeleton';
 
-const FONT_SIZE_SCALE_FACTOR = 1.6;
+// The figure sits bottom-left in ink and fills at most about three quarters
+// of the card width; short values are sized as if they had MIN_SIZED_LENGTH
+// characters so sibling cards keep a common scale.
+const FONT_SIZE_SCALE_FACTOR = 1.3;
+const MIN_SIZED_LENGTH = 8;
+const MAX_FONT_SIZE = 32;
+const LINE_HEIGHT = 38 / 32;
 const CONTAINER_MARGIN = 8;
 
 type SummaryNumberProps = {
@@ -37,7 +44,12 @@ export function SummaryNumber({
 
   displayAmount += suffix;
 
-  const fontSize = `min(${(FONT_SIZE_SCALE_FACTOR * 100) / displayAmount.length}cqi, calc(100cqb - ${CONTAINER_MARGIN * 2}px))`;
+  // Keep the sign in the figure itself, not only in its color.
+  const signedAmount =
+    isNumericValue && value < 0 ? `-${displayAmount}` : displayAmount;
+  const sizedLength = Math.max(signedAmount.length, MIN_SIZED_LENGTH);
+
+  const fontSize = `min(${(FONT_SIZE_SCALE_FACTOR * 100) / sizedLength}cqi, calc(100cqb - ${CONTAINER_MARGIN * 2}px), ${MAX_FONT_SIZE}px)`;
 
   return (
     <>
@@ -54,7 +66,7 @@ export function SummaryNumber({
                   : t('Positive amount: {{amount}}', { amount: displayAmount })
           }
           style={{
-            alignItems: 'center',
+            alignItems: 'flex-start',
             flexGrow: 1,
             flexShrink: 1,
             width: '100%',
@@ -62,18 +74,22 @@ export function SummaryNumber({
             maxWidth: '100%',
             containerType: 'size',
             margin: `${CONTAINER_MARGIN}px 0`,
-            justifyContent: 'center',
-            color: !isNumericValue
-              ? theme.reportsNumberNeutral
-              : value === 0
-                ? theme.reportsNumberNeutral
-                : value < 0
-                  ? theme.reportsNumberNegative
-                  : theme.reportsNumberPositive,
+            justifyContent: 'flex-end',
+            color: theme.pageText,
           }}
         >
-          <FinancialText aria-hidden="true" style={{ fontSize, lineHeight: 1 }}>
-            <PrivacyFilter>{displayAmount}</PrivacyFilter>
+          <FinancialText
+            aria-hidden="true"
+            style={{
+              ...styles.display,
+              fontSize,
+              fontWeight: 300,
+              lineHeight: LINE_HEIGHT,
+              letterSpacing: '-0.015em',
+              whiteSpace: 'nowrap',
+            }}
+          >
+            <PrivacyFilter>{signedAmount}</PrivacyFilter>
           </FinancialText>
         </View>
       )}

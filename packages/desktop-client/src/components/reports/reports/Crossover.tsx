@@ -31,6 +31,10 @@ import { MobilePageHeader, Page, PageHeader } from '#components/Page';
 import { PrivacyFilter } from '#components/PrivacyFilter';
 import { AccountSelector } from '#components/reports/AccountSelector';
 import { CategorySelector } from '#components/reports/CategorySelector';
+import {
+  explainerStyle,
+  reportPanelStyle,
+} from '#components/reports/chart-theme';
 import { CrossoverGraph } from '#components/reports/graphs/CrossoverGraph';
 import { Header } from '#components/reports/Header';
 import { LoadingIndicator } from '#components/reports/LoadingIndicator';
@@ -1033,23 +1037,29 @@ function CrossoverInner({ widget }: CrossoverInnerProps) {
         {/* Right content */}
         <View
           style={{
+            ...reportPanelStyle,
+            marginLeft: isNarrowWidth ? 20 : 10,
+            padding: 20,
             flex: 1,
           }}
         >
           {/* Header stats */}
-          <View
-            style={{
-              backgroundColor: theme.tableBackground,
-              padding: 20,
-              paddingTop: 10,
-              marginBottom: 10,
-            }}
-          >
-            <View style={{ textAlign: 'right' }}>
+          <View style={{ marginBottom: 12 }}>
+            <View
+              style={{
+                textAlign: 'right',
+                fontSize: 13,
+                lineHeight: '20px',
+                color: theme.pageTextLight,
+              }}
+            >
               <View
                 style={{
-                  ...styles.largeText,
-                  fontWeight: 400,
+                  ...styles.display,
+                  fontSize: 28,
+                  lineHeight: '34px',
+                  fontWeight: 300,
+                  color: theme.pageText,
                   marginBottom: 8,
                   whiteSpace: 'nowrap',
                 }}
@@ -1108,7 +1118,6 @@ function CrossoverInner({ widget }: CrossoverInnerProps) {
           {/* Graph area */}
           <View
             style={{
-              backgroundColor: theme.tableBackground,
               flexDirection: 'row',
               flex: '1 0 auto',
               minHeight: 400,
@@ -1117,7 +1126,6 @@ function CrossoverInner({ widget }: CrossoverInnerProps) {
             <View
               style={{
                 flex: 1,
-                padding: 10,
                 height: '100%',
               }}
             >
@@ -1129,14 +1137,7 @@ function CrossoverInner({ widget }: CrossoverInnerProps) {
           </View>
 
           {/* Description */}
-          <View
-            style={{
-              backgroundColor: theme.tableBackground,
-              marginTop: 10,
-              padding: 20,
-              userSelect: 'none',
-            }}
-          >
+          <View style={explainerStyle}>
             <Paragraph>
               <strong>
                 <Trans>What is the Crossover Point?</Trans>

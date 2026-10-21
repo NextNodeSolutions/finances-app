@@ -1,3 +1,4 @@
+import { styles } from '@actual-app/components/styles';
 import { theme } from '@actual-app/components/theme';
 
 // Shared layout constants for the Monte Carlo configuration and results
@@ -5,11 +6,8 @@ import { theme } from '@actual-app/components/theme';
 
 /** Small uppercase heading used for stat tiles, field groups and tables */
 export const GROUP_HEADING_STYLE = {
-  fontSize: 12,
-  fontWeight: 600,
-  letterSpacing: 0.5,
-  textTransform: 'uppercase',
-  color: theme.pageText,
+  ...styles.monoLabel,
+  color: theme.pageTextSubdued,
 } as const;
 
 export const FIELD_STYLE = { width: 170 } as const;

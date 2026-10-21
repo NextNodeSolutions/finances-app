@@ -1,7 +1,8 @@
 import { useTranslation } from 'react-i18next';
 
-import { theme } from '@actual-app/components/theme';
 import { css } from '@emotion/css';
+
+import { chartTooltipSurface } from '#components/reports/chart-theme';
 
 type PayloadItem = {
   payload: {
@@ -29,13 +30,7 @@ export function MonteCarloHistogramTooltip({
     return (
       <div
         className={css({
-          zIndex: 1000,
-          pointerEvents: 'none',
-          borderRadius: 2,
-          boxShadow: '0 1px 6px rgba(0, 0, 0, .20)',
-          backgroundColor: theme.menuBackground,
-          color: theme.menuItemText,
-          padding: 10,
+          ...chartTooltipSurface,
         })}
       >
         {t(

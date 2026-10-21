@@ -3,8 +3,6 @@ import { Trans, useTranslation } from 'react-i18next';
 
 import { Block } from '@actual-app/components/block';
 import { useResponsive } from '@actual-app/components/hooks/useResponsive';
-import { styles } from '@actual-app/components/styles';
-import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 import { send } from '@actual-app/core/platform/client/connection';
 import * as monthUtils from '@actual-app/core/shared/months';
@@ -14,6 +12,12 @@ import type {
 } from '@actual-app/core/types/models';
 
 import { PrivacyFilter } from '#components/PrivacyFilter';
+import {
+  cardChartInset,
+  cardHeaderStyle,
+  cardHeadlineStyle,
+  cardSupportingStyle,
+} from '#components/reports/chart-theme';
 import { CrossoverGraph } from '#components/reports/graphs/CrossoverGraph';
 import { LoadingIndicator } from '#components/reports/LoadingIndicator';
 import { ReportCard } from '#components/reports/ReportCard';
@@ -199,7 +203,7 @@ export function CrossoverCard({
         onPointerEnter={onCardHover}
         onPointerLeave={onCardHoverEnd}
       >
-        <View style={{ flexDirection: 'row', padding: 20 }}>
+        <View style={cardHeaderStyle}>
           <View style={{ flex: 1 }}>
             <ReportCardName
               name={meta?.name || t('Crossover Point')}
@@ -217,13 +221,7 @@ export function CrossoverCard({
           </View>
           {data && (
             <View style={{ textAlign: 'right', whiteSpace: 'nowrap' }}>
-              <Block
-                style={{
-                  ...styles.mediumText,
-                  fontWeight: 500,
-                  marginBottom: 5,
-                }}
-              >
+              <Block style={{ ...cardHeadlineStyle, marginBottom: 2 }}>
                 <PrivacyFilter activationFilters={[!isCardHovered]}>
                   {yearsToRetire != null
                     ? t('{{years}} years', {
@@ -232,12 +230,7 @@ export function CrossoverCard({
                     : t('N/A')}
                 </PrivacyFilter>
               </Block>
-              <Block
-                style={{
-                  fontSize: 12,
-                  color: theme.pageTextSubdued,
-                }}
-              >
+              <Block style={cardSupportingStyle}>
                 <Trans>Years to Retire</Trans>
               </Block>
             </View>
@@ -249,7 +242,7 @@ export function CrossoverCard({
             graphData={data.graphData}
             compact
             showTooltip={!isEditing && !isNarrowWidth}
-            style={{ height: 'auto', flex: 1 }}
+            style={{ height: 'auto', flex: 1, ...cardChartInset }}
           />
         ) : (
           <LoadingIndicator />

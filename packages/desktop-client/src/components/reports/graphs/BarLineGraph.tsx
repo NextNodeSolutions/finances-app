@@ -17,7 +17,16 @@ import {
 } from 'recharts';
 
 import { PrivacyFilter } from '#components/PrivacyFilter';
-import { useRechartsAnimation } from '#components/reports/chart-theme';
+import {
+  chartBarRadius,
+  chartEndMargin,
+  chartGrid,
+  chartLineWidth,
+  chartTooltipSurface,
+  chartXAxis,
+  chartYAxis,
+  useRechartsAnimation,
+} from '#components/reports/chart-theme';
 import { Container } from '#components/reports/Container';
 import { numberFormatterTooltip } from '#components/reports/numberFormatter';
 import { useFormat } from '#hooks/useFormat';
@@ -44,13 +53,7 @@ const CustomTooltip = ({ active, payload }: CustomTooltipProps) => {
     return (
       <div
         className={css({
-          zIndex: 1000,
-          pointerEvents: 'none',
-          borderRadius: 2,
-          boxShadow: '0 1px 6px rgba(0, 0, 0, .20)',
-          backgroundColor: theme.menuBackground,
-          color: theme.menuItemText,
-          padding: 10,
+          ...chartTooltipSurface,
         })}
       >
         <div>
@@ -111,7 +114,12 @@ export function BarLineGraph({
               width={width}
               height={height}
               data={data.data}
-              margin={{ top: 0, right: 0, left: 0, bottom: 0 }}
+              margin={{
+                top: 0,
+                right: compact ? 0 : chartEndMargin,
+                left: 0,
+                bottom: 0,
+              }}
             >
               {showTooltip && (
                 <Tooltip
@@ -120,19 +128,28 @@ export function BarLineGraph({
                   isAnimationActive={false}
                 />
               )}
-              {!compact && <CartesianGrid strokeDasharray="3 3" />}
-              {!compact && <XAxis dataKey="x" />}
-              {!compact && <YAxis dataKey="y" tickFormatter={tickFormatter} />}
+              {!compact && <CartesianGrid {...chartGrid} />}
+              {!compact && <XAxis {...chartXAxis} dataKey="x" />}
+              {!compact && (
+                <YAxis
+                  {...chartYAxis}
+                  dataKey="y"
+                  tickFormatter={tickFormatter}
+                />
+              )}
               <Bar
                 type="monotone"
                 dataKey="y"
-                fill="#8884d8"
+                fill={theme.reportsChartFill}
+                radius={chartBarRadius}
                 {...animationProps}
               />
               <Line
                 type="monotone"
                 dataKey="y"
-                stroke="#8884d8"
+                stroke={theme.pageTextLight}
+                strokeWidth={chartLineWidth}
+                dot={false}
                 {...animationProps}
               />
             </ComposedChart>

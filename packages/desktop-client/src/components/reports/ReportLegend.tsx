@@ -18,19 +18,17 @@ export function ReportLegend({ legend, groupBy, interval }: ReportLegendProps) {
   return (
     <View
       style={{
-        backgroundColor: theme.pageBackground,
-        alignItems: 'center',
         flex: 1,
         overflowY: 'auto',
+        paddingTop: 14,
+        borderTop: `1px solid ${theme.hairlineSubtle}`,
       }}
     >
       <Text
         style={{
-          ...styles.largeText,
-          alignItems: 'center',
-          marginBottom: 2,
-          fontWeight: 400,
-          paddingTop: 10,
+          ...styles.monoLabel,
+          color: theme.pageTextSubdued,
+          marginBottom: 6,
         }}
       >
         {groupBy === 'Interval'
