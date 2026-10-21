@@ -46,6 +46,7 @@ import { getCustomTick } from '#components/reports/getCustomTick';
 import { computePadding } from '#components/reports/graphs/util/computePadding';
 import { Header } from '#components/reports/Header';
 import { LoadingIndicator } from '#components/reports/LoadingIndicator';
+import { ReportBackButton } from '#components/reports/ReportBackButton';
 import { useAccounts } from '#hooks/useAccounts';
 import { useBalanceForecast } from '#hooks/useBalanceForecast';
 import { useDashboardWidget } from '#hooks/useDashboardWidget';
@@ -376,7 +377,12 @@ function BalanceForecastInner({ widget }: BalanceForecastInnerProps) {
 
   return (
     <Page
-      header={<PageHeader title={<Trans>Balance Forecast</Trans>} />}
+      header={
+        <PageHeader
+          leading={<ReportBackButton />}
+          title={<Trans>Balance Forecast</Trans>}
+        />
+      }
       padding={0}
     >
       {isTrackingBudgetForecast ? (

@@ -166,13 +166,13 @@ export const cardHeaderStyle: CSSProperties = {
   padding: '18px 20px 12px',
 };
 
-// The headline figure of a dashboard card, in ink like the page headline.
+// The headline figure of a dashboard card. Mono, not serif: the serif is kept
+// for the page's own headline.
 export const cardHeadlineStyle: CSSProperties = {
-  ...styles.display,
-  fontSize: 26,
-  lineHeight: '30px',
-  fontWeight: 300,
-  letterSpacing: '-0.015em',
+  ...styles.tnum,
+  fontSize: 20,
+  lineHeight: '26px',
+  fontWeight: 500,
   color: theme.pageText,
   whiteSpace: 'nowrap',
 };

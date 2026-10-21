@@ -33,7 +33,6 @@ import { format as formatDate, parseISO } from 'date-fns';
 
 import { EditablePageHeaderTitle } from '#components/EditablePageHeaderTitle';
 import { FinancialText } from '#components/FinancialText';
-import { MobileBackButton } from '#components/mobile/MobileBackButton';
 import { TransactionList as TransactionListMobile } from '#components/mobile/transactions/TransactionList';
 import { MobilePageHeader, Page, PageHeader } from '#components/Page';
 import { PrivacyFilter } from '#components/PrivacyFilter';
@@ -41,6 +40,8 @@ import { DateRange } from '#components/reports/DateRange';
 import { CalendarGraph } from '#components/reports/graphs/CalendarGraph';
 import { Header } from '#components/reports/Header';
 import { LoadingIndicator } from '#components/reports/LoadingIndicator';
+import { ReportBackButton } from '#components/reports/ReportBackButton';
+import { ReportMobileBackButton } from '#components/reports/ReportMobileBackButton';
 import { calculateTimeRange } from '#components/reports/reportRanges';
 import { calendarSpreadsheet } from '#components/reports/spreadsheets/calendar-spreadsheet';
 import type { CalendarDataType } from '#components/reports/spreadsheets/calendar-spreadsheet';
@@ -523,12 +524,11 @@ function CalendarInner({ widget, parameters }: CalendarInnerProps) {
         isNarrowWidth ? (
           <MobilePageHeader
             title={title}
-            leftContent={
-              <MobileBackButton onPress={() => navigate('/reports')} />
-            }
+            leftContent={<ReportMobileBackButton />}
           />
         ) : (
           <PageHeader
+            leading={<ReportBackButton />}
             title={
               widget ? (
                 <EditablePageHeaderTitle

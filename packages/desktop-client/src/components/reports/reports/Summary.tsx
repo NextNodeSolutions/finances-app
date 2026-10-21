@@ -28,11 +28,12 @@ import { AppliedFilters } from '#components/filters/AppliedFilters';
 import { FilterButton } from '#components/filters/FiltersMenu';
 import { FinancialText } from '#components/FinancialText';
 import { Checkbox } from '#components/forms';
-import { MobileBackButton } from '#components/mobile/MobileBackButton';
 import { MobilePageHeader, Page, PageHeader } from '#components/Page';
 import { PrivacyFilter } from '#components/PrivacyFilter';
 import { Header } from '#components/reports/Header';
 import { LoadingIndicator } from '#components/reports/LoadingIndicator';
+import { ReportBackButton } from '#components/reports/ReportBackButton';
+import { ReportMobileBackButton } from '#components/reports/ReportMobileBackButton';
 import { calculateTimeRange } from '#components/reports/reportRanges';
 import { summarySpreadsheet } from '#components/reports/spreadsheets/summary-spreadsheet';
 import { useReport } from '#components/reports/useReport';
@@ -41,7 +42,6 @@ import { FieldSelect } from '#components/rules/RuleEditor';
 import { useDashboardWidget } from '#hooks/useDashboardWidget';
 import { useFormat } from '#hooks/useFormat';
 import { useLocale } from '#hooks/useLocale';
-import { useNavigate } from '#hooks/useNavigate';
 import { useRuleConditionFilters } from '#hooks/useRuleConditionFilters';
 import { useSyncedPref } from '#hooks/useSyncedPref';
 import { addNotification } from '#notifications/notificationsSlice';
@@ -225,7 +225,6 @@ function SummaryInner({ widget }: SummaryInnerProps) {
   }, [latestTransaction, widget?.meta?.timeFrame]);
 
   const dispatch = useDispatch();
-  const navigate = useNavigate();
   const { isNarrowWidth } = useResponsive();
   const title = widget?.meta?.name || t('Summary');
 
@@ -333,12 +332,11 @@ function SummaryInner({ widget }: SummaryInnerProps) {
         isNarrowWidth ? (
           <MobilePageHeader
             title={title}
-            leftContent={
-              <MobileBackButton onPress={() => navigate('/reports')} />
-            }
+            leftContent={<ReportMobileBackButton />}
           />
         ) : (
           <PageHeader
+            leading={<ReportBackButton />}
             title={
               widget ? (
                 <EditablePageHeaderTitle

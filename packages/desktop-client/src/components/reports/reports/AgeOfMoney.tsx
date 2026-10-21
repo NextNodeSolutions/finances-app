@@ -26,7 +26,6 @@ import type {
 import * as d from 'date-fns';
 
 import { EditablePageHeaderTitle } from '#components/EditablePageHeaderTitle';
-import { MobileBackButton } from '#components/mobile/MobileBackButton';
 import { MobilePageHeader, Page, PageHeader } from '#components/Page';
 import { PrivacyFilter } from '#components/PrivacyFilter';
 import {
@@ -37,13 +36,14 @@ import {
 import { AgeOfMoneyGraph } from '#components/reports/graphs/AgeOfMoneyGraph';
 import { Header } from '#components/reports/Header';
 import { LoadingIndicator } from '#components/reports/LoadingIndicator';
+import { ReportBackButton } from '#components/reports/ReportBackButton';
+import { ReportMobileBackButton } from '#components/reports/ReportMobileBackButton';
 import { calculateTimeRange } from '#components/reports/reportRanges';
 import { createAgeOfMoneySpreadsheet } from '#components/reports/spreadsheets/age-of-money-spreadsheet';
 import { useReport } from '#components/reports/useReport';
 import { fromDateRepr } from '#components/reports/util';
 import { useDashboardWidget } from '#hooks/useDashboardWidget';
 import { useLocale } from '#hooks/useLocale';
-import { useNavigate } from '#hooks/useNavigate';
 import { useRuleConditionFilters } from '#hooks/useRuleConditionFilters';
 import { useSyncedPref } from '#hooks/useSyncedPref';
 import { addNotification } from '#notifications/notificationsSlice';
@@ -228,7 +228,6 @@ function AgeOfMoneyInner({ widget }: AgeOfMoneyInnerProps) {
     t,
   ]);
 
-  const navigate = useNavigate();
   const { isNarrowWidth } = useResponsive();
 
   const title = widget?.meta?.name || t('Age of Money');
@@ -262,12 +261,11 @@ function AgeOfMoneyInner({ widget }: AgeOfMoneyInnerProps) {
         isNarrowWidth ? (
           <MobilePageHeader
             title={title}
-            leftContent={
-              <MobileBackButton onPress={() => navigate('/reports')} />
-            }
+            leftContent={<ReportMobileBackButton />}
           />
         ) : (
           <PageHeader
+            leading={<ReportBackButton />}
             title={
               widget ? (
                 <EditablePageHeaderTitle

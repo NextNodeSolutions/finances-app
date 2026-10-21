@@ -81,11 +81,10 @@ export function SummaryNumber({
           <FinancialText
             aria-hidden="true"
             style={{
-              ...styles.display,
+              ...styles.tnum,
               fontSize,
-              fontWeight: 300,
+              fontWeight: 500,
               lineHeight: LINE_HEIGHT,
-              letterSpacing: '-0.015em',
               whiteSpace: 'nowrap',
             }}
           >

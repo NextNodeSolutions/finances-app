@@ -34,7 +34,6 @@ import type { TFunction } from 'i18next';
 import type { SankeyData } from 'recharts/types/chart/Sankey';
 
 import { EditablePageHeaderTitle } from '#components/EditablePageHeaderTitle';
-import { MobileBackButton } from '#components/mobile/MobileBackButton';
 import { MobilePageHeader, Page, PageHeader } from '#components/Page';
 import {
   explainerStyle,
@@ -43,6 +42,8 @@ import {
 import { SankeyGraph } from '#components/reports/graphs/SankeyGraph';
 import { Header } from '#components/reports/Header';
 import { LoadingIndicator } from '#components/reports/LoadingIndicator';
+import { ReportBackButton } from '#components/reports/ReportBackButton';
+import { ReportMobileBackButton } from '#components/reports/ReportMobileBackButton';
 import {
   boundMonthRangeFromDates,
   calculateTimeRange,
@@ -62,7 +63,6 @@ import { useCategories } from '#hooks/useCategories';
 import { useDashboardWidget } from '#hooks/useDashboardWidget';
 import { useFormatList } from '#hooks/useFormatList';
 import { useLocale } from '#hooks/useLocale';
-import { useNavigate } from '#hooks/useNavigate';
 import { useResizeObserver } from '#hooks/useResizeObserver';
 import { useRuleConditionFilters } from '#hooks/useRuleConditionFilters';
 import { addNotification } from '#notifications/notificationsSlice';
@@ -442,7 +442,6 @@ function SankeyInner({ widget }: SankeyInnerProps) {
   const locale = useLocale();
   const dispatch = useDispatch();
   const { t, i18n } = useTranslation();
-  const navigate = useNavigate();
   const { isNarrowWidth } = useResponsive();
 
   const {
@@ -797,12 +796,11 @@ function SankeyInner({ widget }: SankeyInnerProps) {
         isNarrowWidth ? (
           <MobilePageHeader
             title={title}
-            leftContent={
-              <MobileBackButton onPress={() => navigate('/reports')} />
-            }
+            leftContent={<ReportMobileBackButton />}
           />
         ) : (
           <PageHeader
+            leading={<ReportBackButton />}
             title={
               widget ? (
                 <EditablePageHeaderTitle

@@ -30,7 +30,6 @@ import { EditablePageHeaderTitle } from '#components/EditablePageHeaderTitle';
 import { AppliedFilters } from '#components/filters/AppliedFilters';
 import { FilterButton } from '#components/filters/FiltersMenu';
 import { FinancialText } from '#components/FinancialText';
-import { MobileBackButton } from '#components/mobile/MobileBackButton';
 import { MobilePageHeader, Page, PageHeader } from '#components/Page';
 import { PrivacyFilter } from '#components/PrivacyFilter';
 import {
@@ -40,6 +39,8 @@ import {
 import { SpendingGraph } from '#components/reports/graphs/SpendingGraph';
 import { LegendItem } from '#components/reports/LegendItem';
 import { LoadingIndicator } from '#components/reports/LoadingIndicator';
+import { ReportBackButton } from '#components/reports/ReportBackButton';
+import { ReportMobileBackButton } from '#components/reports/ReportMobileBackButton';
 import { calculateSpendingReportTimeRange } from '#components/reports/reportRanges';
 import {
   getSpendingAverageRangeLabel,
@@ -55,7 +56,6 @@ import { fromDateRepr } from '#components/reports/util';
 import { useDashboardWidget } from '#hooks/useDashboardWidget';
 import { useFormat } from '#hooks/useFormat';
 import { useLocale } from '#hooks/useLocale';
-import { useNavigate } from '#hooks/useNavigate';
 import { useRuleConditionFilters } from '#hooks/useRuleConditionFilters';
 import { useSyncedPref } from '#hooks/useSyncedPref';
 import { addNotification } from '#notifications/notificationsSlice';
@@ -170,7 +170,6 @@ function SpendingInternal({ widget }: SpendingInternalProps) {
   );
 
   const data = useReport('default', getGraphData);
-  const navigate = useNavigate();
   const { isNarrowWidth } = useResponsive();
 
   const updateDashboardWidgetMutation = useUpdateDashboardWidgetMutation();
@@ -300,12 +299,11 @@ function SpendingInternal({ widget }: SpendingInternalProps) {
         isNarrowWidth ? (
           <MobilePageHeader
             title={title}
-            leftContent={
-              <MobileBackButton onPress={() => navigate('/reports')} />
-            }
+            leftContent={<ReportMobileBackButton />}
           />
         ) : (
           <PageHeader
+            leading={<ReportBackButton />}
             title={
               widget ? (
                 <EditablePageHeaderTitle

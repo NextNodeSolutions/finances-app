@@ -24,7 +24,6 @@ import * as d from 'date-fns';
 
 import { EditablePageHeaderTitle } from '#components/EditablePageHeaderTitle';
 import { FinancialText } from '#components/FinancialText';
-import { MobileBackButton } from '#components/mobile/MobileBackButton';
 import { MobilePageHeader, Page, PageHeader } from '#components/Page';
 import { PrivacyFilter } from '#components/PrivacyFilter';
 import { Change } from '#components/reports/Change';
@@ -35,6 +34,8 @@ import {
 import { BudgetAnalysisGraph } from '#components/reports/graphs/BudgetAnalysisGraph';
 import { Header } from '#components/reports/Header';
 import { LoadingIndicator } from '#components/reports/LoadingIndicator';
+import { ReportBackButton } from '#components/reports/ReportBackButton';
+import { ReportMobileBackButton } from '#components/reports/ReportMobileBackButton';
 import { calculateTimeRange } from '#components/reports/reportRanges';
 import { buildBudgetAnalysisCsv } from '#components/reports/spreadsheets/budget-analysis-export';
 import {
@@ -46,7 +47,6 @@ import { fromDateRepr } from '#components/reports/util';
 import { useDashboardWidget } from '#hooks/useDashboardWidget';
 import { useFormat } from '#hooks/useFormat';
 import { useLocale } from '#hooks/useLocale';
-import { useNavigate } from '#hooks/useNavigate';
 import { useRuleConditionFilters } from '#hooks/useRuleConditionFilters';
 import { useSyncedPref } from '#hooks/useSyncedPref';
 import { addNotification } from '#notifications/notificationsSlice';
@@ -288,7 +288,6 @@ function BudgetAnalysisInternal({ widget }: BudgetAnalysisInternalProps) {
   );
 
   const data = useReport('default', getGraphData);
-  const navigate = useNavigate();
   const { isNarrowWidth } = useResponsive();
 
   const onChangeDates = (
@@ -390,12 +389,11 @@ function BudgetAnalysisInternal({ widget }: BudgetAnalysisInternalProps) {
         isNarrowWidth ? (
           <MobilePageHeader
             title={title}
-            leftContent={
-              <MobileBackButton onPress={() => navigate('/reports')} />
-            }
+            leftContent={<ReportMobileBackButton />}
           />
         ) : (
           <PageHeader
+            leading={<ReportBackButton />}
             title={
               widget ? (
                 <EditablePageHeaderTitle

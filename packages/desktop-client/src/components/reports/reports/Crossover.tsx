@@ -26,7 +26,6 @@ import { Link } from '#components/common/Link';
 import { EditablePageHeaderTitle } from '#components/EditablePageHeaderTitle';
 import { FinancialText } from '#components/FinancialText';
 import { Checkbox } from '#components/forms';
-import { MobileBackButton } from '#components/mobile/MobileBackButton';
 import { MobilePageHeader, Page, PageHeader } from '#components/Page';
 import { PrivacyFilter } from '#components/PrivacyFilter';
 import { AccountSelector } from '#components/reports/AccountSelector';
@@ -38,6 +37,8 @@ import {
 import { CrossoverGraph } from '#components/reports/graphs/CrossoverGraph';
 import { Header } from '#components/reports/Header';
 import { LoadingIndicator } from '#components/reports/LoadingIndicator';
+import { ReportBackButton } from '#components/reports/ReportBackButton';
+import { ReportMobileBackButton } from '#components/reports/ReportMobileBackButton';
 import { calculateTimeRange } from '#components/reports/reportRanges';
 import { createCrossoverSpreadsheet } from '#components/reports/spreadsheets/crossover-spreadsheet';
 import type { CrossoverData } from '#components/reports/spreadsheets/crossover-spreadsheet';
@@ -47,7 +48,6 @@ import { useCategories } from '#hooks/useCategories';
 import { useDashboardWidget } from '#hooks/useDashboardWidget';
 import { useFormat } from '#hooks/useFormat';
 import { useLocale } from '#hooks/useLocale';
-import { useNavigate } from '#hooks/useNavigate';
 import type { useSpreadsheet } from '#hooks/useSpreadsheet';
 import { addNotification } from '#notifications/notificationsSlice';
 import { useDispatch } from '#redux';
@@ -394,7 +394,6 @@ function CrossoverInner({ widget }: CrossoverInnerProps) {
   // Get target nest egg from spreadsheet data
   const targetNestEgg = displayData?.targetNestEgg ?? null;
 
-  const navigate = useNavigate();
   const { isNarrowWidth } = useResponsive();
 
   const title = widget?.meta?.name || t('Crossover Point');
@@ -433,12 +432,11 @@ function CrossoverInner({ widget }: CrossoverInnerProps) {
         isNarrowWidth ? (
           <MobilePageHeader
             title={title}
-            leftContent={
-              <MobileBackButton onPress={() => navigate('/reports')} />
-            }
+            leftContent={<ReportMobileBackButton />}
           />
         ) : (
           <PageHeader
+            leading={<ReportBackButton />}
             title={
               widget ? (
                 <EditablePageHeaderTitle

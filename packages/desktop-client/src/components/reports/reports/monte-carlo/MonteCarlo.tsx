@@ -19,7 +19,6 @@ import type { MonteCarloWidget } from '@actual-app/core/types/models';
 import { EditablePageHeaderTitle } from '#components/EditablePageHeaderTitle';
 import { FinancialText } from '#components/FinancialText';
 import { LabeledCheckbox } from '#components/forms/LabeledCheckbox';
-import { MobileBackButton } from '#components/mobile/MobileBackButton';
 import { MobilePageHeader, Page, PageHeader } from '#components/Page';
 import { PrivacyFilter } from '#components/PrivacyFilter';
 import {
@@ -32,6 +31,8 @@ import type { MonteCarloGraphView } from '#components/reports/graphs/MonteCarloG
 import { MonteCarloHistogram } from '#components/reports/graphs/MonteCarloHistogram';
 import { MonteCarloPotBalancesGraph } from '#components/reports/graphs/MonteCarloPotBalancesGraph';
 import { LoadingIndicator } from '#components/reports/LoadingIndicator';
+import { ReportBackButton } from '#components/reports/ReportBackButton';
+import { ReportMobileBackButton } from '#components/reports/ReportMobileBackButton';
 import { MonteCarloConfiguration } from '#components/reports/reports/monte-carlo/MonteCarloConfiguration';
 import { HISTORICAL_ANNUAL_RETURNS } from '#components/reports/reports/monte-carlo/monteCarloHistoricalReturns';
 import { MonteCarloRunDetailTable } from '#components/reports/reports/monte-carlo/MonteCarloRunDetailTable';
@@ -51,7 +52,6 @@ import { GROUP_HEADING_STYLE } from '#components/reports/reports/monte-carlo/mon
 import { useResolvedMonteCarloConfig } from '#components/reports/reports/monte-carlo/useResolvedMonteCarloConfig';
 import { useDashboardWidget } from '#hooks/useDashboardWidget';
 import { useFormat } from '#hooks/useFormat';
-import { useNavigate } from '#hooks/useNavigate';
 import { addNotification } from '#notifications/notificationsSlice';
 import { useDispatch } from '#redux';
 import { useUpdateDashboardWidgetMutation } from '#reports/mutations';
@@ -70,7 +70,6 @@ export function MonteCarlo() {
   const { t } = useTranslation();
   const dispatch = useDispatch();
   const format = useFormat();
-  const navigate = useNavigate();
   const { isNarrowWidth } = useResponsive();
 
   const [config, setConfig] = useState<MonteCarloConfig>(MONTE_CARLO_DEFAULTS);
@@ -275,12 +274,11 @@ export function MonteCarlo() {
         isNarrowWidth ? (
           <MobilePageHeader
             title={title}
-            leftContent={
-              <MobileBackButton onPress={() => navigate('/reports')} />
-            }
+            leftContent={<ReportMobileBackButton />}
           />
         ) : (
           <PageHeader
+            leading={<ReportBackButton />}
             title={
               widget ? (
                 <EditablePageHeaderTitle

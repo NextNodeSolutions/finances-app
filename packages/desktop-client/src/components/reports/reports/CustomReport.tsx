@@ -24,7 +24,6 @@ import type { TransObjectLiteral } from '@actual-app/core/types/util';
 import { Warning } from '#components/alerts';
 import { AppliedFilters } from '#components/filters/AppliedFilters';
 import { FinancialText } from '#components/FinancialText';
-import { MobileBackButton } from '#components/mobile/MobileBackButton';
 import { MobilePageHeader, Page, PageHeader } from '#components/Page';
 import { PrivacyFilter } from '#components/PrivacyFilter';
 import {
@@ -41,7 +40,9 @@ import {
 } from '#components/reports/disabledList';
 import { getLiveRange } from '#components/reports/getLiveRange';
 import { LoadingIndicator } from '#components/reports/LoadingIndicator';
+import { ReportBackButton } from '#components/reports/ReportBackButton';
 import { ReportLegend } from '#components/reports/ReportLegend';
+import { ReportMobileBackButton } from '#components/reports/ReportMobileBackButton';
 import {
   defaultReport,
   getIntervalFormat,
@@ -862,10 +863,6 @@ function CustomReportInner({
     }
   };
 
-  const onBackClick = () => {
-    void navigate('/reports');
-  };
-
   return (
     <Page
       header={
@@ -874,10 +871,11 @@ function CustomReportInner({
             title={t('Custom Report: {{name}}', {
               name: report.name ?? t('Unsaved report'),
             })}
-            leftContent={<MobileBackButton onPress={onBackClick} />}
+            leftContent={<ReportMobileBackButton />}
           />
         ) : (
           <PageHeader
+            leading={<ReportBackButton />}
             title={
               <Trans>
                 <Text>
