@@ -1,3 +1,4 @@
+import { expect } from '@playwright/test';
 import type { Locator, Page } from '@playwright/test';
 
 type SettingsSection =
@@ -8,6 +9,8 @@ type SettingsSection =
   | 'Tags'
   | 'Advanced'
   | 'Experimental';
+
+type OptionalFeature = 'bankSync' | 'tags';
 
 export class SettingsPage {
   readonly page: Page;
@@ -63,6 +66,28 @@ export class SettingsPage {
     if (buttonText?.includes(budgetType.toLowerCase())) {
       await this.switchBudgetTypeButton.click();
     }
+  }
+
+  async enableFeature(feature: OptionalFeature) {
+    await this.setFeature(feature, true);
+  }
+
+  async disableFeature(feature: OptionalFeature) {
+    await this.setFeature(feature, false);
+  }
+
+  // The switch's input is visually hidden; its label is the track people
+  // click.
+  private async setFeature(feature: OptionalFeature, isOn: boolean) {
+    await this.goToSection('General');
+
+    const id = `settings-feature-${feature}`;
+    const toggle = this.settings.locator(`[id="${id}"]`);
+    await toggle.waitFor({ state: 'attached' });
+    if ((await toggle.isChecked()) !== isOn) {
+      await this.settings.locator(`label[for="${id}"]`).click();
+    }
+    await expect(toggle).toBeChecked({ checked: isOn });
   }
 
   async enableExperimentalFeature(featureName: string) {
