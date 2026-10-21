@@ -111,7 +111,9 @@ export const PercentageAutomation = ({
           <PercentInput
             id="percent-field"
             key="percent-input"
-            style={isNarrowWidth ? { height: MOBILE_FIELD_HEIGHT } : undefined}
+            style={
+              isNarrowWidth ? { minHeight: MOBILE_FIELD_HEIGHT } : undefined
+            }
             value={template.percent}
             onUpdatePercent={(percent: number) =>
               dispatch(
