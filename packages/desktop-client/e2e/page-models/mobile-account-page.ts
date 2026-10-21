@@ -32,8 +32,11 @@ export class MobileAccountPage {
     this.reconcilingBanner = page.getByTestId('reconciling-banner');
     this.reconcilingBannerAllReconciled =
       this.reconcilingBanner.getByText('All reconciled!');
-    this.reconcilingBannerDifference =
-      this.reconcilingBanner.getByText('needs');
+    // Offered only while the cleared balance differs from the statement.
+    this.reconcilingBannerDifference = this.reconcilingBanner.getByRole(
+      'button',
+      { name: 'Create reconciliation transaction' },
+    );
   }
 
   async waitFor(...options: Parameters<Locator['waitFor']>) {

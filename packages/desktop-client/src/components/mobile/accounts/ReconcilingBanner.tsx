@@ -1,39 +1,56 @@
 import React, { useState } from 'react';
-import { Trans } from 'react-i18next';
+import { Trans, useTranslation } from 'react-i18next';
 
 import { Button } from '@actual-app/components/button';
-import { SvgCheckCircle1 } from '@actual-app/components/icons/v2';
-import { Text } from '@actual-app/components/text';
+import type { CSSProperties } from '@actual-app/components/styles';
 import { theme } from '@actual-app/components/theme';
+import { radius, spacing } from '@actual-app/components/tokens';
 import { View } from '@actual-app/components/view';
 import type { AccountEntity } from '@actual-app/core/types/models';
-import type { TransObjectLiteral } from '@actual-app/core/types/util';
 
+import { StripReading } from '#components/accounts/StripReading';
+import { SettleRule } from '#components/common/SettleRule';
 import { mobileCardStyle } from '#components/mobile/utils';
-import { useFormat } from '#hooks/useFormat';
+import { useSettled } from '#hooks/useSettled';
 import { useSheetValue } from '#hooks/useSheetValue';
 import * as bindings from '#spreadsheet/bindings';
+
+const BUTTON_STYLE: CSSProperties = {
+  flex: 1,
+  minHeight: 44,
+  borderRadius: radius.md,
+};
 
 type ReconcilingBannerProps = {
   account: AccountEntity;
   targetBalance: number;
+  /** Ends reconciling: locks the cleared rows when they match. */
   onDone: () => Promise<void>;
+  /** Ends reconciling without locking anything. */
+  onExit: () => void;
   onCreateTransaction: (targetDiff: number) => Promise<void>;
 };
 
+/**
+ * The reconcile strip of the narrow register: cleared, statement and their
+ * difference, then the settle rule once the difference reaches 0.00.
+ */
 export function ReconcilingBanner({
   account,
   targetBalance,
   onDone,
+  onExit,
   onCreateTransaction,
 }: ReconcilingBannerProps) {
-  const format = useFormat();
+  const { t } = useTranslation();
   const cleared = useSheetValue<'account', 'balanceCleared'>(
     bindings.accountBalanceCleared(account.id),
   );
+  const targetDiff = cleared == null ? null : targetBalance - cleared;
+  const { isSettled, hasJustSettled } = useSettled(targetDiff);
   const [isUpdating, setIsUpdating] = useState(false);
 
-  if (cleared == null) {
+  if (cleared == null || targetDiff == null) {
     return null;
   }
 
@@ -46,22 +63,13 @@ export function ReconcilingBanner({
     }
   };
 
-  const targetDiff = targetBalance - cleared;
-
-  const clearedBalance = format(cleared, 'financial');
-  const bankBalance = format(targetBalance, 'financial');
-  const difference =
-    (targetDiff > 0 ? '+' : '') + format(targetDiff, 'financial');
-
-  const isBalanced = targetDiff === 0;
-
-  // both states stay rendered so the banner keeps the height of the taller one
+  // Both states stay rendered so the banner keeps the height of the taller.
   return (
     <View
       data-testid="reconciling-banner"
       style={{
         flexShrink: 0,
-        display: 'grid',
+        gap: spacing.md,
         ...mobileCardStyle,
         overflow: 'visible',
         margin: '10px 12px 0',
@@ -70,73 +78,75 @@ export function ReconcilingBanner({
     >
       <View
         style={{
-          gridArea: '1 / 1',
+          flexDirection: 'row',
+          flexWrap: 'wrap',
           justifyContent: 'center',
-          gap: 10,
-          ...(!isBalanced && { visibility: 'hidden' }),
+          columnGap: spacing.lg,
+          rowGap: spacing.xs,
         }}
       >
-        <View
-          style={{
-            color: theme.noticeTextLight,
-            flexDirection: 'row',
-            alignItems: 'center',
-            justifyContent: 'center',
-          }}
-        >
-          <SvgCheckCircle1
-            style={{
-              width: 13,
-              height: 13,
-              color: 'inherit',
-              marginRight: 3,
-            }}
-          />
-          <Trans>All reconciled!</Trans>
-        </View>
-        <Button
-          variant="primary"
-          isDisabled={isUpdating}
-          style={{ height: 44, borderRadius: 8 }}
-          onPress={() => runAction(onDone)}
-        >
-          <Trans>Lock transactions</Trans>
-        </Button>
+        <StripReading
+          label={t('Cleared')}
+          amount={cleared}
+          testId="reconciling-cleared"
+        />
+        <StripReading
+          label={t('Statement')}
+          amount={targetBalance}
+          testId="reconciling-statement"
+        />
+        <StripReading
+          label={t('Difference')}
+          amount={targetDiff}
+          isSigned
+          color={isSettled ? theme.pageTextSubdued : theme.numberNegative}
+          testId="reconciling-difference"
+        />
       </View>
-      <View
-        style={{
-          gridArea: '1 / 1',
-          justifyContent: 'center',
-          gap: 10,
-          ...(isBalanced && { visibility: 'hidden' }),
-        }}
-      >
-        <Text
-          style={{
-            color: theme.tableText,
-            textAlign: 'center',
-          }}
-        >
-          <Trans>
-            Your cleared balance{' '}
-            <strong>{{ clearedBalance } as TransObjectLiteral}</strong> needs{' '}
-            <strong>{{ difference } as TransObjectLiteral}</strong> to match
-            your bank&apos;s balance of{' '}
-            <Text style={{ fontWeight: 600 }}>
-              {{ bankBalance } as TransObjectLiteral}
-            </Text>
-          </Trans>
-        </Text>
+      <View style={{ display: 'grid' }}>
         <View
           style={{
-            flexDirection: 'row',
+            gridArea: '1 / 1',
             justifyContent: 'center',
             gap: 10,
+            ...(!isSettled && { visibility: 'hidden' }),
+          }}
+        >
+          <SettleRule
+            isSettled={isSettled}
+            hasJustSettled={hasJustSettled}
+            label={t('All reconciled!')}
+          />
+          <View style={{ flexDirection: 'row', gap: 10 }}>
+            <Button
+              isDisabled={isUpdating}
+              style={BUTTON_STYLE}
+              onPress={onExit}
+            >
+              <Trans>Exit reconciliation</Trans>
+            </Button>
+            <Button
+              variant="primary"
+              isDisabled={isUpdating}
+              style={BUTTON_STYLE}
+              onPress={() => runAction(onDone)}
+            >
+              <Trans>Lock transactions</Trans>
+            </Button>
+          </View>
+        </View>
+        <View
+          style={{
+            gridArea: '1 / 1',
+            flexDirection: 'row',
+            alignItems: 'flex-end',
+            gap: 10,
+            ...(isSettled && { visibility: 'hidden' }),
           }}
         >
           <Button
             isDisabled={isUpdating}
-            style={{ flex: 1, minHeight: 44, borderRadius: 8 }}
+            style={BUTTON_STYLE}
             onPress={() => runAction(() => onCreateTransaction(targetDiff))}
           >
             <Trans>Create reconciliation transaction</Trans>
@@ -144,7 +154,7 @@ export function ReconcilingBanner({
           <Button
             variant="primary"
             isDisabled={isUpdating}
-            style={{ flex: 1, minHeight: 44, borderRadius: 8 }}
+            style={BUTTON_STYLE}
             onPress={() => runAction(onDone)}
           >
             <Trans>Exit reconciliation</Trans>

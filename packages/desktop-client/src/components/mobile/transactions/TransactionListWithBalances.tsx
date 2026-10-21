@@ -316,8 +316,8 @@ function Balance({ balance }: BalanceProps) {
             {...props}
             style={{
               ...styles.display,
-              fontSize: 32,
-              lineHeight: '38px',
+              fontSize: 28,
+              lineHeight: '34px',
               fontWeight: 300,
               whiteSpace: 'nowrap',
               textAlign: 'center',
