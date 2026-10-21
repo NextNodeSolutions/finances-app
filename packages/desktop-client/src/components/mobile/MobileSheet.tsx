@@ -37,8 +37,11 @@ type MobileSheetChildArgs = {
   isEditingTitle: boolean;
 };
 
+// Sheets opened from local state rather than the modal stack.
+type LocalSheetName = 'mobile-more';
+
 type MobileSheetProps = {
-  name: ModalType['name'];
+  name: ModalType['name'] | LocalSheetName;
   title: string;
   onTitleUpdate?: (newTitle: string) => string | undefined;
   isLoading?: boolean;

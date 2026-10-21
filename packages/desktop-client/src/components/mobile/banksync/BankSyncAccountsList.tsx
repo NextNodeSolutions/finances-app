@@ -10,7 +10,7 @@ import type {
   SyncProviders,
 } from '#components/banksync/bankSyncUtils';
 import { getGroupedBankSyncEntries } from '#components/banksync/bankSyncUtils';
-import { MOBILE_NAV_HEIGHT } from '#components/mobile/MobileNavTabs';
+import { MOBILE_NAV_INSET } from '#components/mobile/MobileNavTabs';
 import { mobileFigureLabelStyle } from '#components/mobile/utils';
 
 import { BankSyncAccountsListItem } from './BankSyncAccountsListItem';
@@ -55,9 +55,7 @@ export function BankSyncAccountsList({
   const shouldShowProviderHeaders = groupedAccountEntries.length > 1;
 
   return (
-    <div
-      style={{ flex: 1, overflow: 'auto', paddingBottom: MOBILE_NAV_HEIGHT }}
-    >
+    <div style={{ flex: 1, overflow: 'auto', paddingBottom: MOBILE_NAV_INSET }}>
       {groupedAccountEntries.map(([provider, accounts]) => (
         <div key={provider}>
           {shouldShowProviderHeaders && (

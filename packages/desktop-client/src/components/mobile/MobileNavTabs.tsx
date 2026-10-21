@@ -1,269 +1,165 @@
-import React, { useCallback, useState } from 'react';
-import type { ComponentProps, ComponentType, CSSProperties } from 'react';
-import { useTranslation } from 'react-i18next';
-import { NavLink } from 'react-router';
-import { animated, config, useSpring } from 'react-spring';
+import { useState } from 'react';
+import type { ComponentType, CSSProperties, SVGProps } from 'react';
+import { Trans, useTranslation } from 'react-i18next';
+import { NavLink, useLocation } from 'react-router';
 
+import { Button } from '@actual-app/components/button';
 import { useResponsive } from '@actual-app/components/hooks/useResponsive';
 import {
   SvgAdd,
-  SvgCog,
+  SvgChartPie,
+  SvgDotsHorizontalTriple,
   SvgPiggyBank,
-  SvgReports,
   SvgWallet,
 } from '@actual-app/components/icons/v1';
-import { SvgCalendar3 } from '@actual-app/components/icons/v2';
 import { styles } from '@actual-app/components/styles';
 import { theme } from '@actual-app/components/theme';
 import { motion, radius } from '@actual-app/components/tokens';
 import { View } from '@actual-app/components/view';
-import { useDrag } from '@use-gesture/react';
 
-import { useIsTestEnv } from '#hooks/useIsTestEnv';
-import { useScrollListener } from '#hooks/useScrollListener';
+import { isMorePath, MobileMoreSheet } from './MobileMoreSheet';
 
-const COLUMN_COUNT = 3;
-const ROW_COUNT = 2;
-const PILL_HEIGHT = 15;
-const ROW_HEIGHT = 70;
-const TOTAL_HEIGHT = ROW_HEIGHT * ROW_COUNT;
-const OPEN_FULL_Y = 1;
-const OPEN_DEFAULT_Y = TOTAL_HEIGHT - ROW_HEIGHT;
-const HIDDEN_Y = TOTAL_HEIGHT;
+/** Height of the bottom bar, without the bottom safe-area inset. */
+export const MOBILE_NAV_HEIGHT = 56;
+/** Space a page leaves under its content so the bar never covers it. */
+export const MOBILE_NAV_INSET = `calc(${MOBILE_NAV_HEIGHT}px + env(safe-area-inset-bottom))`;
 
-export const MOBILE_NAV_HEIGHT = ROW_HEIGHT + PILL_HEIGHT;
+const ADD_BUTTON_SIZE = 44;
+const TAB_ICON_SIZE = 20;
 
+type TabIcon =
+  | ComponentType<SVGProps<SVGElement>>
+  | ComponentType<SVGProps<SVGSVGElement>>;
+
+/**
+ * The one bottom bar of the narrow layout: Overview, Budget, a new
+ * transaction, Accounts, and More for every secondary page.
+ */
 export function MobileNavTabs() {
   const { t } = useTranslation();
   const { isNarrowWidth } = useResponsive();
-  const isTestEnv = useIsTestEnv();
-  const [navbarState, setNavbarState] = useState<'default' | 'open' | 'hidden'>(
-    'default',
-  );
-
-  const navTabStyle = {
-    flex: `1 1 ${100 / COLUMN_COUNT}%`,
-    height: ROW_HEIGHT,
-    padding: '10px 10px 12px',
-    maxWidth: `${100 / COLUMN_COUNT}%`,
-  };
-
-  const [{ y }, api] = useSpring(() => ({ from: { y: OPEN_DEFAULT_Y } }), []);
-
-  const openFull = useCallback(
-    ({ canceled }: { canceled?: boolean }) => {
-      // when cancel is true, it means that the user passed the upwards threshold
-      // so we change the spring config to create a nice wobbly effect
-      setNavbarState('open');
-      void api.start({
-        to: { y: OPEN_FULL_Y },
-        immediate: isTestEnv,
-        config: canceled ? config.wobbly : config.stiff,
-      });
-    },
-    [api, isTestEnv],
-  );
-
-  const openDefault = useCallback(
-    (velocity = 0) => {
-      setNavbarState('default');
-      void api.start({
-        to: { y: OPEN_DEFAULT_Y },
-        immediate: isTestEnv,
-        config: { ...config.stiff, velocity },
-      });
-    },
-    [api, isTestEnv],
-  );
-
-  const hide = useCallback(
-    (velocity = 0) => {
-      setNavbarState('hidden');
-      void api.start({
-        to: { y: HIDDEN_Y },
-        immediate: isTestEnv,
-        config: { ...config.stiff, velocity },
-      });
-    },
-    [api, isTestEnv],
-  );
-
-  const navTabs = [
-    {
-      name: t('Budget'),
-      path: '/budget',
-      style: navTabStyle,
-      Icon: SvgWallet,
-    },
-    {
-      name: t('Transaction'),
-      path: '/transactions/new',
-      style: navTabStyle,
-      Icon: SvgAdd,
-    },
-    {
-      name: t('Accounts'),
-      path: '/accounts',
-      style: navTabStyle,
-      Icon: SvgPiggyBank,
-    },
-    {
-      name: t('Reports'),
-      path: '/reports',
-      style: navTabStyle,
-      Icon: SvgReports,
-    },
-    {
-      name: t('Schedules'),
-      path: '/schedules',
-      style: navTabStyle,
-      Icon: SvgCalendar3,
-    },
-    {
-      name: t('Settings'),
-      path: '/settings',
-      style: navTabStyle,
-      Icon: SvgCog,
-    },
-  ].map(tab => (
-    <NavTab key={tab.path} onClick={() => openDefault()} {...tab} />
-  ));
-
-  useScrollListener(
-    useCallback(
-      ({ isScrolling, hasScrolledToEnd }) => {
-        if (isScrolling('down') && !hasScrolledToEnd('up')) {
-          hide();
-        } else if (isScrolling('up') && !hasScrolledToEnd('down')) {
-          openDefault();
-        }
-      },
-      [hide, openDefault],
-    ),
-  );
-
-  const bind = useDrag(
-    ({
-      last,
-      velocity: [, vy],
-      direction: [, dy],
-      offset: [, oy],
-      cancel,
-      canceled,
-    }) => {
-      // if the user drags up passed a threshold, then we cancel
-      // the drag so that the sheet resets to its open position
-      if (oy < 0) {
-        cancel();
-      }
-
-      // when the user releases the sheet, we check whether it passed
-      // the threshold for it to close, or if we reset it to its open position
-      if (last) {
-        if (oy > ROW_HEIGHT * 0.5 || (vy > 0.5 && dy > 0)) {
-          openDefault(vy);
-        } else {
-          openFull({ canceled });
-        }
-      } else {
-        // when the user keeps dragging, we just move the sheet according to
-        // the cursor position
-        void api.start({ to: { y: oy }, immediate: true });
-      }
-    },
-    {
-      from: () => [0, y.get()],
-      filterTaps: true,
-      bounds: { top: -TOTAL_HEIGHT, bottom: TOTAL_HEIGHT - ROW_HEIGHT },
-      axis: 'y',
-      rubberband: true,
-    },
-  );
+  const { pathname } = useLocation();
+  const [isMoreOpen, setIsMoreOpen] = useState(false);
 
   return (
-    <animated.div
+    <View
       role="navigation"
-      {...bind()}
+      aria-label={t('Main')}
+      data-navbar-state={isMoreOpen ? 'open' : 'default'}
       style={{
-        y,
-        touchAction: 'pan-x',
+        position: 'fixed',
+        left: 0,
+        right: 0,
+        bottom: 0,
+        zIndex: 100,
+        flexDirection: 'row',
+        alignItems: 'stretch',
+        height: MOBILE_NAV_INSET,
+        paddingBottom: 'env(safe-area-inset-bottom)',
+        paddingLeft: 'env(safe-area-inset-left)',
+        paddingRight: 'env(safe-area-inset-right)',
         backgroundColor: theme.mobileNavBackground,
         borderTop: `1px solid ${theme.hairline}`,
-        height: TOTAL_HEIGHT + PILL_HEIGHT,
-        width: '100%',
-        position: 'fixed',
-        zIndex: 100,
-        bottom: 0,
         ...(!isNarrowWidth && { display: 'none' }),
       }}
-      data-navbar-state={navbarState}
     >
-      <View>
-        <div
-          style={{
-            backgroundColor: theme.hairlineStrong,
-            borderRadius: radius.pill,
-            width: 32,
-            height: 4,
-            marginTop: 5,
-            marginBottom: 6,
-            alignSelf: 'center',
-          }}
+      <NavTab name={t('Overview')} path="/overview" Icon={SvgChartPie} />
+      <NavTab name={t('Budget')} path="/budget" Icon={SvgWallet} />
+      <AddTransactionTab name={t('Transaction')} />
+      <NavTab name={t('Accounts')} path="/accounts" Icon={SvgPiggyBank} />
+      <Button
+        variant="bare"
+        aria-haspopup="dialog"
+        aria-expanded={isMoreOpen}
+        onPress={() => setIsMoreOpen(true)}
+        style={{
+          ...getTabStyle(isMorePath(pathname)),
+          borderRadius: 0,
+          padding: 0,
+        }}
+      >
+        <SvgDotsHorizontalTriple
+          width={TAB_ICON_SIZE}
+          height={TAB_ICON_SIZE}
+          style={{ flexShrink: 0 }}
         />
-        <View
-          style={{
-            flexDirection: 'row',
-            flexWrap: 'wrap',
-            height: TOTAL_HEIGHT,
-            width: '100%',
-          }}
-        >
-          {navTabs}
-        </View>
-      </View>
-    </animated.div>
+        <Trans>More</Trans>
+      </Button>
+      {isMoreOpen && (
+        <MobileMoreSheet
+          onNavigate={() => setIsMoreOpen(false)}
+          onClose={() => setIsMoreOpen(false)}
+        />
+      )}
+    </View>
   );
 }
 
-type NavTabIconProps = {
-  width: number;
-  height: number;
-  style?: CSSProperties;
-};
+function getTabStyle(isActive: boolean): CSSProperties {
+  return {
+    ...styles.noTapHighlight,
+    flex: 1,
+    minWidth: 0,
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 4,
+    fontSize: 11,
+    fontWeight: isActive ? 600 : 500,
+    letterSpacing: '0.01em',
+    color: isActive ? theme.mobileNavItemSelected : theme.mobileNavItem,
+    backgroundColor: 'transparent',
+    textDecoration: 'none',
+    userSelect: 'none',
+    transition: `color ${motion.base} ${motion.ease}`,
+  };
+}
 
 type NavTabProps = {
   name: string;
   path: string;
-  Icon: ComponentType<NavTabIconProps>;
-  style?: CSSProperties;
-  onClick: ComponentProps<typeof NavLink>['onClick'];
+  Icon: TabIcon;
 };
 
-function NavTab({ Icon: TabIcon, name, path, style, onClick }: NavTabProps) {
+function NavTab({ name, path, Icon }: NavTabProps) {
+  return (
+    <NavLink to={path} style={({ isActive }) => getTabStyle(isActive)}>
+      <Icon
+        width={TAB_ICON_SIZE}
+        height={TAB_ICON_SIZE}
+        style={{ flexShrink: 0 }}
+      />
+      {name}
+    </NavLink>
+  );
+}
+
+// The middle slot: an ink disc, the one primary action of the bar.
+function AddTransactionTab({ name }: { name: string }) {
   return (
     <NavLink
-      to={path}
-      style={({ isActive }) => ({
-        ...styles.noTapHighlight,
-        alignItems: 'center',
-        color: isActive ? theme.mobileNavItemSelected : theme.mobileNavItem,
-        display: 'flex',
-        flexDirection: 'column',
-        gap: 5,
-        fontSize: 11,
-        fontWeight: isActive ? 600 : 500,
-        letterSpacing: '0.01em',
-        textDecoration: 'none',
-        textAlign: 'center',
-        textWrap: 'balance',
-        userSelect: 'none',
-        transition: `color ${motion.base} ${motion.ease}`,
-        ...style,
-      })}
-      onClick={onClick}
+      to="/transactions/new"
+      aria-label={name}
+      style={{
+        ...getTabStyle(false),
+        // The disc is the whole control; the label lives in aria-label.
+        gap: 0,
+      }}
     >
-      <TabIcon width={20} height={20} style={{ minHeight: '20px' }} />
-      {name}
+      <View
+        style={{
+          width: ADD_BUTTON_SIZE,
+          height: ADD_BUTTON_SIZE,
+          borderRadius: radius.pill,
+          alignItems: 'center',
+          justifyContent: 'center',
+          backgroundColor: theme.buttonPrimaryBackground,
+          color: theme.buttonPrimaryText,
+        }}
+      >
+        <SvgAdd width={16} height={16} />
+      </View>
     </NavLink>
   );
 }
