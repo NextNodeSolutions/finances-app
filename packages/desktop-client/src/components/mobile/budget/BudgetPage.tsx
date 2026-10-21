@@ -1,16 +1,8 @@
 // @ts-strict-ignore
-import React, {
-  useCallback,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-} from 'react';
-import { GridList, GridListItem } from 'react-aria-components';
-import { Trans, useTranslation } from 'react-i18next';
+import React, { useCallback, useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 
 import { Button } from '@actual-app/components/button';
-import { Card } from '@actual-app/components/card';
 import { AnimatedLoading } from '@actual-app/components/icons/AnimatedLoading';
 import { SvgLogo } from '@actual-app/components/icons/logo';
 import {
@@ -20,15 +12,12 @@ import {
   SvgCheveronRight,
 } from '@actual-app/components/icons/v1';
 import { SvgCalendar } from '@actual-app/components/icons/v2';
-import type { CSSProperties } from '@actual-app/components/styles';
 import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import { radius } from '@actual-app/components/tokens';
 import { View } from '@actual-app/components/view';
 import { send } from '@actual-app/core/platform/client/connection';
 import * as monthUtils from '@actual-app/core/shared/months';
-import { groupById } from '@actual-app/core/shared/util';
-import type { TransObjectLiteral } from '@actual-app/core/types/util';
 
 import { sync } from '#app/appSlice';
 import {
@@ -43,7 +32,6 @@ import {
 } from '#budget';
 import { closeBudget } from '#budgetfiles/budgetfilesSlice';
 import { prewarmMonth } from '#components/budget/util';
-import { FinancialText } from '#components/FinancialText';
 import {
   MOBILE_HEADER_TITLE_CHEVRON_SIZE,
   mobileHeaderIconButtonStyle,
@@ -54,23 +42,21 @@ import { MobilePageHeader, Page } from '#components/Page';
 import { SyncRefresh } from '#components/SyncRefresh';
 import { useCategories } from '#hooks/useCategories';
 import { useFeatureFlag } from '#hooks/useFeatureFlag';
-import { useFormat } from '#hooks/useFormat';
 import { useLocale } from '#hooks/useLocale';
 import { useLocalPref } from '#hooks/useLocalPref';
-import { useNavigate } from '#hooks/useNavigate';
-import { useOverspentCategories } from '#hooks/useOverspentCategories';
 import { SheetNameProvider } from '#hooks/useSheetName';
-import { useSheetValue } from '#hooks/useSheetValue';
 import { useSpreadsheet } from '#hooks/useSpreadsheet';
 import { useSyncedPref } from '#hooks/useSyncedPref';
-import { useTransactions } from '#hooks/useTransactions';
-import { useUndo } from '#hooks/useUndo';
 import { collapseModals, pushModal } from '#modals/modalsSlice';
-import { uncategorizedTransactions } from '#queries';
 import { useDispatch } from '#redux';
-import { envelopeBudget } from '#spreadsheet/bindings';
 
+import { BudgetBanners } from './BudgetBanners';
 import { BudgetTable } from './BudgetTable';
+
+// The month title is the page's display line on mobile.
+const MONTH_TITLE_SIZE = 22;
+const MONTH_TITLE_LINE_HEIGHT = 28;
+const MONTH_STEP_BUTTON_SIZE = 32;
 
 function isBudgetType(input?: string): input is 'envelope' | 'tracking' {
   return ['envelope', 'tracking'].includes(input);
@@ -529,68 +515,96 @@ export function BudgetPage() {
     );
   }
 
+  const isPrevMonthEnabled = startMonth > monthBounds.start;
+  const isNextMonthEnabled =
+    startMonth < monthUtils.subMonths(monthBounds.end, 1);
+
   return (
     <Page
       padding={0}
       header={
         <MobilePageHeader
           title={
-            <MonthSelector
+            <MonthTitle
               month={startMonth}
-              monthBounds={monthBounds}
               onOpenMonthMenu={onOpenBudgetMonthMenu}
-              onPrevMonth={onPrevMonth}
-              onNextMonth={onNextMonth}
             />
           }
           leftContent={
-            <Button
-              variant="bare"
-              style={{
-                ...mobileHeaderIconButtonStyle,
-                width: 'auto',
-                padding: '0 6px',
-                gap: 2,
-              }}
-              onPress={onOpenBudgetPageMenu}
-              aria-label={t('Budget page menu')}
-            >
-              <SvgLogo
-                style={{ color: theme.mobileHeaderText }}
-                width="18"
-                height="18"
-              />
-              <SvgCheveronRight
-                style={{ flexShrink: 0, color: theme.mobileHeaderTextSubdued }}
-                width="12"
-                height="12"
-              />
-            </Button>
-          }
-          rightContent={
-            !monthUtils.isCurrentMonth(startMonth) && (
+            <>
               <Button
                 variant="bare"
-                onPress={onCurrentMonth}
-                aria-label={t('Today')}
-                style={mobileHeaderIconButtonStyle}
+                style={{
+                  ...mobileHeaderIconButtonStyle,
+                  width: 'auto',
+                  padding: '0 6px',
+                  gap: 2,
+                }}
+                onPress={onOpenBudgetPageMenu}
+                aria-label={t('Budget page menu')}
               >
-                <SvgCalendar width={18} height={18} />
+                <SvgLogo
+                  style={{ color: theme.mobileHeaderText }}
+                  width="18"
+                  height="18"
+                />
+                <SvgCheveronRight
+                  style={{
+                    flexShrink: 0,
+                    color: theme.mobileHeaderTextSubdued,
+                  }}
+                  width="12"
+                  height="12"
+                />
               </Button>
-            )
+              <MonthStepButton
+                label={t('Previous month')}
+                isEnabled={isPrevMonthEnabled}
+                onPress={onPrevMonth}
+                style={{ marginLeft: 'auto' }}
+              >
+                <SvgArrowThinLeft width="14" height="14" />
+              </MonthStepButton>
+            </>
+          }
+          rightContent={
+            <>
+              <MonthStepButton
+                label={t('Next month')}
+                isEnabled={isNextMonthEnabled}
+                onPress={onNextMonth}
+                style={{ marginRight: 'auto' }}
+              >
+                <SvgArrowThinRight width="14" height="14" />
+              </MonthStepButton>
+              {!monthUtils.isCurrentMonth(startMonth) && (
+                <Button
+                  variant="bare"
+                  onPress={onCurrentMonth}
+                  aria-label={t('Today')}
+                  style={mobileHeaderIconButtonStyle}
+                >
+                  <SvgCalendar width={18} height={18} />
+                </Button>
+              )}
+            </>
           }
         />
       }
     >
-      <SheetNameProvider name={monthUtils.sheetForMonth(startMonth)}>
-        <SyncRefresh
-          onSync={async () => {
-            void dispatch(sync());
-          }}
-        >
-          {({ onRefresh }) => (
-            <>
-              <Banners month={startMonth} onBudgetAction={onBudgetAction} />
+      <SyncRefresh
+        onSync={async () => {
+          void dispatch(sync());
+        }}
+      >
+        {({ onRefresh }) => (
+          <>
+            <BudgetBanners
+              month={startMonth}
+              budgetType={budgetType}
+              onBudgetAction={onBudgetAction}
+            />
+            <SheetNameProvider name={monthUtils.sheetForMonth(startMonth)}>
               <BudgetTable
                 // This key forces the whole table rerender when the number
                 // format changes
@@ -603,466 +617,72 @@ export function BudgetPage() {
                 onEditCategoryGroup={onOpenCategoryGroupMenuModal}
                 onEditCategory={onOpenCategoryMenuModal}
               />
-            </>
-          )}
-        </SyncRefresh>
-      </SheetNameProvider>
+            </SheetNameProvider>
+          </>
+        )}
+      </SyncRefresh>
     </Page>
   );
 }
 
-function Banners({ month, onBudgetAction }) {
-  const { t } = useTranslation();
-  const [budgetType = 'envelope'] = useSyncedPref('budgetType');
-
-  return (
-    <GridList
-      aria-label={t('Banners')}
-      style={{ backgroundColor: theme.mobilePageBackground }}
-    >
-      <UncategorizedTransactionsBanner />
-      <OverspendingBanner
-        month={month}
-        onBudgetAction={onBudgetAction}
-        budgetType={budgetType}
-      />
-      {budgetType === 'envelope' && (
-        <OverbudgetedBanner month={month} onBudgetAction={onBudgetAction} />
-      )}
-    </GridList>
-  );
-}
-
-// Attention banners use the signal family (overspending, overbudgeting,
-// uncategorized money); informational ones stay in the quiet notice tint.
-const BANNER_TONES = {
-  critical: {
-    backgroundColor: theme.signalSubtle,
-    borderColor: theme.warningBorder,
-    markColor: theme.signal,
-  },
-  warning: {
-    backgroundColor: theme.warningBackground,
-    borderColor: theme.warningBorder,
-    markColor: theme.signal,
-  },
-  info: {
-    backgroundColor: theme.noticeBackground,
-    borderColor: theme.noticeBorder,
-    markColor: theme.noticeText,
-  },
-};
-
-const BANNER_ACTION_STYLE: CSSProperties = {
-  flexShrink: 0,
-  marginLeft: 10,
-  minHeight: 30,
-  padding: '0 14px',
-  borderRadius: radius.md,
-  fontSize: 12.5,
-  fontWeight: 500,
-  color: theme.buttonNormalText,
-};
-
-function Banner({ type = 'info', children }) {
-  const tone = BANNER_TONES[type] ?? BANNER_TONES.info;
-  return (
-    <Card
-      style={{
-        minHeight: 48,
-        margin: '10px 8px 0',
-        padding: '8px 8px 8px 12px',
-        justifyContent: 'center',
-        borderRadius: radius.lg,
-        border: `1px solid ${tone.borderColor}`,
-        boxShadow: 'none',
-        backgroundColor: tone.backgroundColor,
-        color: theme.pageText,
-        fontSize: 13,
-        lineHeight: '18px',
-      }}
-    >
-      <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
-        <View
-          aria-hidden
-          style={{
-            width: 6,
-            height: 6,
-            borderRadius: radius.pill,
-            flexShrink: 0,
-            backgroundColor: tone.markColor,
-          }}
-        />
-        <View style={{ flex: 1 }}>{children}</View>
-      </View>
-    </Card>
-  );
-}
-
-function UncategorizedTransactionsBanner(props) {
-  const navigate = useNavigate();
-  const format = useFormat();
-
-  const transactionsQuery = useMemo(
-    () => uncategorizedTransactions().select('*'),
-    [],
-  );
-
-  const { transactions, isPending: isTransactionsLoading } = useTransactions({
-    query: transactionsQuery,
-    options: {
-      pageSize: 1000,
-    },
-  });
-
-  if (isTransactionsLoading || transactions.length === 0) {
-    return null;
-  }
-
-  const totalUncategorizedAmount = transactions.reduce(
-    (sum, t) => sum + (t.amount ?? 0),
-    0,
-  );
-
-  return (
-    <GridListItem textValue="Uncategorized transactions banner" {...props}>
-      <Banner type="warning">
-        <View
-          style={{
-            flex: 1,
-            flexDirection: 'row',
-            alignItems: 'center',
-            justifyContent: 'space-between',
-          }}
-        >
-          <Text>
-            <Trans count={transactions.length}>
-              You have {{ count: transactions.length }} uncategorized
-              transactions (
-              <FinancialText>
-                {
-                  {
-                    amount: format(totalUncategorizedAmount, 'financial'),
-                  } as TransObjectLiteral
-                }
-              </FinancialText>
-              )
-            </Trans>
-          </Text>
-          <Button
-            onPress={() => navigate('/categories/uncategorized')}
-            style={BANNER_ACTION_STYLE}
-          >
-            <Text>
-              <Trans>Categorize</Trans>
-            </Text>
-          </Button>
-        </View>
-      </Banner>
-    </GridListItem>
-  );
-}
-
-function OverbudgetedBanner({ month, onBudgetAction, ...props }) {
-  const { t } = useTranslation();
-  const format = useFormat();
-  const toBudgetAmount = useSheetValue<
-    'envelope-budget',
-    typeof envelopeBudget.toBudget
-  >(envelopeBudget.toBudget);
-  const dispatch = useDispatch();
-  const { showUndoNotification } = useUndo();
-  const { data: { list: categories } = { list: [] } } = useCategories();
-  const categoriesById = useMemo(() => groupById(categories), [categories]);
-
-  const openCoverOverbudgetedModal = useCallback(() => {
-    dispatch(
-      pushModal({
-        modal: {
-          name: 'cover',
-          options: {
-            title: t('Cover overbudgeted'),
-            month,
-            amount: toBudgetAmount,
-            showToBeBudgeted: false,
-            onSubmit: (amount, categoryId) => {
-              onBudgetAction(month, 'cover-overbudgeted', {
-                category: categoryId,
-                amount,
-                currencyCode: format.currency.code,
-              });
-              showUndoNotification({
-                message: t('Covered overbudgeted from {{categoryName}}', {
-                  categoryName: categoriesById[categoryId].name,
-                }),
-              });
-            },
-          },
-        },
-      }),
-    );
-  }, [
-    categoriesById,
-    dispatch,
-    month,
-    onBudgetAction,
-    showUndoNotification,
-    t,
-    toBudgetAmount,
-    format.currency.code,
-  ]);
-
-  if (!toBudgetAmount || toBudgetAmount >= 0) {
-    return null;
-  }
-
-  return (
-    <GridListItem textValue="Overbudgeted banner" {...props}>
-      <Banner type="critical">
-        <View
-          style={{
-            flexDirection: 'row',
-            alignItems: 'center',
-            justifyContent: 'space-between',
-          }}
-        >
-          <Text>
-            <Trans>You have budgeted more than your available funds</Trans>
-          </Text>
-          <Button
-            onPress={openCoverOverbudgetedModal}
-            style={BANNER_ACTION_STYLE}
-          >
-            <Trans>Cover</Trans>
-          </Button>
-        </View>
-      </Banner>
-    </GridListItem>
-  );
-}
-
-function OverspendingBanner({ month, onBudgetAction, budgetType, ...props }) {
-  const { t } = useTranslation();
-
-  const {
-    data: { list: categories, grouped: categoryGroups } = {
-      list: [],
-      grouped: [],
-    },
-  } = useCategories();
-  const categoriesById = useMemo(() => groupById(categories), [categories]);
-
-  const dispatch = useDispatch();
-  const format = useFormat();
-
-  const {
-    categories: overspentCategories,
-    amountsByCategory,
-    totalAmount: totalOverspending,
-  } = useOverspentCategories({ month });
-
-  const amountsByCategoryRef = useRef(amountsByCategory);
-  amountsByCategoryRef.current = amountsByCategory;
-
-  const categoryGroupsToShow = useMemo(
-    () =>
-      categoryGroups
-        .filter(g => overspentCategories.some(c => c.group === g.id))
-        .map(g => ({
-          ...g,
-          categories: overspentCategories.filter(c => c.group === g.id),
-        })),
-    [categoryGroups, overspentCategories],
-  );
-
-  const { showUndoNotification } = useUndo();
-
-  const onOpenCoverCategoryModal = useCallback(
-    categoryId => {
-      const category = categoriesById[categoryId];
-      dispatch(
-        pushModal({
-          modal: {
-            name: 'cover',
-            options: {
-              title: category.name,
-              month,
-              amount: amountsByCategoryRef.current.get(category.id),
-              categoryId: category.id,
-              onSubmit: (amount, fromCategoryId) => {
-                onBudgetAction(month, 'cover-overspending', {
-                  to: category.id,
-                  from: fromCategoryId,
-                  amount,
-                  currencyCode: format.currency.code,
-                });
-                showUndoNotification({
-                  message: t(
-                    `Covered {{toCategoryName}} overspending from {{fromCategoryName}}.`,
-                    {
-                      toCategoryName: category.name,
-                      fromCategoryName:
-                        fromCategoryId === 'to-budget'
-                          ? t('To Budget')
-                          : categoriesById[fromCategoryId].name,
-                    },
-                  ),
-                });
-              },
-            },
-          },
-        }),
-      );
-    },
-    [
-      categoriesById,
-      dispatch,
-      month,
-      onBudgetAction,
-      showUndoNotification,
-      t,
-      format.currency.code,
-    ],
-  );
-
-  const onOpenCategorySelectionModal = useCallback(() => {
-    dispatch(
-      pushModal({
-        modal: {
-          name: 'category-autocomplete',
-          options: {
-            title:
-              budgetType === 'envelope'
-                ? t('Cover overspending')
-                : t('Overspent categories'),
-            month,
-            categoryGroups: categoryGroupsToShow,
-            showHiddenCategories: true,
-            onSelect:
-              budgetType === 'envelope' ? onOpenCoverCategoryModal : null,
-            clearOnSelect: true,
-            closeOnSelect: false,
-          },
-        },
-      }),
-    );
-  }, [
-    categoryGroupsToShow,
-    dispatch,
-    month,
-    onOpenCoverCategoryModal,
-    t,
-    budgetType,
-  ]);
-
-  const numberOfOverspentCategories = overspentCategories.length;
-  if (numberOfOverspentCategories === 0) {
-    return null;
-  }
-
-  return (
-    <GridListItem textValue="Overspent banner" {...props}>
-      <Banner type="critical">
-        <View
-          style={{
-            flexDirection: 'row',
-            alignItems: 'center',
-            justifyContent: 'space-between',
-          }}
-        >
-          <Text>
-            <Trans count={numberOfOverspentCategories}>
-              You have {{ count: numberOfOverspentCategories }} overspent
-              categories (
-              <FinancialText>
-                {
-                  {
-                    amount: format(totalOverspending, 'financial'),
-                  } as TransObjectLiteral
-                }
-              </FinancialText>
-              )
-            </Trans>
-          </Text>
-          <Button
-            onPress={onOpenCategorySelectionModal}
-            style={BANNER_ACTION_STYLE}
-          >
-            {budgetType === 'envelope' && <Trans>Cover</Trans>}
-            {budgetType === 'tracking' && <Trans>View</Trans>}
-          </Button>
-        </View>
-      </Banner>
-    </GridListItem>
-  );
-}
-
-function MonthSelector({
-  month,
-  monthBounds,
-  onOpenMonthMenu,
-  onPrevMonth,
-  onNextMonth,
-}) {
+// The month, in the display serif; it opens the month menu. The steps
+// around it live in the header's side slots so a long month never pushes
+// them out of reach.
+function MonthTitle({ month, onOpenMonthMenu }) {
   const locale = useLocale();
-  const { t } = useTranslation();
-  const prevEnabled = month > monthBounds.start;
-  const nextEnabled = month < monthUtils.subMonths(monthBounds.end, 1);
-
-  const arrowButtonStyle = {
-    ...mobileHeaderIconButtonStyle,
-    margin: 0,
-    color: theme.mobileHeaderTextSubdued,
-  };
 
   return (
-    <View
+    <Button
+      variant="bare"
       style={{
-        flex: 1,
-        justifyContent: 'center',
-        alignItems: 'center',
-        flexDirection: 'row',
+        textAlign: 'center',
+        padding: '4px 6px',
+        borderRadius: radius.md,
+        minWidth: 0,
+      }}
+      onPress={() => {
+        onOpenMonthMenu?.(month);
+      }}
+      data-month={month}
+    >
+      <Text
+        style={{
+          ...mobileHeaderTitleStyle,
+          fontSize: MONTH_TITLE_SIZE,
+          lineHeight: `${MONTH_TITLE_LINE_HEIGHT}px`,
+          whiteSpace: 'nowrap',
+          overflow: 'hidden',
+          textOverflow: 'ellipsis',
+        }}
+      >
+        {monthUtils.format(month, "MMMM ''yy", locale)}
+      </Text>
+      <SvgCheveronDown
+        width={MOBILE_HEADER_TITLE_CHEVRON_SIZE}
+        height={MOBILE_HEADER_TITLE_CHEVRON_SIZE}
+        style={mobileHeaderTitleChevronStyle}
+      />
+    </Button>
+  );
+}
+
+function MonthStepButton({ label, isEnabled, onPress, style, children }) {
+  return (
+    <Button
+      aria-label={label}
+      variant="bare"
+      isDisabled={!isEnabled}
+      onPress={onPress}
+      style={{
+        ...mobileHeaderIconButtonStyle,
+        width: MONTH_STEP_BUTTON_SIZE,
+        margin: 0,
+        color: theme.mobileHeaderTextSubdued,
+        opacity: isEnabled ? 1 : 0.4,
+        ...style,
       }}
     >
-      <Button
-        aria-label={t('Previous month')}
-        variant="bare"
-        isDisabled={!prevEnabled}
-        onPress={onPrevMonth}
-        style={{ ...arrowButtonStyle, opacity: prevEnabled ? 1 : 0.4 }}
-      >
-        <SvgArrowThinLeft width="14" height="14" />
-      </Button>
-      <Button
-        variant="bare"
-        style={{
-          textAlign: 'center',
-          padding: '4px 8px',
-          borderRadius: 8,
-        }}
-        onPress={() => {
-          onOpenMonthMenu?.(month);
-        }}
-        data-month={month}
-      >
-        <Text style={{ ...mobileHeaderTitleStyle, whiteSpace: 'nowrap' }}>
-          {monthUtils.format(month, "MMMM ''yy", locale)}
-        </Text>
-        <SvgCheveronDown
-          width={MOBILE_HEADER_TITLE_CHEVRON_SIZE}
-          height={MOBILE_HEADER_TITLE_CHEVRON_SIZE}
-          style={mobileHeaderTitleChevronStyle}
-        />
-      </Button>
-      <Button
-        aria-label={t('Next month')}
-        variant="bare"
-        isDisabled={!nextEnabled}
-        onPress={onNextMonth}
-        style={{ ...arrowButtonStyle, opacity: nextEnabled ? 1 : 0.4 }}
-      >
-        <SvgArrowThinRight width="14" height="14" />
-      </Button>
-    </View>
+      {children}
+    </Button>
   );
 }

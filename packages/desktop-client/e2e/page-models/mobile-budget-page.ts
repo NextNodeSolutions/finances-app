@@ -38,12 +38,15 @@ export class MobileBudgetPage {
     // Page header locators
 
     this.heading = page.getByRole('heading');
-    this.previousMonthButton = this.heading.getByRole('button', {
+    // The month steps sit beside the heading, which holds only the month.
+    this.previousMonthButton = page.getByRole('button', {
       name: 'Previous month',
+      exact: true,
     });
     this.selectedBudgetMonthButton = this.heading.locator('button[data-month]');
-    this.nextMonthButton = this.heading.getByRole('button', {
+    this.nextMonthButton = page.getByRole('button', {
       name: 'Next month',
+      exact: true,
     });
     this.budgetPageMenuButton = page.getByRole('button', {
       name: 'Budget page menu',

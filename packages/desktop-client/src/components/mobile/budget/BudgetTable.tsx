@@ -19,7 +19,7 @@ import type {
 } from '@actual-app/core/types/models';
 import { AutoTextSize } from 'auto-text-size';
 
-import { MOBILE_NAV_HEIGHT } from '#components/mobile/MobileNavTabs';
+import { MOBILE_NAV_INSET } from '#components/mobile/MobileNavTabs';
 import { PullToRefresh } from '#components/mobile/PullToRefresh';
 import {
   mobileAmountChipClassName,
@@ -38,6 +38,7 @@ import { envelopeBudget, trackingBudget } from '#spreadsheet/bindings';
 
 import { ExpenseGroupList } from './ExpenseGroupList';
 import { IncomeGroup } from './IncomeGroup';
+import { MonthPace } from './MonthPace';
 
 export const ROW_HEIGHT = 50;
 
@@ -234,11 +235,10 @@ function Saved({ projected, onPress, show3Columns }: SavedProps) {
                       ...styles.display,
                       lineHeight: 1.15,
                       textAlign: 'left',
-                      color: projected
-                        ? theme.warningText
-                        : isNegative
-                          ? theme.numberNegative
-                          : theme.pageText,
+                      // Never amber on a figure at or above zero.
+                      color: isNegative
+                        ? theme.numberNegative
+                        : theme.pageTextDark,
                     }}
                   >
                     {format(value, type)}
@@ -405,13 +405,26 @@ export function BudgetTable({
         toggleSpentColumn={toggleSpentColumn}
         onShowBudgetSummary={onShowBudgetSummary}
       />
+      <View
+        style={{
+          flexShrink: 0,
+          padding: '0 16px 10px 14px',
+          backgroundColor: getHeaderBackground(month),
+          borderBottom: `1px solid ${theme.hairline}`,
+        }}
+      >
+        <MonthPace
+          month={month}
+          budgetType={budgetType === 'tracking' ? 'tracking' : 'envelope'}
+        />
+      </View>
       <PullToRefresh onRefresh={onRefresh}>
         <View
           data-testid="budget-table"
           style={{
             backgroundColor: theme.pageBackground,
             minHeight: '100vh',
-            paddingBottom: MOBILE_NAV_HEIGHT,
+            paddingBottom: MOBILE_NAV_INSET,
           }}
         >
           <SchedulesProvider query={schedulesQuery}>
@@ -431,6 +444,14 @@ export function BudgetTable({
       </PullToRefresh>
     </>
   );
+}
+
+// The summary and its pace gauge share one band, tinted off the current
+// month.
+function getHeaderBackground(month: string): string {
+  return monthUtils.isCurrentMonth(month)
+    ? theme.titlebarBackground
+    : theme.budgetHeaderOtherMonth;
 }
 
 type BudgetTableHeaderProps = {
@@ -482,11 +503,7 @@ function BudgetTableHeader({
         flexShrink: 0,
         minHeight: 56,
         padding: '6px 16px 8px 14px',
-        backgroundColor: monthUtils.isCurrentMonth(month)
-          ? theme.titlebarBackground
-          : theme.budgetHeaderOtherMonth,
-        borderBottomWidth: 1,
-        borderColor: theme.hairline,
+        backgroundColor: getHeaderBackground(month),
       }}
     >
       <View
