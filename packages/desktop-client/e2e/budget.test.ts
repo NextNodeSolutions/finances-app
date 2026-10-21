@@ -3,6 +3,7 @@ import type { Page } from '@playwright/test';
 import { expect, test } from './fixtures';
 import type { BudgetPage } from './page-models/budget-page';
 import { ConfigurationPage } from './page-models/configuration-page';
+import { Navigation } from './page-models/navigation';
 
 test.describe('Budget', () => {
   let page: Page;
@@ -78,6 +79,61 @@ test.describe('Budget', () => {
     const menu = page.getByRole('menu');
     await expect(menu).toBeVisible();
     await expect(menu.getByRole('button', { name: 'Rename' })).toBeVisible();
+  });
+
+  test('covers an overspent category from the source the user picks', async () => {
+    const categoryName = await budgetPage.getCategoryNameForRow(1);
+    if (!categoryName) {
+      throw new Error('Unable to get the first category name.');
+    }
+    await budgetPage.setBudgetedAmount(categoryName, '-5000');
+    await expect.poll(() => budgetPage.getBalanceForRow(1)).toBeLessThan(0);
+    const overspentBalance = await budgetPage.getBalanceForRow(1);
+
+    const panel = await budgetPage.openCoverOverspendingForRow(1);
+    const coverButton = panel.getByRole('button', {
+      name: 'Cover',
+      exact: true,
+    });
+
+    // Nothing is preselected: covering without a source asks for one.
+    await coverButton.click();
+    await expect(
+      panel.getByText('Choose where the money comes from.'),
+    ).toBeVisible();
+
+    await budgetPage.chooseCoverSource('To budget');
+    await coverButton.click();
+
+    await expect(
+      panel.getByText(/^(All overspending covered|Some overspending is left)$/),
+    ).toBeVisible();
+    await panel.getByRole('button', { name: 'Done', exact: true }).click();
+    await expect(panel).toBeHidden();
+
+    await expect
+      .poll(() => budgetPage.getBalanceForRow(1))
+      .toBeGreaterThan(overspentBalance);
+  });
+
+  test('tracking budget shows plan against actual and income variance', async () => {
+    const navigation = new Navigation(page);
+    const settingsPage = await navigation.goToSettingsPage();
+    await settingsPage.useBudgetType('Tracking');
+    budgetPage = await navigation.goToBudgetPage();
+
+    const rail = budgetPage.budgetSummary.first();
+    await expect(rail.getByText('Projected savings')).toBeVisible({
+      timeout: 10000,
+    });
+    await expect(rail.getByText('Expected income')).toBeVisible();
+    await expect(rail.getByText('Budgeted expenses')).toBeVisible();
+    await expect(rail.getByText('Planned saving')).toBeVisible();
+    await expect(rail.getByText('Received', { exact: true })).toBeVisible();
+    await expect(rail.getByText('Saved so far')).toBeVisible();
+    await expect(
+      budgetPage.budgetTable.getByText('Variance', { exact: true }),
+    ).toBeVisible();
   });
 
   test('right clicking budget name opens context menu', async () => {
