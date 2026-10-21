@@ -7,7 +7,7 @@ import { View } from '@actual-app/components/view';
 import { q } from '@actual-app/core/shared/query';
 import type { ScheduleEntity } from '@actual-app/core/types/models';
 
-import { useNavigate } from '#hooks/useNavigate';
+import { useTransactionPanels } from '#components/transactions/panels/useTransactionPanels';
 import { useTransactions } from '#hooks/useTransactions';
 
 import { SchedulePanelSection } from './SchedulePanelSection';
@@ -23,7 +23,7 @@ type ScheduleRecentTransactionsProps = {
 export function ScheduleRecentTransactions({
   scheduleId,
 }: ScheduleRecentTransactionsProps) {
-  const navigate = useNavigate();
+  const transactionPanels = useTransactionPanels();
   // useTransactions refetches whenever the query identity changes.
   const query = useMemo(
     () =>
@@ -62,7 +62,7 @@ export function ScheduleRecentTransactions({
             <ScheduleRecentRow
               key={transaction.id}
               transaction={transaction}
-              onOpen={() => void navigate(`/accounts/${transaction.account}`)}
+              onOpen={() => transactionPanels.openDetail(transaction.id)}
             />
           ))}
         </View>

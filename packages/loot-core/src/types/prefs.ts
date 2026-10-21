@@ -114,6 +114,8 @@ export type LocalPrefs = Partial<{
   'flags.updateNotificationShownForVersion': string;
   'tour.introSeen': boolean;
   'schedules.showCompleted': boolean;
+  /** The account the last new transaction (side panel or palette) went to. */
+  'ui.lastTransactionAccount': string;
   reportsViewLegend: boolean;
   reportsViewSummary: boolean;
   reportsViewLabel: boolean;
