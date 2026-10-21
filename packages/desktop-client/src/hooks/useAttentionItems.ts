@@ -100,7 +100,10 @@ function getUncategorizedItem(
     severity: 'notice',
     count,
     amount,
-    label: t('{{count}} uncategorized transactions', { count }),
+    label:
+      count === 1
+        ? t('1 uncategorized transaction')
+        : t('{{count}} uncategorized transactions', { count }),
     to: '/categories/uncategorized',
   };
 }
@@ -121,10 +124,13 @@ function getOverspentItem(
     severity: 'signal',
     count,
     amount,
-    label: t('{{count}} categories overspent in {{month}}', {
-      count,
-      month: monthName,
-    }),
+    label:
+      count === 1
+        ? t('1 category overspent in {{month}}', { month: monthName })
+        : t('{{count}} categories overspent in {{month}}', {
+            count,
+            month: monthName,
+          }),
     to: '/budget',
     state: { focusOverspent: true },
   };
@@ -145,7 +151,10 @@ function getMissedSchedulesItem(
     severity: 'notice',
     count,
     amount: null,
-    label: t('{{count}} scheduled payments missed', { count }),
+    label:
+      count === 1
+        ? t('1 scheduled payment missed')
+        : t('{{count}} scheduled payments missed', { count }),
     to: '/schedules',
   };
 }
