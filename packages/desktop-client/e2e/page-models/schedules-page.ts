@@ -65,12 +65,46 @@ export class SchedulesPage {
     await this._performNthAction(index, 'Complete');
   }
 
+  /**
+   * Open the side panel of the nth-schedule.
+   * 0-based index
+   */
+  async openSchedulePanel(index: number) {
+    await this.getNthScheduleRow(index).getByTestId('date').click();
+
+    const panel = this.page.getByTestId('schedule-panel');
+    await panel.waitFor();
+    return panel;
+  }
+
+  /**
+   * Edit the nth-schedule through its side panel.
+   * 0-based index
+   */
+  async editNthSchedule(index: number) {
+    const panel = await this.openSchedulePanel(index);
+    await panel.getByRole('button', { name: 'Edit', exact: true }).click();
+
+    return new ScheduleEditModal(this.page.getByTestId('schedule-edit-modal'));
+  }
+
+  /**
+   * Show only the schedules with the given status.
+   */
+  async selectStatusFilter(name: 'All' | 'Upcoming' | 'Missed' | 'Completed') {
+    await this.page.getByRole('button', { name, exact: true }).click();
+  }
+
   async _performNthAction(index: number, actionName: string | RegExp) {
     const row = this.getNthScheduleRow(index);
     const actions = row.getByTestId('actions');
 
     await actions.getByRole('button').click();
-    await this.page.getByRole('button', { name: actionName }).click();
+    // Scoped to the menu: the status filter has a "Completed" button too.
+    await this.page
+      .getByRole('menu')
+      .getByRole('button', { name: actionName })
+      .click();
   }
 
   async rightClickNthSchedule(index: number) {
