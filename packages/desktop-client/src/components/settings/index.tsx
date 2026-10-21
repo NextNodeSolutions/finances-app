@@ -18,7 +18,7 @@ import { getLatestAppVersion } from '#app/appSlice';
 import { closeBudget } from '#budgetfiles/budgetfilesSlice';
 import { Link } from '#components/common/Link';
 import { Checkbox, FormField, FormLabel } from '#components/forms';
-import { MOBILE_NAV_HEIGHT } from '#components/mobile/MobileNavTabs';
+import { MOBILE_NAV_INSET } from '#components/mobile/MobileNavTabs';
 import { MobilePageHeader, Page } from '#components/Page';
 import { useServerURL, useServerVersion } from '#components/ServerContext';
 import { useFeatureFlag } from '#hooks/useFeatureFlag';
@@ -200,7 +200,7 @@ function SettingsSections({ title, children }: SettingsSectionsProps) {
         maxWidth: 640,
         width: '100%',
         gap: spacing.xl + spacing.sm,
-        paddingBottom: MOBILE_NAV_HEIGHT,
+        paddingBottom: MOBILE_NAV_INSET,
       }}
     >
       {children}
@@ -240,7 +240,7 @@ export function SettingsIndex() {
           marginTop: 10,
           flexShrink: 0,
           gap: 30,
-          paddingBottom: MOBILE_NAV_HEIGHT,
+          paddingBottom: MOBILE_NAV_INSET,
         }}
       >
         <View
