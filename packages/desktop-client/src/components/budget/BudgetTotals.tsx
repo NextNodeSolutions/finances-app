@@ -1,4 +1,4 @@
-import React, { memo, useRef, useState } from 'react';
+import React, { memo } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 
 import { Button } from '@actual-app/components/button';
@@ -7,8 +7,6 @@ import {
   SvgArrowButtonRight1,
   SvgArrowButtonSingleLeft1,
 } from '@actual-app/components/icons/v2';
-import { Menu } from '@actual-app/components/menu';
-import { Popover } from '@actual-app/components/popover';
 import { styles } from '@actual-app/components/styles';
 import { theme } from '@actual-app/components/theme';
 import { elevation, motion, radius } from '@actual-app/components/tokens';
@@ -16,17 +14,10 @@ import { View } from '@actual-app/components/view';
 
 import { useGlobalPref } from '#hooks/useGlobalPref';
 
-import { OverflowMenuIcon } from './OverflowMenuIcon';
 import { RenderMonths } from './RenderMonths';
 import { getScrollbarWidth } from './util';
 
 import { useBudgetComponents } from '.';
-
-type BudgetTotalsProps = {
-  toggleHiddenCategories: () => void;
-  expandAllCategories: () => void;
-  collapseAllCategories: () => void;
-};
 
 const headerIconButtonStyle = {
   width: 26,
@@ -36,17 +27,16 @@ const headerIconButtonStyle = {
   color: 'currentColor',
 };
 
-export const BudgetTotals = memo(function BudgetTotals({
-  toggleHiddenCategories,
-  expandAllCategories,
-  collapseAllCategories,
-}: BudgetTotalsProps) {
+/**
+ * The header band: CATEGORY with the column-width toggle, then each
+ * month's labelled totals. Hidden categories and expand/collapse live in
+ * the toolbar.
+ */
+export const BudgetTotals = memo(function BudgetTotals() {
   const { t } = useTranslation();
   const [categoryExpandedStatePref, setCategoryExpandedStatePref] =
     useGlobalPref('categoryExpandedState');
   const categoryExpandedState = categoryExpandedStatePref ?? 0;
-  const [menuOpen, setMenuOpen] = useState(false);
-  const triggerRef = useRef(null);
 
   const cycleExpandedState = () => {
     const nextState = (categoryExpandedState + 1) % 3;
@@ -123,49 +113,6 @@ export const BudgetTotals = memo(function BudgetTotals({
             <SvgArrowButtonRight1 style={{ width: 11, height: 11 }} />
           )}
         </Button>
-        <Button
-          ref={triggerRef}
-          variant="bare"
-          aria-label={t('Menu')}
-          onPress={() => setMenuOpen(true)}
-          style={headerIconButtonStyle}
-        >
-          <OverflowMenuIcon />
-        </Button>
-
-        <Popover
-          triggerRef={triggerRef}
-          isOpen={menuOpen}
-          onOpenChange={() => setMenuOpen(false)}
-          style={{ width: 200 }}
-        >
-          <Menu
-            onMenuSelect={type => {
-              if (type === 'toggle-visibility') {
-                toggleHiddenCategories();
-              } else if (type === 'expandAllCategories') {
-                expandAllCategories();
-              } else if (type === 'collapseAllCategories') {
-                collapseAllCategories();
-              }
-              setMenuOpen(false);
-            }}
-            items={[
-              {
-                name: 'toggle-visibility',
-                text: t('Toggle hidden categories'),
-              },
-              {
-                name: 'expandAllCategories',
-                text: t('Expand all'),
-              },
-              {
-                name: 'collapseAllCategories',
-                text: t('Collapse all'),
-              },
-            ]}
-          />
-        </Popover>
       </View>
       <RenderMonths>
         <MonthComponent />

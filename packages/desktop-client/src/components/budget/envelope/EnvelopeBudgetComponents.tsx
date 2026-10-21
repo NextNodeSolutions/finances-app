@@ -708,5 +708,3 @@ export function IncomeCategoryMonth({
     </View>
   );
 }
-
-export { BudgetSummary } from './budgetsummary/BudgetSummary';

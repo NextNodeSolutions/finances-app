@@ -5,16 +5,23 @@ import { Trans } from 'react-i18next';
 import { AlignedText } from '@actual-app/components/aligned-text';
 import { Block } from '@actual-app/components/block';
 import { styles } from '@actual-app/components/styles';
+import type { CSSProperties as ViewStyle } from '@actual-app/components/styles';
 import { theme } from '@actual-app/components/theme';
 import { Tooltip } from '@actual-app/components/tooltip';
 import { View } from '@actual-app/components/view';
 
 import { EnvelopeCellValue } from '#components/budget/envelope/EnvelopeBudgetComponents';
-import { summaryLedgerStyle } from '#components/budget/SummaryCard';
 import { CellValueText } from '#components/spreadsheet/CellValue';
 import { useFormat } from '#hooks/useFormat';
 import type { FormatType } from '#hooks/useFormat';
 import { envelopeBudget } from '#spreadsheet/bindings';
+
+// The stat lines, ruled by a hairline between each.
+const summaryLedgerStyle: ViewStyle = {
+  '& > :not(:first-child)': {
+    borderTop: '1px solid ' + theme.hairlineSubtle,
+  },
+};
 
 /**
  * Creates a formatter that displays values with explicit +/- signs.

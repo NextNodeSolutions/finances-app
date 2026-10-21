@@ -1,151 +1,108 @@
-import React, { useCallback, useRef, useState } from 'react';
-import type { CSSProperties, MouseEvent } from 'react';
+import { useRef, useState } from 'react';
+import type { CSSProperties, ReactNode } from 'react';
+import { useTranslation } from 'react-i18next';
 
+import { Button } from '@actual-app/components/button';
 import { Popover } from '@actual-app/components/popover';
-import { View } from '@actual-app/components/view';
 
 import { CoverMenu } from '#components/budget/envelope/CoverMenu';
 import { useEnvelopeSheetValue } from '#components/budget/envelope/EnvelopeBudgetComponents';
 import { HoldMenu } from '#components/budget/envelope/HoldMenu';
-import { TransferMenu } from '#components/budget/envelope/TransferMenu';
+import { useBudgetPanels } from '#components/budget/panels/useBudgetPanels';
 import { useFormat } from '#hooks/useFormat';
 import { envelopeBudget } from '#spreadsheet/bindings';
 
-import { ToBudgetAmount } from './ToBudgetAmount';
 import { ToBudgetMenu } from './ToBudgetMenu';
 
 type ToBudgetProps = {
   month: string;
   onBudgetAction: (month: string, action: string, arg?: unknown) => void;
-  prevMonthName: string;
+  /** The To budget figure the menu opens from. */
+  children: ReactNode;
   style?: CSSProperties;
-  amountStyle?: CSSProperties;
-  isCollapsed?: boolean;
 };
+
+type MenuStep = 'actions' | 'buffer' | 'cover';
+
+/**
+ * The To budget figure as a button opening its menu: move to a category
+ * (in the side panel), hold for next month, reset the buffer, or cover an
+ * overbudget from a category.
+ */
 export function ToBudget({
   month,
-  prevMonthName,
   onBudgetAction,
+  children,
   style,
-  amountStyle,
-  isCollapsed = false,
 }: ToBudgetProps) {
-  const [menuStep, _setMenuStep] = useState<string>('actions');
-  const triggerRef = useRef(null);
+  const { t } = useTranslation();
   const format = useFormat();
-
-  const ref = useRef<HTMLSpanElement>(null);
-  const setMenuStep = useCallback(
-    (menu: string) => {
-      if (menu) ref.current?.focus();
-      _setMenuStep(menu);
-    },
-    [ref, _setMenuStep],
-  );
-  const availableValue = useEnvelopeSheetValue({
-    name: envelopeBudget.toBudget,
-    value: 0,
-  });
-  if (typeof availableValue !== 'number' && availableValue !== null) {
-    throw new Error(
-      'Expected availableValue to be a number but got ' + availableValue,
-    );
-  }
-
-  const [menuOpen, setMenuOpen] = useState(false);
-  const [position, setPosition] = useState({ crossOffset: 0, offset: 0 });
-  const resetPosition = (crossOffset = 0, offset = 0) =>
-    setPosition({ crossOffset, offset });
-
-  const handleContextMenu = (e: MouseEvent) => {
-    e.preventDefault();
-    const rect = e.currentTarget.getBoundingClientRect();
-    setPosition({
-      crossOffset: e.clientX - rect.left,
-      offset: e.clientY - rect.bottom,
-    });
-    setMenuOpen(true);
-  };
+  const { openMoveMoney } = useBudgetPanels();
+  const triggerRef = useRef<HTMLButtonElement>(null);
+  const [menuStep, setMenuStep] = useState<MenuStep>('actions');
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const toBudget = useEnvelopeSheetValue(envelopeBudget.toBudget) ?? 0;
 
   const closeMenu = () => {
     setMenuStep('actions');
-    setMenuOpen(false);
+    setIsMenuOpen(false);
   };
 
   return (
     <>
-      <View ref={triggerRef}>
-        <ToBudgetAmount
-          onClick={() => {
-            resetPosition();
-            setMenuOpen(true);
-          }}
-          prevMonthName={prevMonthName}
-          style={style}
-          amountStyle={amountStyle}
-          isTotalsListTooltipDisabled={!isCollapsed || menuOpen}
-          onContextMenu={handleContextMenu}
-        />
-      </View>
-
+      <Button
+        ref={triggerRef}
+        variant="bare"
+        aria-label={t('To budget menu')}
+        onPress={() => setIsMenuOpen(true)}
+        style={{ padding: 0, justifyContent: 'flex-start', ...style }}
+      >
+        {children}
+      </Button>
       <Popover
         triggerRef={triggerRef}
-        placement="bottom"
-        isOpen={menuOpen}
+        placement="bottom start"
+        isOpen={isMenuOpen}
         onOpenChange={closeMenu}
         style={{ width: 200, margin: 1 }}
         isNonModal
-        {...position}
       >
-        <span tabIndex={-1} ref={ref}>
-          {menuStep === 'actions' && (
-            <ToBudgetMenu
-              onTransfer={() => setMenuStep('transfer')}
-              onCover={() => setMenuStep('cover')}
-              onHoldBuffer={() => setMenuStep('buffer')}
-              onResetHoldBuffer={() => {
-                onBudgetAction(month, 'reset-hold');
-                setMenuOpen(false);
-              }}
-              month={month}
-              onBudgetAction={onBudgetAction}
-            />
-          )}
-          {menuStep === 'buffer' && (
-            <HoldMenu
-              onClose={closeMenu}
-              onSubmit={amount => {
-                onBudgetAction(month, 'hold', { amount });
-              }}
-            />
-          )}
-          {menuStep === 'transfer' && (
-            <TransferMenu
-              initialAmount={availableValue}
-              onClose={closeMenu}
-              onSubmit={(amount, categoryId) => {
-                onBudgetAction(month, 'transfer-available', {
-                  amount,
-                  category: categoryId,
-                });
-              }}
-            />
-          )}
-          {menuStep === 'cover' && (
-            <CoverMenu
-              showToBeBudgeted={false}
-              initialAmount={availableValue}
-              onClose={closeMenu}
-              onSubmit={(amount, categoryId) => {
-                onBudgetAction(month, 'cover-overbudgeted', {
-                  category: categoryId,
-                  amount,
-                  currencyCode: format.currency.code,
-                });
-              }}
-            />
-          )}
-        </span>
+        {menuStep === 'actions' && (
+          <ToBudgetMenu
+            month={month}
+            onBudgetAction={onBudgetAction}
+            onTransfer={() => {
+              closeMenu();
+              openMoveMoney({ month });
+            }}
+            onCover={() => setMenuStep('cover')}
+            onHoldBuffer={() => setMenuStep('buffer')}
+            onResetHoldBuffer={() => {
+              onBudgetAction(month, 'reset-hold');
+              closeMenu();
+            }}
+          />
+        )}
+        {menuStep === 'buffer' && (
+          <HoldMenu
+            onClose={closeMenu}
+            onSubmit={amount => onBudgetAction(month, 'hold', { amount })}
+          />
+        )}
+        {menuStep === 'cover' && (
+          <CoverMenu
+            showToBeBudgeted={false}
+            initialAmount={toBudget}
+            onClose={closeMenu}
+            onSubmit={(amount, categoryId) =>
+              onBudgetAction(month, 'cover-overbudgeted', {
+                category: categoryId,
+                amount,
+                currencyCode: format.currency.code,
+              })
+            }
+          />
+        )}
       </Popover>
     </>
   );

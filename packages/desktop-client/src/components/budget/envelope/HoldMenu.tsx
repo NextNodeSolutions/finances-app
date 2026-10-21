@@ -22,7 +22,7 @@ export function HoldMenu({ onSubmit, onClose }: HoldMenuProps) {
   });
 
   if (amount === null) {
-    // See `TransferMenu` for more info about this
+    // Wait for the To budget figure before rendering the prefilled input
     return null;
   }
 

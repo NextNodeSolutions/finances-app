@@ -56,16 +56,17 @@ export const spentValueClassName = css({
   ':hover': { textDecoration: 'underline' },
 });
 
-// A negative balance sits in a garnet chip. The negative right margin
-// keeps its figures on the same decimal column as the rows around it.
+// A negative balance sits in the overspent pill (signal: it needs
+// attention). The negative right margin keeps its figures on the same
+// decimal column as the rows around it.
 export const negativeBalanceChipClassName = css({
   display: 'inline-block',
   padding: '1px 6px',
   marginRight: -6,
   lineHeight: '18px',
   borderRadius: radius.sm,
-  backgroundColor: theme.errorBackground,
-  color: theme.errorText,
+  backgroundColor: theme.signalSubtle,
+  color: theme.signalText,
 });
 
 type ScheduleStatus = 'missed' | 'due' | string;

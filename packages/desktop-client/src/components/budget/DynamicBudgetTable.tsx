@@ -1,142 +1,116 @@
-// @ts-strict-ignore
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import type { ComponentProps } from 'react';
 import { ErrorBoundary } from 'react-error-boundary';
-import { useHotkeys } from 'react-hotkeys-hook';
 import { AutoSizer } from 'react-virtualized-auto-sizer';
 
+import { spacing } from '@actual-app/components/tokens';
 import { View } from '@actual-app/components/view';
 import * as monthUtils from '@actual-app/core/shared/months';
+import { q } from '@actual-app/core/shared/query';
+import type { CategoryEntity } from '@actual-app/core/types/models';
 
 import { FeatureErrorFallback } from '#components/FeatureErrorFallback';
+import { usePanels } from '#components/panels/PanelProvider';
+import { SchedulesProvider } from '#hooks/useCachedSchedules';
 import { useFeatureFlag } from '#hooks/useFeatureFlag';
 import { useGlobalPref } from '#hooks/useGlobalPref';
+import { useOverspentCategories } from '#hooks/useOverspentCategories';
 
+import { BudgetHeader } from './BudgetHeader';
 import { useBudgetMonthCount } from './BudgetMonthCountContext';
-import { BudgetPageHeader } from './BudgetPageHeader';
+import {
+  clampStartMonth,
+  getCategoryColumnWidth,
+  getCurrentMonthStart,
+  getNumPossibleMonths,
+  getVisibleMonths,
+  resolveFocusedMonth,
+} from './budgetMonths';
 import { BudgetTable } from './BudgetTable';
+import { BUDGET_RAIL_WIDTH } from './rail/BudgetRail';
+import { EnvelopeRail } from './rail/EnvelopeRail';
+import { TrackingRail } from './rail/TrackingRail';
+import { useBudgetHotkeys } from './useBudgetHotkeys';
+import { useBudgetLocationState } from './useBudgetLocationState';
 
-function getNumPossibleMonths(width: number, categoryWidth: number) {
-  const estimatedTableWidth = width - categoryWidth;
-
-  if (estimatedTableWidth < 500) {
-    return 1;
-  } else if (estimatedTableWidth < 750) {
-    return 2;
-  } else if (estimatedTableWidth < 1000) {
-    return 3;
-  } else if (estimatedTableWidth < 1250) {
-    return 4;
-  } else if (estimatedTableWidth < 1500) {
-    return 5;
-  }
-
-  return 6;
-}
+// The rail and the gap before it.
+const RAIL_SPACE = BUDGET_RAIL_WIDTH + spacing.lg;
+// The narrowest month column the rail may sit beside.
+const MIN_MONTH_WIDTH_BESIDE_RAIL = 340;
+// Below this content width an open panel hides the rail.
+const RAIL_WITH_PANEL_MIN_WIDTH = 1100;
+const MONTH_COLUMN_MAX_WIDTH = 500;
 
 type DynamicBudgetTableProps = {
   width: number;
   height: number;
 } & AutoSizingBudgetTableProps;
 
-const DynamicBudgetTable = ({
+function DynamicBudgetTable({
   type,
   width,
   height,
-  prewarmStartMonth,
   startMonth,
   maxMonths = 3,
   monthBounds,
   onMonthSelect,
   onBudgetAction,
+  onApplyBudgetTemplatesInGroup,
   ...props
-}: DynamicBudgetTableProps) => {
+}: DynamicBudgetTableProps) {
   const { setDisplayMax } = useBudgetMonthCount();
+  const { current: openPanel } = usePanels();
   const [categoryExpandedStatePref] = useGlobalPref('categoryExpandedState');
   const isGoalTemplatesEnabled = useFeatureFlag('goalTemplatesEnabled');
-  const categoryExpandedState = categoryExpandedStatePref ?? 0;
+  const [schedulesQuery] = useState(() => q('schedules').select('*'));
+  const [requestedFocus, setRequestedFocus] = useState<string | null>(null);
+  const budgetType = type === 'tracking' ? 'tracking' : 'envelope';
 
-  const numPossible = getNumPossibleMonths(
-    width,
-    200 + 100 * categoryExpandedState,
-  );
+  const categoryWidth = getCategoryColumnWidth(categoryExpandedStatePref ?? 0);
+  const numPossible = getNumPossibleMonths(width, categoryWidth);
   const numMonths = Math.min(numPossible, maxMonths);
-  const maxWidth = 200 + 100 * categoryExpandedState + 500 * numMonths;
+  const hasRail =
+    numMonths === 1 &&
+    width - RAIL_SPACE >= categoryWidth + MIN_MONTH_WIDTH_BESIDE_RAIL &&
+    !(openPanel !== null && width < RAIL_WITH_PANEL_MIN_WIDTH);
+  const maxWidth =
+    categoryWidth +
+    MONTH_COLUMN_MAX_WIDTH * numMonths +
+    (hasRail ? RAIL_SPACE : 0);
+
+  const visibleMonths = getVisibleMonths(startMonth, numMonths);
+  const focusedMonth = resolveFocusedMonth(requestedFocus, visibleMonths);
+  const overspent = useOverspentCategories({ month: focusedMonth });
 
   useEffect(() => {
     setDisplayMax(numPossible);
   }, [setDisplayMax, numPossible]);
 
-  function getValidMonth(month) {
-    const start = monthBounds.start;
-    const end = monthUtils.subMonths(monthBounds.end, numMonths - 1);
+  const selectMonth = (month: string) => {
+    onMonthSelect(clampStartMonth(month, monthBounds, numMonths), numMonths);
+  };
 
-    if (month < start) {
-      return start;
-    } else if (month > end) {
-      return end;
-    }
-    return month;
-  }
+  useBudgetHotkeys({
+    startMonth,
+    numMonths,
+    budgetType,
+    focusedMonth,
+    isGoalTemplatesEnabled,
+    onMonthSelect: selectMonth,
+    onOverwriteTemplates: month =>
+      onBudgetAction(month, 'overwrite-goal-template', null),
+  });
 
-  function _onMonthSelect(month) {
-    onMonthSelect(getValidMonth(month), numMonths);
-  }
-
-  useHotkeys(
-    'left',
-    () => {
-      _onMonthSelect(monthUtils.prevMonth(startMonth));
+  useBudgetLocationState({
+    onShowMonth: month => {
+      setRequestedFocus(month);
+      selectMonth(month);
     },
-    {
-      preventDefault: true,
-      scopes: ['app'],
+    onShowCurrentMonth: () => {
+      setRequestedFocus(monthUtils.currentMonth());
+      selectMonth(getCurrentMonthStart(budgetType, numMonths));
     },
-    [_onMonthSelect, startMonth],
-  );
-  useHotkeys(
-    'right',
-    () => {
-      _onMonthSelect(monthUtils.nextMonth(startMonth));
-    },
-    {
-      preventDefault: true,
-      scopes: ['app'],
-    },
-    [_onMonthSelect, startMonth],
-  );
-  useHotkeys(
-    '0',
-    () => {
-      _onMonthSelect(
-        monthUtils.subMonths(
-          monthUtils.currentMonth(),
-          type === 'envelope'
-            ? Math.floor((numMonths - 1) / 2)
-            : numMonths === 2
-              ? 1
-              : Math.max(numMonths - 2, 0),
-        ),
-      );
-    },
-    {
-      preventDefault: true,
-      scopes: ['app'],
-    },
-    [_onMonthSelect, startMonth, numMonths],
-  );
-  useHotkeys(
-    'shift+t',
-    () => {
-      onBudgetAction(startMonth, 'overwrite-goal-template', null);
-    },
-    {
-      preventDefault: true,
-      scopes: ['app'],
-      enabled: isGoalTemplatesEnabled,
-    },
-    [onBudgetAction, startMonth, isGoalTemplatesEnabled],
-  );
+  });
 
   return (
     <View
@@ -147,40 +121,67 @@ const DynamicBudgetTable = ({
         opacity: width <= 0 || height <= 0 ? 0 : 1,
       }}
     >
-      <View style={{ width: '100%', maxWidth }}>
+      <View style={{ width: '100%', maxWidth, flex: 1, minHeight: 0 }}>
         <ErrorBoundary FallbackComponent={FeatureErrorFallback}>
-          <BudgetPageHeader
-            startMonth={prewarmStartMonth}
-            numMonths={numMonths}
-            monthBounds={monthBounds}
-            onMonthSelect={_onMonthSelect}
-          />
-          <BudgetTable
-            type={type}
-            prewarmStartMonth={prewarmStartMonth}
+          <BudgetHeader
             startMonth={startMonth}
             numMonths={numMonths}
             monthBounds={monthBounds}
-            onBudgetAction={onBudgetAction}
-            {...props}
+            focusedMonth={focusedMonth}
+            budgetType={budgetType}
+            onMonthSelect={selectMonth}
           />
+          <SchedulesProvider query={schedulesQuery}>
+            <BudgetTable
+              type={type}
+              startMonth={startMonth}
+              numMonths={numMonths}
+              monthBounds={monthBounds}
+              onBudgetAction={onBudgetAction}
+              onApplyBudgetTemplatesInGroup={categoryIds =>
+                onApplyBudgetTemplatesInGroup(categoryIds, focusedMonth)
+              }
+              focusedMonth={focusedMonth}
+              onFocusMonth={setRequestedFocus}
+              overspent={overspent}
+              hasColumnSummaries={!hasRail}
+              aside={
+                hasRail &&
+                (budgetType === 'tracking' ? (
+                  <TrackingRail month={focusedMonth} overspent={overspent} />
+                ) : (
+                  <EnvelopeRail month={focusedMonth} overspent={overspent} />
+                ))
+              }
+              {...props}
+            />
+          </SchedulesProvider>
         </ErrorBoundary>
       </View>
     </View>
   );
-};
-
-DynamicBudgetTable.displayName = 'DynamicBudgetTable';
+}
 
 type AutoSizingBudgetTableProps = Omit<
   ComponentProps<typeof BudgetTable>,
-  'numMonths'
+  | 'numMonths'
+  | 'focusedMonth'
+  | 'onFocusMonth'
+  | 'overspent'
+  | 'hasColumnSummaries'
+  | 'aside'
+  | 'onApplyBudgetTemplatesInGroup'
 > & {
   maxMonths: number;
+  /** Applies the group's templates to the focused month. */
+  onApplyBudgetTemplatesInGroup: (
+    categoryIds: Array<CategoryEntity['id']>,
+    month: string,
+  ) => void;
   onMonthSelect: (month: string, numMonths: number) => void;
 };
 
-export const AutoSizingBudgetTable = (props: AutoSizingBudgetTableProps) => {
+export function AutoSizingBudgetTable(props: AutoSizingBudgetTableProps) {
   return (
     <AutoSizer
       renderProp={({ width = 0, height = 0 }) => {
@@ -192,6 +193,4 @@ export const AutoSizingBudgetTable = (props: AutoSizingBudgetTableProps) => {
       }}
     />
   );
-};
-
-AutoSizingBudgetTable.displayName = 'AutoSizingBudgetTable';
+}
