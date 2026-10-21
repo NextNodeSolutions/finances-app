@@ -191,7 +191,13 @@ export function LineGraph({
     ? computeTrendLines(data.intervalData, data.legend)
     : [];
 
-  const onShowActivity = (id, payload, uncategorizedId, bucketTagNames) => {
+  const onShowActivity = (
+    id,
+    payload,
+    uncategorizedId,
+    bucketTagNames,
+    name,
+  ) => {
     showActivity({
       navigate,
       categories,
@@ -209,6 +215,7 @@ export function LineGraph({
       bucketTagNames,
       scopeTagNames: data.scopeTagNames,
       interval,
+      name,
     });
   };
 
@@ -304,6 +311,7 @@ export function LineGraph({
                           payload,
                           entry.uncategorizedId,
                           entry.bucketTagNames,
+                          entry.name,
                         ),
                     }}
                   />

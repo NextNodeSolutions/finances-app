@@ -360,6 +360,7 @@ export function BarGraph({
                           endDate: data.endDate,
                           field: groupBy.toLowerCase(),
                           id: item.id,
+                          name: item.payload.name,
                           uncategorizedId: itemPayload?.uncategorizedId,
                         };
 

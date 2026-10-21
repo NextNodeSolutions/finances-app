@@ -324,6 +324,7 @@ export function StackedBarGraph({
                         field: groupBy.toLowerCase(),
                         id: entry.id,
                         uncategorizedId: entry.uncategorizedId,
+                        name: entry.name,
                         bucketTagNames: entry.bucketTagNames,
                         scopeTagNames: data.scopeTagNames,
                         interval,

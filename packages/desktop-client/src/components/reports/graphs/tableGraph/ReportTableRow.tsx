@@ -97,6 +97,7 @@ export const ReportTableRow = memo(
             endDate,
             field: drilldownField,
             id: item.id,
+            name: item.name,
           };
     const canShowActivity = !isNarrowWidth && !compact;
 
@@ -190,6 +191,7 @@ export const ReportTableRow = memo(
                         endDate: intervalItem.intervalEndDate || '',
                         field: drilldownField,
                         id: item.id,
+                        name: item.name,
                         uncategorizedId: item.uncategorizedId,
                         interval,
                         bucketTagNames: item.bucketTagNames,

@@ -13,6 +13,8 @@ import { t } from 'i18next';
 
 import { ReportOptions } from '#components/reports/ReportOptions';
 
+import { getActivityFilterName } from './getActivityFilterName';
+
 type showActivityProps = {
   navigate: NavigateFunction;
   categories: { list: CategoryEntity[]; grouped: CategoryGroupEntity[] };
@@ -30,6 +32,8 @@ type showActivityProps = {
   interval?: string;
   bucketTagNames?: string[];
   scopeTagNames?: string[];
+  /** The drilled-into item's name, shown in the register header. */
+  name?: string;
 };
 
 export function showActivity({
@@ -49,6 +53,7 @@ export function showActivity({
   interval = 'Day',
   bucketTagNames,
   scopeTagNames = [],
+  name,
 }: showActivityProps) {
   const isOutFlow =
     balanceTypeOp === 'totalDebts' || type === 'debts' ? true : false;
@@ -154,6 +159,16 @@ export function showActivity({
     state:
       balanceTypeOp === 'totalBudgeted'
         ? { goBack: true }
-        : { goBack: true, filterConditions },
+        : {
+            goBack: true,
+            filterConditions,
+            filterName: getActivityFilterName({
+              name,
+              startDate,
+              endDate,
+              interval,
+              isRange: isDateOp,
+            }),
+          },
   });
 }
