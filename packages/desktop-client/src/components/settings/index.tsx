@@ -36,6 +36,7 @@ import { ExperimentalFeatures } from './Experimental';
 import { ExportBudget } from './Export';
 import { FormatSettings } from './Format';
 import { LanguageSettings } from './LanguageSettings';
+import { OptionalFeatures } from './OptionalFeatures';
 import { RepairTransactions } from './RepairTransactions';
 import { ResetCache, ResetSync } from './Reset';
 import { SettingsBackButton } from './SettingsBackButton';
@@ -276,28 +277,21 @@ export function GeneralSettings() {
   const { t } = useTranslation();
   const { isNarrowWidth } = useResponsive();
   const isCurrencyExperimentalEnabled = useFeatureFlag('currency');
-  const serverURL = useServerURL();
 
   return (
     <SettingsSections title={t('General')}>
-      <About />
-      <ThemeSettings />
+      <BudgetTypeSettings />
+      <OptionalFeatures />
       {!isNarrowWidth && <SidebarSettings />}
-      <FormatSettings />
-      {isCurrencyExperimentalEnabled && <CurrencySettings />}
-      <LanguageSettings />
-      <SettingsGroup title={t('Budget')}>
-        <BudgetTypeSettings />
-      </SettingsGroup>
-      {serverURL && (
-        <SettingsGroup title={t('Security')}>
-          <AuthSettings />
-          <EncryptionSettings />
-        </SettingsGroup>
-      )}
+      <ThemeSettings />
+      <FormatSettings>
+        {isCurrencyExperimentalEnabled && <CurrencySettings />}
+        <LanguageSettings />
+      </FormatSettings>
       <SettingsGroup title={t('Data')}>
-        {isElectron() && <Backups />}
         <ExportBudget />
+        {isElectron() && <Backups />}
+        <EncryptionSettings />
       </SettingsGroup>
     </SettingsSections>
   );
@@ -305,10 +299,17 @@ export function GeneralSettings() {
 
 export function AdvancedSettings() {
   const { t } = useTranslation();
+  const serverURL = useServerURL();
 
   return (
     <SettingsSections title={t('Advanced')}>
+      <About />
       <AdvancedAbout />
+      {serverURL && (
+        <SettingsGroup title={t('Security')}>
+          <AuthSettings />
+        </SettingsGroup>
+      )}
       <SettingsGroup title={t('Troubleshooting')}>
         <ResetCache />
         <ResetSync />

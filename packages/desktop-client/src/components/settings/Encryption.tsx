@@ -23,7 +23,16 @@ export function EncryptionSettings() {
 
   const missingCryptoAPI = !(window.crypto && crypto.subtle);
 
-  if (!serverURL || !groupId) {
+  if (!serverURL) {
+    return (
+      <SettingsRow
+        title={t('End-to-end encryption')}
+        description={t('Requires a sync server.')}
+      />
+    );
+  }
+
+  if (!groupId) {
     return null;
   }
 

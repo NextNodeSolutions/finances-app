@@ -193,12 +193,8 @@ export function ThemeSettings() {
   if (showInstaller) {
     return (
       <SettingsGroup
-        title={t('Themes')}
-        description={
-          <Trans>
-            <span>Themes</span> change the user interface colors.
-          </Trans>
-        }
+        title={t('Appearance')}
+        description={t('Themes change the colors of the app.')}
       >
         <View style={{ padding: spacing.lg }}>
           <ThemeInstaller
@@ -218,12 +214,8 @@ export function ThemeSettings() {
 
   return (
     <SettingsGroup
-      title={t('Themes')}
-      description={
-        <Trans>
-          <span>Themes</span> change the user interface colors.
-        </Trans>
-      }
+      title={t('Appearance')}
+      description={t('Themes change the colors of the app.')}
     >
       <SettingsRow
         title={t('Theme')}
