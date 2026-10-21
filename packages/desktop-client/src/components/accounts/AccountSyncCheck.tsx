@@ -18,6 +18,7 @@ import { authorizeBank as authorizeGoCardless } from '#gocardless';
 import { useAccounts } from '#hooks/useAccounts';
 import { useCurrentAccess } from '#hooks/useCurrentAccess';
 import { useFailedAccounts } from '#hooks/useFailedAccounts';
+import { useOptionalFeature } from '#hooks/useOptionalFeature';
 import { pushModal } from '#modals/modalsSlice';
 import { useDispatch } from '#redux';
 
@@ -108,6 +109,7 @@ export function AccountSyncCheck() {
   const [open, setOpen] = useState(false);
   const triggerRef = useRef(null);
   const { getErrorMessage } = useErrorMessage();
+  const [isBankSyncOn] = useOptionalFeature('bankSync');
 
   const reauth = useCallback(
     (acc: AccountEntity) => {
@@ -152,7 +154,7 @@ export function AccountSyncCheck() {
     );
   }, [dispatch]);
 
-  if (!id) {
+  if (!id || !isBankSyncOn) {
     return null;
   }
 

@@ -5,11 +5,15 @@ import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 
+import { useOptionalFeature } from '#hooks/useOptionalFeature';
+
 type AccountEmptyMessageProps = {
   onAdd: () => void;
 };
 
 export function AccountEmptyMessage({ onAdd }: AccountEmptyMessageProps) {
+  const [isBankSyncOn] = useOptionalFeature('bankSync');
+
   return (
     <View
       style={{
@@ -38,12 +42,20 @@ export function AccountEmptyMessage({ onAdd }: AccountEmptyMessageProps) {
             '& strong': { fontWeight: 600, color: theme.pageText },
           }}
         >
-          <Trans>
-            <strong>Let's add your first account.</strong> Accounts hold your
-            transactions, like everyday spending, savings, credit cards, or
-            cash. You can connect to your bank to import transactions
-            automatically, or add them yourself.
-          </Trans>
+          {isBankSyncOn ? (
+            <Trans>
+              <strong>Let's add your first account.</strong> Accounts hold your
+              transactions, like everyday spending, savings, credit cards, or
+              cash. You can connect to your bank to import transactions
+              automatically, or add them yourself.
+            </Trans>
+          ) : (
+            <Trans>
+              <strong>Let's add your first account.</strong> Accounts hold your
+              transactions, like everyday spending, savings, credit cards, or
+              cash. Add transactions yourself, or import a file from your bank.
+            </Trans>
+          )}
         </Text>
 
         <Button
