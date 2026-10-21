@@ -14,8 +14,10 @@ import { css } from '@emotion/css';
 import { parseDate } from '@internationalized/date';
 
 import { SvgCheveronLeft, SvgCheveronRight } from '#icons/v1';
+import { styles } from '#styles';
 import type { CSSProperties } from '#styles';
 import { theme } from '#theme';
+import { radius } from '#tokens';
 import { View } from '#View';
 
 import type { DateRangePickerLabels, FirstDayOfWeek } from './util';
@@ -36,20 +38,21 @@ const calendarStyles: CSSProperties = {
       color: 'inherit',
       background: 'none',
       border: 'none',
-      borderRadius: 4,
+      borderRadius: radius.sm,
       padding: 5,
       cursor: 'pointer',
       display: 'flex',
       '&:hover': { backgroundColor: theme.buttonBareBackgroundHover },
       '&[disabled]': { opacity: 0.4, cursor: 'default' },
+      '&[data-focus-visible]': styles.focusRing,
     },
     '& select': {
       color: 'inherit',
       background: 'none',
       border: 'none',
-      borderRadius: 4,
+      borderRadius: radius.sm,
       padding: 4,
-      fontWeight: 'bold',
+      fontWeight: 600,
       fontSize: 13,
       cursor: 'pointer',
       '&:hover': { backgroundColor: theme.buttonBareBackgroundHover },
@@ -69,10 +72,10 @@ const calendarStyles: CSSProperties = {
   },
   '& .react-aria-CalendarHeaderCell': {
     color: theme.pageTextSubdued,
-    fontSize: 10,
-    fontWeight: 'bold',
+    fontSize: 11,
+    fontWeight: 500,
     textAlign: 'center',
-    padding: '2px 0',
+    padding: '2px 0 6px',
   },
   '& .react-aria-CalendarCell': {
     minWidth: 28,
@@ -80,41 +83,46 @@ const calendarStyles: CSSProperties = {
     lineHeight: '28px',
     textAlign: 'center',
     fontSize: 12,
+    fontVariantNumeric: 'tabular-nums',
     cursor: 'pointer',
     '&[data-outside-month]': {
       display: 'none',
     },
     '&[data-hovered]': {
       backgroundColor: theme.buttonBareBackgroundHover,
-      borderRadius: 4,
+      borderRadius: radius.sm,
     },
     // Same current-day treatment as the month grid's GridButton.
     '&[data-today]': {
-      fontWeight: 'bold',
-      boxShadow: `inset 0 0 0 1px ${theme.pageTextPositive}`,
-      borderRadius: 4,
-      color: theme.pageTextPositive,
+      fontWeight: 600,
+      boxShadow: `inset 0 0 0 1px ${theme.hairlineStrong}`,
+      borderRadius: radius.sm,
     },
     '&[data-selected]': {
       backgroundColor: theme.datePickerRangeBackground,
+      boxShadow: 'none',
       borderRadius: 0,
     },
     '&[data-selection-start], &[data-selection-end]': {
       backgroundColor: theme.buttonPrimaryBackground,
       color: theme.buttonPrimaryText,
+      fontWeight: 500,
     },
     '&[data-selection-start]': {
-      borderRadius: '4px 0 0 4px',
+      borderRadius: `${radius.sm}px 0 0 ${radius.sm}px`,
     },
     '&[data-selection-end]': {
-      borderRadius: '0 4px 4px 0',
+      borderRadius: `0 ${radius.sm}px ${radius.sm}px 0`,
+    },
+    '&[data-selection-start][data-selection-end]': {
+      borderRadius: radius.sm,
     },
     '&[data-disabled]': {
       opacity: 0.4,
       cursor: 'default',
     },
     '&[data-focus-visible]': {
-      outline: `2px solid ${theme.buttonPrimaryBackground}`,
+      outline: `2px solid ${theme.focusRing}`,
       outlineOffset: -2,
     },
   },

@@ -37,7 +37,7 @@ export const styles: CSSProperties = {
   },
   altMenuHeaderText: {
     fontSize: 13,
-    fontWeight: 700,
+    fontWeight: 600,
   },
   veryLargeText: {
     fontSize: 30,
@@ -94,6 +94,12 @@ export const styles: CSSProperties = {
   },
   shadowLarge,
   shadowSheet,
+  // Keyboard focus indicator shared by every control: a sky ring held
+  // off the edge so it never merges with the control's own border.
+  focusRing: {
+    outline: `2px solid ${theme.focusRing}`,
+    outlineOffset: 2,
+  },
   // Money and measurements: set in the mono face with tabular figures so
   // every amount reads like an instrument readout and columns align.
   tnum: {

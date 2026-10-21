@@ -154,6 +154,9 @@
   --color-buttonPrimaryTextHover: var(--color-buttonPrimaryText);
   --color-buttonPrimaryBackground: var(--palette-purple300);
   --color-buttonPrimaryBackgroundHover: var(--color-buttonPrimaryBackground);
+  --color-buttonPrimaryBackgroundActive: var(
+    --color-buttonPrimaryBackgroundHover
+  );
   --color-buttonPrimaryBorder: var(--color-buttonPrimaryBackground);
   --color-buttonPrimaryShadow: rgba(0, 0, 0, 0.6);
   --color-buttonPrimaryDisabledText: var(--palette-gray400);
@@ -166,6 +169,9 @@
   --color-buttonNormalTextHover: var(--palette-gray150);
   --color-buttonNormalBackground: var(--palette-gray600);
   --color-buttonNormalBackgroundHover: var(--palette-gray400);
+  --color-buttonNormalBackgroundActive: var(
+    --color-buttonNormalBackgroundHover
+  );
   --color-buttonNormalBorder: var(--palette-gray300);
   --color-buttonNormalShadow: rgba(0, 0, 0, 0.4);
   --color-buttonNormalSelectedText: var(--palette-white);
@@ -237,6 +243,7 @@
   --color-checkboxToggleBackground: var(--palette-gray400);
   --color-checkboxToggleBackgroundSelected: var(--palette-purple300);
   --color-checkboxToggleDisabled: var(--palette-gray700);
+  --color-checkboxToggleKnob: var(--palette-white);
 
   --color-pillBackground: var(--palette-gray500);
   --color-pillBackgroundLight: var(--palette-gray900);

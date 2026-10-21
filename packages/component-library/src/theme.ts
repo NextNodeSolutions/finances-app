@@ -136,6 +136,7 @@ export const theme = {
   buttonPrimaryTextHover: 'var(--color-buttonPrimaryTextHover)',
   buttonPrimaryBackground: 'var(--color-buttonPrimaryBackground)',
   buttonPrimaryBackgroundHover: 'var(--color-buttonPrimaryBackgroundHover)',
+  buttonPrimaryBackgroundActive: 'var(--color-buttonPrimaryBackgroundActive)',
   buttonPrimaryBorder: 'var(--color-buttonPrimaryBorder)',
   buttonPrimaryShadow: 'var(--color-buttonPrimaryShadow)',
   buttonPrimaryDisabledText: 'var(--color-buttonPrimaryDisabledText)',
@@ -146,6 +147,7 @@ export const theme = {
   buttonNormalTextHover: 'var(--color-buttonNormalTextHover)',
   buttonNormalBackground: 'var(--color-buttonNormalBackground)',
   buttonNormalBackgroundHover: 'var(--color-buttonNormalBackgroundHover)',
+  buttonNormalBackgroundActive: 'var(--color-buttonNormalBackgroundActive)',
   buttonNormalBorder: 'var(--color-buttonNormalBorder)',
   buttonNormalShadow: 'var(--color-buttonNormalShadow)',
   buttonNormalSelectedText: 'var(--color-buttonNormalSelectedText)',
@@ -213,6 +215,7 @@ export const theme = {
   checkboxToggleBackgroundSelected:
     'var(--color-checkboxToggleBackgroundSelected)',
   checkboxToggleDisabled: 'var(--color-checkboxToggleDisabled)',
+  checkboxToggleKnob: 'var(--color-checkboxToggleKnob)',
   pillBackground: 'var(--color-pillBackground)',
   pillBackgroundLight: 'var(--color-pillBackgroundLight)',
   pillText: 'var(--color-pillText)',

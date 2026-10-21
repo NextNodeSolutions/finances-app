@@ -3,6 +3,7 @@ import type { ReactNode } from 'react';
 import { css } from '@emotion/css';
 
 import type { CSSProperties } from './styles';
+import { theme } from './theme';
 
 type InlineFieldProps = {
   label: ReactNode;
@@ -26,7 +27,7 @@ export function InlineField({
           display: 'flex',
           flexDirection: 'row',
           alignItems: 'center',
-          margin: '7px 0',
+          margin: '8px 0',
           width,
         },
         style,
@@ -35,8 +36,11 @@ export function InlineField({
       <div
         style={{
           width: labelWidth || 75,
+          flexShrink: 0,
           textAlign: 'right',
-          paddingRight: 10,
+          paddingRight: 12,
+          fontWeight: 500,
+          color: theme.formLabelText,
         }}
       >
         {label}:

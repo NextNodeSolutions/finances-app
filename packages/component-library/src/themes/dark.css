@@ -154,6 +154,7 @@
   --color-buttonPrimaryTextHover: var(--color-buttonPrimaryText);
   --color-buttonPrimaryBackground: var(--palette-onyx50);
   --color-buttonPrimaryBackgroundHover: var(--palette-onyx200);
+  --color-buttonPrimaryBackgroundActive: var(--palette-onyx100);
   --color-buttonPrimaryBorder: var(--palette-onyx50);
   --color-buttonPrimaryShadow: rgba(0, 0, 0, 0.5);
   --color-buttonPrimaryDisabledText: var(--palette-onyx500);
@@ -164,7 +165,8 @@
   --color-buttonNormalTextHover: var(--palette-onyx50);
   --color-buttonNormalBackground: var(--palette-onyx750);
   --color-buttonNormalBackgroundHover: var(--palette-onyx700);
-  --color-buttonNormalBorder: var(--palette-onyx600);
+  --color-buttonNormalBackgroundActive: var(--palette-onyx650);
+  --color-buttonNormalBorder: var(--palette-onyx650);
   --color-buttonNormalShadow: rgba(0, 0, 0, 0.3);
   --color-buttonNormalSelectedText: var(--palette-onyx900);
   --color-buttonNormalSelectedBackground: var(--palette-onyx50);
@@ -233,6 +235,7 @@
   --color-checkboxToggleBackground: var(--palette-onyx600);
   --color-checkboxToggleBackgroundSelected: var(--palette-onyx50);
   --color-checkboxToggleDisabled: var(--palette-onyx700);
+  --color-checkboxToggleKnob: var(--palette-onyx100);
 
   --color-pillBackground: var(--palette-onyx700);
   --color-pillBackgroundLight: var(--palette-onyx750);
@@ -246,7 +249,7 @@
   --color-pillTextSubdued: var(--palette-onyx500);
 
   --color-reportsRed: var(--palette-garnet300);
-  --color-reportsBlue: var(--palette-sky400);
+  --color-reportsBlue: var(--palette-onyx100);
   --color-reportsGreen: var(--palette-jade300);
   --color-reportsGray: var(--palette-onyx500);
   --color-reportsLabel: var(--palette-onyx100);
@@ -254,7 +257,7 @@
   --color-reportsNumberPositive: var(--color-numberPositive);
   --color-reportsNumberNegative: var(--color-numberNegative);
   --color-reportsNumberNeutral: var(--color-numberNeutral);
-  --color-reportsChartFill: var(--palette-sky400);
+  --color-reportsChartFill: var(--palette-onyx100);
 
   --color-noteTagBackground: var(--palette-onyx700);
   --color-noteTagBackgroundHover: var(--palette-onyx650);
@@ -278,14 +281,14 @@
 
   --color-overlayBackground: rgba(0, 0, 0, 0.55);
 
-  --color-chartQual1: #5b93cf;
-  --color-chartQual2: #52b48f;
-  --color-chartQual3: #e0a35a;
-  --color-chartQual4: #d9776b;
-  --color-chartQual5: #9a8cd4;
-  --color-chartQual6: #6bb9d6;
-  --color-chartQual7: #c995bb;
-  --color-chartQual8: #a7b676;
+  --color-chartQual1: var(--palette-chartLuxDark1);
+  --color-chartQual2: var(--palette-chartLuxDark2);
+  --color-chartQual3: var(--palette-chartLuxDark3);
+  --color-chartQual4: var(--palette-chartLuxDark4);
+  --color-chartQual5: var(--palette-chartLuxDark5);
+  --color-chartQual6: var(--palette-chartLuxDark6);
+  --color-chartQual7: var(--palette-chartLuxDark7);
+  --color-chartQual8: var(--palette-chartLuxDark8);
   --color-chartQual9: var(--palette-onyx400);
 
   --shadow-xs: 0 1px 1px rgba(0, 0, 0, 0.3);

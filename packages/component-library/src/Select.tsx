@@ -1,12 +1,24 @@
 import { useRef, useState } from 'react';
 import type { CSSProperties } from 'react';
 
+import { css, cx } from '@emotion/css';
+
 import { Button } from './Button';
-import { SvgExpandArrow } from './icons/v0';
+import { SvgCheveronDown } from './icons/v1';
 import { Menu } from './Menu';
 import type { MenuItem } from './Menu';
 import { Popover } from './Popover';
+import { theme } from './theme';
 import { View } from './View';
+
+// A framed select reads as a field holding a value, not as an action:
+// input chrome, input padding and regular weight.
+const fieldClassName = css({
+  padding: '6px 10px',
+  fontWeight: 400,
+  backgroundColor: theme.formInputBackground,
+  borderColor: theme.formInputBorder,
+});
 
 /** A non-selectable heading above the options that follow it */
 export type SelectHeading = readonly [typeof Menu.label, string];
@@ -88,14 +100,14 @@ export function Select<const Value = string>({
           setIsOpen(true);
         }}
         style={style}
-        className={className}
+        className={bare ? className : cx(fieldClassName, className)}
       >
         <View
           style={{
             flexDirection: 'row',
             alignItems: 'center',
             justifyContent: 'space-between',
-            gap: 5,
+            gap: 8,
             width: '100%',
           }}
         >
@@ -105,16 +117,18 @@ export function Select<const Value = string>({
               overflow: 'hidden',
               textOverflow: 'ellipsis',
               whiteSpace: 'nowrap',
-              width: 'calc(100% - 7px)',
+              width: 'calc(100% - 12px)',
             }}
           >
             {targetOption ? targetOption[1] : defaultLabel}
           </span>
-          <SvgExpandArrow
+          <SvgCheveronDown
             style={{
-              width: 7,
-              height: 7,
+              width: 12,
+              height: 12,
+              flexShrink: 0,
               color: 'inherit',
+              opacity: 0.55,
             }}
           />
         </View>
@@ -148,7 +162,7 @@ export function Select<const Value = string>({
           })}
           getItemStyle={option => {
             if (targetOption && targetOption[0] === option.name) {
-              return { fontWeight: 'bold' };
+              return { fontWeight: 600 };
             }
             return {};
           }}

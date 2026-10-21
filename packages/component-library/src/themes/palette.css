@@ -204,4 +204,14 @@
   --palette-chartLux7: #b07aa1;
   --palette-chartLux8: #8c9a5b;
   --palette-chartLux9: #8a8983;
+
+  /* The same series, lifted for dark surfaces. */
+  --palette-chartLuxDark1: #5b93cf;
+  --palette-chartLuxDark2: #52b48f;
+  --palette-chartLuxDark3: #e0a35a;
+  --palette-chartLuxDark4: #d9776b;
+  --palette-chartLuxDark5: #9a8cd4;
+  --palette-chartLuxDark6: #6bb9d6;
+  --palette-chartLuxDark7: #c995bb;
+  --palette-chartLuxDark8: #a7b676;
 }

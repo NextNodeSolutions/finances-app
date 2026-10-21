@@ -161,9 +161,10 @@ export const componentSizeText: Record<
   },
 };
 
-// Padding and min-height for controls (Button, Input). The `medium` row
-// reproduces today's default look exactly (5px / 5px 10px, no
-// min-height). `extra-large` narrow hits the 40px mobile touch target.
+// Padding and min-height for controls (Button, Input). `medium` is also
+// the look a control gets when `size` is omitted (6px / 6px 12px, no
+// min-height: 13px text lands it on ~30px). `extra-large` narrow hits the
+// 40px mobile touch target.
 export const componentSizeControl: Record<
   ComponentSize,
   Record<BreakpointGroup, ComponentSizeControlValues>
@@ -175,10 +176,10 @@ export const componentSizeControl: Record<
     wide: { paddingY: 3, paddingX: spacing.sm, minHeight: 24 },
   },
   medium: {
-    narrow: { paddingY: 5, paddingX: 10 },
-    small: { paddingY: 5, paddingX: 10 },
-    medium: { paddingY: 5, paddingX: 10 },
-    wide: { paddingY: 5, paddingX: 10 },
+    narrow: { paddingY: 6, paddingX: spacing.md },
+    small: { paddingY: 6, paddingX: spacing.md },
+    medium: { paddingY: 6, paddingX: spacing.md },
+    wide: { paddingY: 6, paddingX: spacing.md },
   },
   large: {
     narrow: { paddingY: spacing.sm, paddingX: spacing.md, minHeight: 36 },
