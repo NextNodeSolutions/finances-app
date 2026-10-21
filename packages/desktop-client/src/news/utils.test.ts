@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 
 import type { NewsEntry } from './types';
-import { getNewestDate, getReleaseToNotify, getUnseenEntries } from './utils';
+import { getNewestDate, getUnseenEntries } from './utils';
 
 function release(version: string, date: string): NewsEntry {
   return {
@@ -49,30 +49,5 @@ describe('getNewestDate', () => {
   it('finds the newest date regardless of order', () => {
     expect(getNewestDate([...entries].reverse())).toBe('2026-09-01');
     expect(getNewestDate([])).toBeUndefined();
-  });
-});
-
-describe('getReleaseToNotify', () => {
-  it('picks the newest unseen release the client is already running', () => {
-    expect(getReleaseToNotify(entries, '26.8.1', '2026-08-01')?.id).toBe(
-      'release-26.8.1',
-    );
-  });
-
-  it('ignores releases newer than the client version', () => {
-    expect(getReleaseToNotify(entries, '26.8.0', '2026-08-01')?.id).toBe(
-      'release-26.8.0',
-    );
-  });
-
-  it('ignores posts and already-seen releases', () => {
-    expect(getReleaseToNotify(entries, '26.8.1', '2026-08-07')).toBeUndefined();
-    expect(
-      getReleaseToNotify(
-        [post('only-post', '2026-08-10')],
-        '26.8.1',
-        '2026-08-01',
-      ),
-    ).toBeUndefined();
   });
 });

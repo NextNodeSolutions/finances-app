@@ -48,7 +48,7 @@ export function NotificationsPage() {
   }, [entries]);
 
   return (
-    <Page header={t('Notifications')}>
+    <Page header={t("What's new")}>
       <View
         style={{
           marginTop: 10,
