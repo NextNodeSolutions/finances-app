@@ -62,12 +62,12 @@ export function ThemeSelector({ style }: ThemeSelectorProps) {
           onPress={() => setMenuOpen(true)}
           style={style}
         >
-          <Icon style={{ width: 13, height: 13, color: 'inherit' }} />
+          <Icon style={{ width: 15, height: 15, color: 'inherit' }} />
         </Button>
       </Tooltip>
 
       <Popover
-        offset={8}
+        offset={12}
         triggerRef={triggerRef}
         isOpen={menuOpen}
         onOpenChange={() => setMenuOpen(false)}

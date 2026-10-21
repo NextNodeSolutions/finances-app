@@ -8,6 +8,8 @@ import { SvgHelp } from '@actual-app/components/icons/v2';
 import { Menu } from '@actual-app/components/menu';
 import { Popover } from '@actual-app/components/popover';
 import { SpaceBetween } from '@actual-app/components/space-between';
+import { theme } from '@actual-app/components/theme';
+import { radius } from '@actual-app/components/tokens';
 import { useToggle } from 'usehooks-ts';
 
 import { useFeatureFlag } from '#hooks/useFeatureFlag';
@@ -68,7 +70,7 @@ type HelpButtonProps = {
 
 const HelpButton = forwardRef<HTMLButtonElement, HelpButtonProps>(
   ({ onPress }, ref) => {
-    const size = 15;
+    const size = 14;
     return (
       <Button
         variant="bare"
@@ -78,7 +80,12 @@ const HelpButton = forwardRef<HTMLButtonElement, HelpButtonProps>(
         style={{
           display: 'flex',
           alignItems: 'center',
-          gap: 4,
+          gap: 6,
+          height: 30,
+          padding: '0 10px 0 8px',
+          borderRadius: radius.md,
+          fontWeight: 500,
+          color: theme.pageTextLight,
         }}
       >
         <SvgHelp width={size} height={size} />
@@ -130,7 +137,7 @@ export const HelpMenu = () => {
 
       <Popover
         placement="bottom end"
-        offset={8}
+        offset={12}
         triggerRef={menuButtonRef}
         isOpen={isMenuOpen}
         onOpenChange={() => setMenuOpen(false)}

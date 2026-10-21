@@ -239,6 +239,9 @@ export function FinancesApp() {
               scrollableRef={scrollableRef}
             >
               <MobilePageHeaderProvider>
+                {/* The titlebar sits above the scroll area so it stays put
+                    while pages scroll beneath its hairline. */}
+                <Titlebar style={{ WebkitAppRegion: 'drag' }} />
                 <View
                   ref={scrollableRef}
                   style={{
@@ -247,16 +250,6 @@ export function FinancesApp() {
                     position: 'relative',
                   }}
                 >
-                  <Titlebar
-                    style={{
-                      WebkitAppRegion: 'drag',
-                      position: 'absolute',
-                      top: 0,
-                      left: 0,
-                      right: 0,
-                      zIndex: 1000,
-                    }}
-                  />
                   <Notifications />
                   <BankSyncStatus />
                   {isNarrowWidth && <MobilePageHeaderSlot />}

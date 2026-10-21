@@ -12,6 +12,7 @@ import { SpaceBetween } from '@actual-app/components/space-between';
 import { styles } from '@actual-app/components/styles';
 import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
+import { elevation, motion, radius } from '@actual-app/components/tokens';
 import { View } from '@actual-app/components/view';
 import { css } from '@emotion/css';
 
@@ -29,6 +30,16 @@ const OPACITY_MULTIPLIER = 0.2; // Opacity reduction per stacked notification
 const MIN_OPACITY = 1; // Minimum opacity for stacked notifications
 const Y_OFFSET_PER_LEVEL = -20; // Vertical offset in pixels per stacked notification
 const BASE_Z_INDEX = 10; // Base z-index for notification stacking
+
+type NotificationTone = 'positive' | 'error' | 'warning';
+
+// A small tinted lamp carries the status; the card itself stays a calm
+// white popover surface.
+const toneLamps: Record<NotificationTone, { halo: string; core: string }> = {
+  positive: { halo: theme.noticeBackground, core: theme.noticeTextLight },
+  error: { halo: theme.errorBackground, core: theme.errorText },
+  warning: { halo: theme.warningBackground, core: theme.signal },
+};
 
 function compileMessage(
   message: string,
@@ -126,8 +137,9 @@ function Notification({
   });
   useEffect(() => connected(), []);
 
-  const positive = type === 'message';
-  const error = type === 'error';
+  const tone: NotificationTone =
+    type === 'message' ? 'positive' : type === 'error' ? 'error' : 'warning';
+  const lamp = toneLamps[tone];
 
   const processedMessage = useMemo(
     () =>
@@ -212,11 +224,7 @@ function Notification({
         ),
         opacity: spring.opacity,
         pointerEvents: isInteractive ? 'auto' : 'none',
-        color: positive
-          ? theme.noticeText
-          : error
-            ? theme.errorTextDark
-            : theme.warningTextDark,
+        color: theme.pageTextLight,
         // Prevents scrolling conflicts
         touchAction: isInteractive ? 'none' : 'auto',
       }}
@@ -225,69 +233,97 @@ function Notification({
       <View
         style={{
           position: 'relative',
-          padding: '14px 14px',
-          paddingRight: 40,
-          borderRadius: 8,
-          ...styles.mediumText,
-          backgroundColor: positive
-            ? theme.noticeBackgroundLight
-            : error
-              ? theme.errorBackground
-              : theme.warningBackground,
-          borderTop: `3px solid ${
-            positive
-              ? theme.noticeBorder
-              : error
-                ? theme.errorBorder
-                : theme.warningBorder
-          }`,
-          ...styles.shadowLarge,
+          flexDirection: 'row',
+          alignItems: 'flex-start',
+          gap: 12,
+          padding: '14px 44px 14px 14px',
+          borderRadius: radius.lg,
+          fontSize: 13,
+          lineHeight: '19px',
+          backgroundColor: theme.menuBackground,
+          border: `1px solid ${theme.menuBorder}`,
+          boxShadow: elevation.popover,
           maxWidth: 550,
-          '& a': { color: 'currentColor' },
+          '& a': { color: theme.accentText },
         }}
       >
+        <View
+          aria-hidden
+          style={{
+            width: 22,
+            height: 22,
+            flexShrink: 0,
+            borderRadius: radius.pill,
+            alignItems: 'center',
+            justifyContent: 'center',
+            backgroundColor: lamp.halo,
+          }}
+        >
+          <View
+            style={{
+              width: 7,
+              height: 7,
+              borderRadius: radius.pill,
+              backgroundColor: lamp.core,
+            }}
+          />
+        </View>
+
         {/* Close button in top right corner */}
         <Button
           variant="bare"
           aria-label={t('Close')}
           style={{
             position: 'absolute',
-            top: 8,
-            right: 8,
-            padding: 8,
-            color: 'currentColor',
-            opacity: 0.7,
+            top: 10,
+            right: 10,
+            width: 24,
+            height: 24,
+            padding: 0,
+            borderRadius: radius.sm,
+            color: theme.pageTextSubdued,
           }}
           onPress={onRemove}
         >
-          <SvgDelete style={{ width: 10, height: 10 }} />
+          <SvgDelete style={{ width: 9, height: 9 }} />
         </Button>
 
         {/* Content and action button layout */}
         <SpaceBetween
           direction="vertical"
-          gap={10}
-          style={{ alignItems: 'flex-start' }}
+          gap={8}
+          style={{ flex: 1, minWidth: 0, alignItems: 'flex-start' }}
         >
           {title && (
             <View
               style={{
-                ...styles.mediumText,
-                fontWeight: 700,
-                paddingRight: 20,
+                fontSize: 13.5,
+                lineHeight: '22px',
+                fontWeight: 600,
+                letterSpacing: '-0.005em',
+                color: theme.pageText,
               }}
             >
               {title}
             </View>
           )}
 
-          {/* Message and button on same row */}
+          {/* Message with its action underneath, so the copy keeps the
+              full card width */}
           <SpaceBetween
-            wrap={false}
-            gap={10}
+            direction="vertical"
+            gap={12}
             style={{ width: '100%', alignItems: 'flex-start' }}
           >
-            <View style={{ flex: 1, minWidth: 0 }}>{processedMessage}</View>
+            <View
+              style={{
+                width: '100%',
+                minWidth: 0,
+                paddingTop: title ? 0 : 2,
+              }}
+            >
+              {processedMessage}
+            </View>
             {button && (
               <ButtonWithLoading
                 variant="bare"
@@ -299,23 +335,25 @@ function Notification({
                   setLoading(false);
                 }}
                 className={css({
-                  backgroundColor: 'transparent',
-                  border: `1px solid ${
-                    positive
-                      ? theme.noticeBorder
-                      : error
-                        ? theme.errorBorder
-                        : theme.warningBorder
-                  }`,
-                  color: 'currentColor',
-                  ...styles.mediumText,
+                  height: 30,
+                  padding: '0 12px',
+                  borderRadius: radius.md,
+                  backgroundColor: theme.buttonNormalBackground,
+                  border: `1px solid ${theme.buttonNormalBorder}`,
+                  boxShadow: elevation.xs,
+                  color: theme.buttonNormalText,
+                  fontSize: 13,
+                  fontWeight: 500,
                   flexShrink: 0,
-                  '&[data-hovered], &[data-pressed]': {
-                    backgroundColor: positive
-                      ? theme.noticeBackground
-                      : error
-                        ? theme.errorBackground
-                        : theme.warningBackground,
+                  transition: `background-color ${motion.base} ${motion.ease}, border-color ${motion.base} ${motion.ease}`,
+                  '&[data-hovered]': {
+                    backgroundColor: theme.buttonNormalBackgroundHover,
+                    borderColor: theme.hairlineStrong,
+                    color: theme.buttonNormalText,
+                    boxShadow: elevation.xs,
+                  },
+                  '&[data-pressed]': {
+                    backgroundColor: theme.buttonNormalBackgroundHover,
                   },
                   ...narrowStyle,
                 })}
@@ -330,12 +368,15 @@ function Notification({
                 <View
                   key={idx}
                   style={{
+                    ...styles.tnum,
                     whiteSpace: 'pre-wrap',
-                    fontFamily: 'monospace',
-                    fontSize: 12,
-                    backgroundColor: 'rgba(0, 0, 0, .05)',
-                    padding: 10,
-                    borderRadius: 4,
+                    fontSize: 11.5,
+                    lineHeight: '17px',
+                    color: theme.pageTextLight,
+                    backgroundColor: theme.trayBackground,
+                    border: `1px solid ${theme.trayBorder}`,
+                    padding: '10px 12px',
+                    borderRadius: radius.md,
                     width: '100%',
                   }}
                 >
@@ -353,13 +394,14 @@ function Notification({
             left: 0,
             right: 0,
             bottom: 0,
-            backgroundColor: theme.tableBackground,
+            borderRadius: radius.lg,
+            backgroundColor: theme.menuBackground,
             alignItems: 'center',
             justifyContent: 'center',
           }}
         >
           <AnimatedLoading
-            style={{ width: 20, height: 20, color: 'currentColor' }}
+            style={{ width: 20, height: 20, color: theme.pageTextLight }}
           />
         </View>
       )}

@@ -11,6 +11,8 @@ import {
 import { SvgHelp, SvgNotesPaperText } from '@actual-app/components/icons/v2';
 import { styles } from '@actual-app/components/styles';
 import { Text } from '@actual-app/components/text';
+import { theme } from '@actual-app/components/theme';
+import { elevation, motion, radius } from '@actual-app/components/tokens';
 import { View } from '@actual-app/components/view';
 import { css } from '@emotion/css';
 import { Command } from 'cmdk';
@@ -81,7 +83,12 @@ function BalanceRow<
         {props => (
           <CellValueText
             {...props}
-            style={{ ...styles.tnum, whiteSpace: 'nowrap', opacity: 0.9 }}
+            style={{
+              ...styles.tnum,
+              fontSize: 12.5,
+              whiteSpace: 'nowrap',
+              color: theme.pageTextLight,
+            }}
           />
         )}
       </CellValue>
@@ -263,6 +270,12 @@ export function CommandBar() {
       label={t('Command Bar')}
       aria-label={t('Command Bar')}
       shouldFilter={false}
+      overlayClassName={css({
+        position: 'fixed',
+        inset: 0,
+        backgroundColor: theme.overlayBackground,
+        zIndex: 3000,
+      })}
       className={css({
         position: 'fixed',
         top: '30%',
@@ -270,11 +283,11 @@ export function CommandBar() {
         transform: 'translate(-50%, -30%)',
         width: '90%',
         maxWidth: '600px',
-        backgroundColor: 'var(--color-modalBackground)',
-        border: '1px solid var(--color-modalBorder)',
-        color: 'var(--color-pageText)',
-        borderRadius: '8px',
-        boxShadow: '0 4px 12px rgba(0, 0, 0, 0.1)',
+        backgroundColor: theme.menuBackground,
+        border: `1px solid ${theme.menuBorder}`,
+        color: theme.pageText,
+        borderRadius: radius.xl,
+        boxShadow: elevation.modal,
         overflow: 'hidden',
         zIndex: 3001,
       })}
@@ -286,23 +299,23 @@ export function CommandBar() {
         onValueChange={setSearch}
         className={css({
           width: '100%',
-          padding: '12px 16px',
-          fontSize: '1rem',
+          padding: '16px 20px',
+          fontSize: 15,
           border: 'none',
-          borderBottom: '1px solid var(--color-tableBorderSeparator)',
+          borderBottom: `1px solid ${theme.hairline}`,
           backgroundColor: 'transparent',
-          color: 'var(--color-pageText)',
+          color: theme.pageText,
           outline: 'none',
           '&::placeholder': {
-            color: 'var(--color-pageTextSubdued)',
+            color: theme.formInputTextPlaceholder,
           },
         })}
       />
       <Command.List
         className={css({
-          maxHeight: '300px',
+          maxHeight: '340px',
           overflowY: 'auto',
-          padding: '8px 0',
+          padding: '6px 0 8px',
           // Hide the scrollbar
           scrollbarWidth: 'none',
           '&::-webkit-scrollbar': {
@@ -319,13 +332,12 @@ export function CommandBar() {
                 key={section.key}
                 heading={section.heading}
                 className={css({
-                  padding: '0 8px',
+                  padding: '0 6px',
                   '& [cmdk-group-heading]': {
-                    padding: '8px 8px 4px',
-                    fontSize: '0.8rem',
+                    padding: '10px 10px 4px',
+                    fontSize: 11.5,
                     fontWeight: 500,
-                    color: 'var(--color-pageTextSubdued)',
-                    textTransform: 'uppercase',
+                    color: theme.menuItemTextHeader,
                   },
                 })}
               >
@@ -335,29 +347,34 @@ export function CommandBar() {
                     onSelect={() => section.onSelect({ id })}
                     value={name}
                     className={css({
-                      padding: '8px 16px',
+                      padding: '7px 10px',
                       cursor: 'pointer',
-                      fontSize: '0.9rem',
-                      borderRadius: '4px',
+                      fontSize: 13,
+                      borderRadius: radius.sm,
                       margin: '0',
                       display: 'flex',
                       alignItems: 'center',
-                      gap: '8px',
+                      gap: '10px',
+                      color: theme.menuItemText,
+                      transition: `background-color ${motion.fast} ${motion.ease}`,
+                      '& > svg': {
+                        color: theme.pageTextLight,
+                        flexShrink: 0,
+                      },
                       // Avoid showing mouse hover styles when using keyboard navigation
                       '[data-cmdk-list]:not([data-cmdk-list-nav-active]) &:hover':
                         {
-                          backgroundColor:
-                            'var(--color-menuItemBackgroundHover)',
-                          color: 'var(--color-menuItemTextHover)',
+                          backgroundColor: theme.menuItemBackgroundHover,
+                          color: theme.menuItemTextHover,
                         },
 
                       "&[data-selected='true']": {
-                        backgroundColor: 'var(--color-menuItemBackgroundHover)',
-                        color: 'var(--color-menuItemTextHover)',
+                        backgroundColor: theme.menuItemBackgroundHover,
+                        color: theme.menuItemTextHover,
                       },
                     })}
                   >
-                    <Icon width={16} height={16} />
+                    <Icon width={15} height={15} />
                     {content || name}
                   </Command.Item>
                 ))}
@@ -368,10 +385,10 @@ export function CommandBar() {
         {!hasResults && (
           <Command.Empty
             className={css({
-              padding: '16px',
+              padding: '20px 16px',
               textAlign: 'center',
-              fontSize: '0.9rem',
-              color: 'var(--color-pageTextSubdued)',
+              fontSize: 13,
+              color: theme.pageTextSubdued,
             })}
           >
             <Trans>No results found</Trans>

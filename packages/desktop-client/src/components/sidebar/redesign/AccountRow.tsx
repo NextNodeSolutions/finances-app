@@ -8,7 +8,7 @@ import { Input } from '@actual-app/components/input';
 import { styles } from '@actual-app/components/styles';
 import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
-import { radius, spacing } from '@actual-app/components/tokens';
+import { radius } from '@actual-app/components/tokens';
 import { View } from '@actual-app/components/view';
 import type { AccountEntity } from '@actual-app/core/types/models';
 import { css } from '@emotion/css';
@@ -25,6 +25,15 @@ import { isTouchDevice } from '#util/isTouchDevice';
 import { AccountHoverCard } from './AccountHoverCard';
 import { DragHandle } from './DragHandle';
 import { SidebarBalance } from './SidebarBalance';
+import {
+  rowTransition,
+  TREE_COLUMN_GAP,
+  TREE_LEAD_COLUMN,
+  TREE_NESTED_INDENT,
+  TREE_ROW_PADDING_LEFT,
+  TREE_ROW_PADDING_RIGHT,
+  treeFocusRing,
+} from './styles';
 import { SyncDot, useSyncDotLabel } from './SyncDot';
 import type { SyncDotStatus } from './SyncDot';
 import { useTreeItemEditing } from './treeItemEditing';
@@ -125,11 +134,13 @@ export function AccountRow({
       }}
       className={css({
         outline: 'none',
-        borderRadius: radius.sm,
+        borderRadius: radius.md,
+        marginBottom: 1,
         cursor: 'pointer',
         color: isClosed ? theme.sidebarTextMuted : theme.sidebarItemText,
+        transition: rowTransition,
         ...(isUpdated && {
-          fontWeight: 700,
+          fontWeight: 600,
           color: theme.sidebarItemTextUpdated,
         }),
         ...(isActive && {
@@ -137,10 +148,17 @@ export function AccountRow({
           color: theme.sidebarItemTextSelected,
           fontWeight: 'normal',
         }),
-        '&[data-hovered], &[data-focus-visible]': {
+        '&[data-hovered]': {
           backgroundColor: isActive
             ? theme.sidebarItemBackgroundSelected
             : theme.sidebarItemBackgroundHover,
+          color: theme.sidebarItemTextSelected,
+        },
+        '&[data-focus-visible]': {
+          backgroundColor: isActive
+            ? theme.sidebarItemBackgroundSelected
+            : theme.sidebarItemBackgroundHover,
+          ...treeFocusRing,
         },
         '&[data-dragging]': { opacity: 0.5 },
       })}
@@ -155,17 +173,20 @@ export function AccountRow({
               style={{
                 flexDirection: 'row',
                 alignItems: 'center',
-                gap: spacing.xs,
-                paddingBlock: spacing.xs,
-                paddingRight: spacing.sm,
-                paddingLeft: level > 1 ? spacing.xs + spacing.sm : spacing.xs,
+                gap: TREE_COLUMN_GAP,
+                height: 28,
+                paddingRight: TREE_ROW_PADDING_RIGHT,
+                paddingLeft:
+                  level > 1
+                    ? TREE_ROW_PADDING_LEFT + TREE_NESTED_INDENT
+                    : TREE_ROW_PADDING_LEFT,
                 fontSize: 13,
                 textDecoration: isClosed ? 'line-through' : 'none',
               }}
             >
               <View
                 style={{
-                  width: spacing.lg,
+                  width: TREE_LEAD_COLUMN,
                   flexShrink: 0,
                   alignItems: 'center',
                 }}
@@ -176,7 +197,7 @@ export function AccountRow({
                 <InitialFocus>
                   <Input
                     aria-label={t('Account name')}
-                    style={{ flex: 1, padding: 0, fontSize: 13 }}
+                    style={{ flex: 1, padding: '2px 6px', fontSize: 13 }}
                     defaultValue={account.name}
                     onKeyDown={e => e.stopPropagation()}
                     onEnter={newAccountName => {
@@ -200,9 +221,12 @@ export function AccountRow({
               <SidebarBalance
                 binding={bindings.accountBalance(account.id)}
                 style={{
-                  fontSize: 12,
-                  color: 'inherit',
-                  marginLeft: spacing.xs,
+                  color: isClosed
+                    ? theme.sidebarTextMuted
+                    : isActive
+                      ? theme.sidebarItemTextSelected
+                      : theme.sidebarTextSubdued,
+                  marginLeft: TREE_COLUMN_GAP,
                 }}
               />
               <DragHandle />

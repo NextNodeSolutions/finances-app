@@ -11,7 +11,15 @@ import { css } from '@emotion/css';
 import { AccountTree } from './AccountTree';
 import { CollapseChevron } from './CollapseChevron';
 import { CountPill } from './CountPill';
-import { sectionLabelStyle } from './styles';
+import {
+  rowTransition,
+  sectionLabelStyle,
+  TREE_COLUMN_GAP,
+  TREE_LEAD_COLUMN,
+  TREE_ROW_PADDING_LEFT,
+  TREE_ROW_PADDING_RIGHT,
+  treeFocusRing,
+} from './styles';
 
 type ClosedSectionProps = {
   accounts: AccountEntity[];
@@ -33,29 +41,39 @@ export function ClosedSection({
   }
 
   return (
-    <View style={{ marginTop: spacing.xxs }}>
+    <View style={{ marginTop: spacing.xs }}>
       <Button
         variant="bare"
         aria-expanded={isOpen}
         onPress={onToggle}
         className={css({
-          '&[data-hovered], &[data-focus-visible]': {
+          transition: rowTransition,
+          '&[data-hovered]': {
             backgroundColor: theme.sidebarItemBackgroundHover,
           },
+          '&[data-focus-visible]': treeFocusRing,
         })}
         style={{
           flexDirection: 'row',
           alignItems: 'center',
           justifyContent: 'flex-start',
-          gap: spacing.xs + spacing.xxs,
-          paddingBlock: spacing.xs,
-          paddingLeft: spacing.xs + spacing.xxs,
-          paddingRight: spacing.sm,
-          borderRadius: radius.sm,
+          gap: TREE_COLUMN_GAP,
+          height: 30,
+          paddingLeft: TREE_ROW_PADDING_LEFT,
+          paddingRight: TREE_ROW_PADDING_RIGHT,
+          borderRadius: radius.md,
           width: '100%',
         }}
       >
-        <CollapseChevron isOpen={isOpen} color={theme.sidebarTextMuted} />
+        <View
+          style={{
+            width: TREE_LEAD_COLUMN,
+            alignItems: 'center',
+            flexShrink: 0,
+          }}
+        >
+          <CollapseChevron isOpen={isOpen} />
+        </View>
         <Text style={{ ...sectionLabelStyle, color: theme.sidebarTextMuted }}>
           <Trans>Closed</Trans>
         </Text>

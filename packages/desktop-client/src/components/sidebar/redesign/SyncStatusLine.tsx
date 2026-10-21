@@ -1,26 +1,19 @@
-import type { ComponentType, SVGProps } from 'react';
 import { useTranslation } from 'react-i18next';
 
-import {
-  SvgCloudCheck,
-  SvgCloudWarning,
-} from '@actual-app/components/icons/v1';
-import { SvgCloudUnknown } from '@actual-app/components/icons/v2';
 import { styles } from '@actual-app/components/styles';
 import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
-import { spacing } from '@actual-app/components/tokens';
 import { View } from '@actual-app/components/view';
 
 import { useSyncServerStatus } from '#hooks/useSyncServerStatus';
 import { useSyncStatus } from '#hooks/useSyncStatus';
 import type { SyncState } from '#hooks/useSyncStatus';
 
+import { getSyncDotStyle } from './SyncDot';
+import type { SyncDotStatus } from './SyncDot';
+
 type SyncPresentation = {
-  Icon:
-    | ComponentType<SVGProps<SVGElement>>
-    | ComponentType<SVGProps<SVGSVGElement>>;
-  color: string;
+  dot: SyncDotStatus;
   label: string;
 };
 
@@ -33,41 +26,13 @@ export function SyncStatusLine() {
     'no-server' | 'syncing' | 'synced' | Exclude<SyncState, null>,
     SyncPresentation
   > = {
-    'no-server': {
-      Icon: SvgCloudUnknown,
-      color: theme.sidebarTextSubdued,
-      label: t('Local only'),
-    },
-    syncing: {
-      Icon: SvgCloudCheck,
-      color: theme.sidebarTextSubdued,
-      label: t('Syncing…'),
-    },
-    error: {
-      Icon: SvgCloudWarning,
-      color: theme.sidebarTextFailed,
-      label: t('Sync error'),
-    },
-    offline: {
-      Icon: SvgCloudUnknown,
-      color: theme.sidebarTextSubdued,
-      label: t('Offline'),
-    },
-    local: {
-      Icon: SvgCloudUnknown,
-      color: theme.sidebarTextSubdued,
-      label: t('Local file'),
-    },
-    disabled: {
-      Icon: SvgCloudUnknown,
-      color: theme.sidebarTextSubdued,
-      label: t('Sync disabled'),
-    },
-    synced: {
-      Icon: SvgCloudCheck,
-      color: theme.sidebarTextPositive,
-      label: t('Synced'),
-    },
+    'no-server': { dot: 'unlinked', label: t('Local only') },
+    syncing: { dot: 'pending', label: t('Syncing…') },
+    error: { dot: 'error', label: t('Sync error') },
+    offline: { dot: 'unlinked', label: t('Offline') },
+    local: { dot: 'unlinked', label: t('Local file') },
+    disabled: { dot: 'unlinked', label: t('Sync disabled') },
+    synced: { dot: 'synced', label: t('Synced') },
   };
 
   const statusKey =
@@ -76,22 +41,23 @@ export function SyncStatusLine() {
       : isSyncing
         ? 'syncing'
         : (syncState ?? 'synced');
-  const { Icon, color, label } = presentations[statusKey];
+  const { dot, label } = presentations[statusKey];
 
   return (
     <View
       style={{
         flexDirection: 'row',
         alignItems: 'center',
-        gap: spacing.xs,
+        gap: 6,
         marginTop: 1,
       }}
     >
-      <Icon width={10} height={10} style={{ flexShrink: 0, color }} />
+      <View aria-hidden style={getSyncDotStyle(dot)} />
       <Text
         style={{
-          fontSize: 11,
-          color: theme.sidebarTextSubdued,
+          fontSize: 11.5,
+          lineHeight: '14px',
+          color: dot === 'error' ? theme.signalText : theme.sidebarTextSubdued,
           ...styles.ellipsisText,
         }}
       >

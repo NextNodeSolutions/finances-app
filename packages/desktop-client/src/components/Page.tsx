@@ -6,9 +6,17 @@ import { useResponsive } from '@actual-app/components/hooks/useResponsive';
 import { styles } from '@actual-app/components/styles';
 import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
+import { tokens } from '@actual-app/components/tokens';
 import { View } from '@actual-app/components/view';
 
 const HEADER_HEIGHT = 50;
+
+// Desktop page frame: the side gutter shared by the title and the content,
+// and the calm space between the titlebar hairline and the page title.
+const PAGE_GUTTER = 20;
+const PAGE_TOP_SPACE = 28;
+const PAGE_TITLE_GAP = 20;
+const NARROW_PAGE_GUTTER = 10;
 
 type PageHeaderProps = {
   title: ReactNode;
@@ -22,15 +30,21 @@ export function PageHeader({ title, style }: PageHeaderProps) {
         flexDirection: 'row',
         justifyContent: 'flex-start',
         alignItems: 'center',
-        marginLeft: 20,
+        minHeight: 34,
+        marginLeft: PAGE_GUTTER,
+        marginRight: PAGE_GUTTER,
+        marginBottom: PAGE_TITLE_GAP,
         ...style,
       }}
     >
       <View
         style={{
+          ...styles.display,
           flexDirection: 'row',
-          fontSize: 25,
-          fontWeight: 500,
+          alignItems: 'center',
+          fontSize: 28,
+          lineHeight: '34px',
+          color: theme.pageText,
         }}
       >
         {typeof title === 'string' ? <Text>{title}</Text> : title}
@@ -163,7 +177,8 @@ type PageProps = {
 export function Page({ header, style, padding, children, footer }: PageProps) {
   const { isNarrowWidth } = useResponsive();
   const mobileHeaderSlot = useContext(MobilePageHeaderSlotContext);
-  const childrenPadding = padding != null ? padding : isNarrowWidth ? 10 : 20;
+  const childrenPadding =
+    padding ?? (isNarrowWidth ? NARROW_PAGE_GUTTER : PAGE_GUTTER);
 
   const headerToRender =
     typeof header === 'string' ? (
@@ -211,6 +226,9 @@ export function Page({ header, style, padding, children, footer }: PageProps) {
     <View
       style={{
         ...styles.page,
+        [`@media (min-width: ${tokens.breakpoint_small})`]: {
+          paddingTop: PAGE_TOP_SPACE,
+        },
         flex: 1,
         backgroundColor: theme.pageBackground,
         ...style,

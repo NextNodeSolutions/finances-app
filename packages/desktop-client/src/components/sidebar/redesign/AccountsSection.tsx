@@ -45,6 +45,7 @@ export function AccountsSection() {
         minHeight: 0,
         overflowY: 'auto',
         paddingInline: spacing.sm,
+        paddingTop: spacing.lg + spacing.xxs,
       }}
     >
       <View style={{ flexShrink: 0 }}>

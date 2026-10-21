@@ -8,7 +8,7 @@ import { Input } from '@actual-app/components/input';
 import { styles } from '@actual-app/components/styles';
 import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
-import { spacing } from '@actual-app/components/tokens';
+import { motion, radius, spacing } from '@actual-app/components/tokens';
 import { Tooltip } from '@actual-app/components/tooltip';
 import { View } from '@actual-app/components/view';
 import { isElectron } from '@actual-app/core/shared/environment';
@@ -34,9 +34,16 @@ export function SidebarBudgetName({
   const iconButtonClassName = cx(
     'hover-visible',
     css({
+      width: 20,
+      height: 20,
+      padding: 0,
+      borderRadius: radius.sm,
       backgroundColor: 'transparent',
+      color: theme.sidebarTextMuted,
+      transition: `opacity ${motion.base} ${motion.ease}, background-color ${motion.base} ${motion.ease}`,
       '&[data-hovered], &[data-focus-visible]': {
-        backgroundColor: theme.sidebarControlBackground,
+        backgroundColor: theme.sidebarItemBackgroundHover,
+        color: theme.sidebarItemTextSelected,
       },
     }),
   );
@@ -54,7 +61,7 @@ export function SidebarBudgetName({
         style={{
           flexDirection: 'row',
           alignItems: 'center',
-          gap: spacing.xs,
+          gap: spacing.xxs,
           minWidth: 0,
           visibility: isEditing ? 'hidden' : undefined,
           '& .hover-visible': {
@@ -68,9 +75,10 @@ export function SidebarBudgetName({
         <Text
           data-testid="budget-name"
           style={{
+            ...styles.display,
             color: theme.sidebarHeaderText,
-            fontSize: 13,
-            fontWeight: 600,
+            fontSize: 17,
+            lineHeight: '21px',
             ...styles.ellipsisText,
           }}
         >
@@ -80,14 +88,9 @@ export function SidebarBudgetName({
           variant="bare"
           className={iconButtonClassName}
           aria-label={t('Rename budget')}
-          style={{ padding: spacing.xxs, flexShrink: 0 }}
           onPress={() => onEditingChange(true)}
         >
-          <SvgPencil1
-            width={11}
-            height={11}
-            style={{ color: theme.sidebarTextSubdued }}
-          />
+          <SvgPencil1 width={10} height={10} />
         </Button>
         {isElectron() && (
           <Tooltip
@@ -100,18 +103,13 @@ export function SidebarBudgetName({
               variant="bare"
               className={iconButtonClassName}
               aria-label={t('Load Backup…')}
-              style={{ padding: spacing.xxs, flexShrink: 0 }}
               onPress={() =>
                 dispatch(
                   pushModal({ modal: { name: 'load-backup', options: {} } }),
                 )
               }
             >
-              <SvgTime
-                width={11}
-                height={11}
-                style={{ color: theme.sidebarTextSubdued }}
-              />
+              <SvgTime width={10} height={10} />
             </Button>
           </Tooltip>
         )}
@@ -127,7 +125,8 @@ export function SidebarBudgetName({
               left: 0,
               width: '100%',
               transform: 'translateY(-50%)',
-              fontWeight: 600,
+              ...styles.display,
+              fontSize: 15,
             }}
             defaultValue={budgetName}
             onEnter={saveBudgetName}

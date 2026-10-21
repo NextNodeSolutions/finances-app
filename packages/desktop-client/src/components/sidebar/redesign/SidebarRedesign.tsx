@@ -1,8 +1,8 @@
 import { useTranslation } from 'react-i18next';
 
 import { theme } from '@actual-app/components/theme';
-import { spacing } from '@actual-app/components/tokens';
 import { View } from '@actual-app/components/view';
+import { css, cx } from '@emotion/css';
 
 import { useSidebar } from '#components/sidebar/SidebarProvider';
 import { SidebarShell } from '#components/sidebar/SidebarShell';
@@ -29,7 +29,12 @@ export function SidebarRedesign() {
   return (
     <SidebarShell
       defaultWidth={DEFAULT_SIDEBAR_WIDTH}
-      className="sidebar-redesign"
+      // The light palette file draws this border too; declaring it here gives
+      // dark and midnight the same hairline edge.
+      className={cx(
+        'sidebar-redesign',
+        css({ borderRight: `1px solid ${theme.sidebarBorder}` }),
+      )}
     >
       <View
         role="navigation"
@@ -43,15 +48,6 @@ export function SidebarRedesign() {
         </SidebarHeader>
 
         <PrimaryNav />
-
-        <View
-          style={{
-            height: 1,
-            margin: `${spacing.sm}px ${spacing.md}px`,
-            backgroundColor: theme.sidebarBorder,
-            flexShrink: 0,
-          }}
-        />
 
         <AccountsSection />
 

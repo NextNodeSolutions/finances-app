@@ -12,11 +12,11 @@ import {
   SvgViewHide,
   SvgViewShow,
 } from '@actual-app/components/icons/v2';
-import { SpaceBetween } from '@actual-app/components/space-between';
 import type { CSSProperties } from '@actual-app/components/styles';
 import { styles } from '@actual-app/components/styles';
 import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
+import { motion, radius, spacing } from '@actual-app/components/tokens';
 import { Tooltip } from '@actual-app/components/tooltip';
 import { View } from '@actual-app/components/view';
 import { isDevelopmentEnvironment } from '@actual-app/core/shared/environment';
@@ -45,6 +45,23 @@ import { useServerURL } from './ServerContext';
 import { useSidebar } from './sidebar/SidebarProvider';
 import { ThemeSelector } from './ThemeSelector';
 
+// The frame's top bar. The sidebar header shares this height so both bottom
+// hairlines meet in one line across the window.
+export const TITLEBAR_HEIGHT = 48;
+
+const ICON_BUTTON_SIZE = 30;
+
+// Bare 30x30 icon buttons for the right cluster; the bare variant supplies
+// the hover fill.
+const iconButtonStyle: CSSProperties = {
+  minWidth: ICON_BUTTON_SIZE,
+  height: ICON_BUTTON_SIZE,
+  padding: '0 7px',
+  borderRadius: radius.md,
+  color: theme.pageTextLight,
+  transition: `background-color ${motion.base} ${motion.ease}, color ${motion.base} ${motion.ease}`,
+};
+
 function UncategorizedButton() {
   const count: number | null = useSheetValue(bindings.uncategorizedCount());
   if (count === null || count <= 0) {
@@ -57,9 +74,31 @@ function UncategorizedButton() {
       buttonVariant="bare"
       to="/categories/uncategorized"
       style={{
-        color: theme.errorText,
+        gap: 6,
+        height: 26,
+        padding: '0 10px',
+        marginRight: spacing.sm,
+        borderRadius: radius.md,
+        fontSize: 12,
+        fontWeight: 500,
+        color: theme.signalText,
+        backgroundColor: theme.signalSubtle,
+        '&[data-hovered]': {
+          backgroundColor: theme.signalSubtle,
+          color: theme.signalText,
+          boxShadow: `inset 0 0 0 1px ${theme.warningBorder}`,
+        },
       }}
     >
+      <View
+        aria-hidden
+        style={{
+          width: 6,
+          height: 6,
+          borderRadius: radius.pill,
+          backgroundColor: theme.signal,
+        }}
+      />
       <Trans count={count}>{{ count }} uncategorized transactions</Trans>
     </Link>
   );
@@ -143,12 +182,12 @@ function ServerSyncButton({ style, isMobile = false }: ServerSyncButtonProps) {
         : theme.mobileHeaderText;
   const desktopColor =
     syncState === 'error'
-      ? theme.errorTextDark
+      ? theme.signalText
       : syncState === 'disabled' ||
           syncState === 'offline' ||
           syncState === 'local'
         ? theme.buttonBareDisabledText
-        : theme.buttonBareText;
+        : theme.pageTextLight;
 
   const activeStyle = isMobile
     ? {
@@ -238,7 +277,7 @@ function ServerSyncButton({ style, isMobile = false }: ServerSyncButtonProps) {
             <AnimatedRefresh width={18} height={18} animating={syncing} />
           )
         ) : syncState === 'error' ? (
-          <SvgAlertTriangle width={13} />
+          <SvgAlertTriangle width={14} height={14} />
         ) : (
           <AnimatedRefresh animating={syncing} />
         )}
@@ -282,12 +321,11 @@ export function Titlebar({ style }: TitlebarProps) {
       style={{
         flexDirection: 'row',
         alignItems: 'center',
-        padding: '0 10px 0 15px',
-        height: 36,
-        pointerEvents: 'none',
-        '& *': {
-          pointerEvents: 'auto',
-        },
+        flexShrink: 0,
+        height: TITLEBAR_HEIGHT,
+        padding: '0 20px 0 28px',
+        backgroundColor: theme.titlebarBackground,
+        borderBottom: `1px solid ${theme.titlebarBorder}`,
         ...(!Platform.isBrowser && Platform.OS === 'mac' && floatingSidebar
           ? { paddingLeft: 80 }
           : {}),
@@ -298,7 +336,7 @@ export function Titlebar({ style }: TitlebarProps) {
         <Button
           aria-label={t('Sidebar menu')}
           variant="bare"
-          style={{ marginRight: 8 }}
+          style={{ ...iconButtonStyle, marginRight: spacing.sm }}
           onHoverStart={e => {
             if (e.pointerType === 'mouse') {
               sidebar.setHidden(false);
@@ -322,12 +360,19 @@ export function Titlebar({ style }: TitlebarProps) {
           path="*"
           element={
             location.state?.goBack ? (
-              <Button variant="bare" onPress={() => navigate(-1)}>
-                <SvgArrowLeft
-                  width={10}
-                  height={10}
-                  style={{ marginRight: 5 }}
-                />{' '}
+              <Button
+                variant="bare"
+                style={{
+                  height: ICON_BUTTON_SIZE,
+                  padding: '0 10px 0 8px',
+                  gap: 6,
+                  borderRadius: radius.md,
+                  fontWeight: 500,
+                  color: theme.pageTextLight,
+                }}
+                onPress={() => navigate(-1)}
+              >
+                <SvgArrowLeft width={10} height={10} />
                 <Trans>Back</Trans>
               </Button>
             ) : null
@@ -339,16 +384,27 @@ export function Titlebar({ style }: TitlebarProps) {
         <Route path="/budget" element={<BudgetTitlebar />} />
       </Routes>
       <View style={{ flex: 1 }} />
-      <SpaceBetween gap={10}>
+      <View style={{ flexDirection: 'row', alignItems: 'center', gap: 2 }}>
         <UncategorizedButton />
-        {isDevelopmentEnvironment() && !isTestEnv && <ThemeSelector />}
-        <PrivacyButton />
-        <NotificationsButton />
-        {serverURL ? <ServerSyncButton /> : null}
+        {isDevelopmentEnvironment() && !isTestEnv && (
+          <ThemeSelector style={iconButtonStyle} />
+        )}
+        <PrivacyButton style={iconButtonStyle} />
+        <NotificationsButton style={iconButtonStyle} />
+        {serverURL ? <ServerSyncButton style={iconButtonStyle} /> : null}
         <SharedArrayBufferWarning />
+        <View
+          aria-hidden
+          style={{
+            width: 1,
+            height: 16,
+            marginInline: spacing.sm,
+            backgroundColor: theme.titlebarBorder,
+          }}
+        />
         <LoggedInUser />
         <HelpMenu />
-      </SpaceBetween>
+      </View>
     </View>
   );
 }

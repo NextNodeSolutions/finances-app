@@ -4,7 +4,9 @@ import { Button } from '@actual-app/components/button';
 import { SvgPencil1 } from '@actual-app/components/icons/v2';
 import { InitialFocus } from '@actual-app/components/initial-focus';
 import { Input } from '@actual-app/components/input';
+import { styles } from '@actual-app/components/styles';
 import { theme } from '@actual-app/components/theme';
+import { motion, radius } from '@actual-app/components/tokens';
 import { View } from '@actual-app/components/view';
 
 type EditablePageHeaderTitleProps = {
@@ -39,13 +41,14 @@ export function EditablePageHeaderTitle({
           onUpdate={onSaveValue}
           onEscape={() => setIsEditing(false)}
           style={{
-            fontSize: 25,
-            fontWeight: 500,
+            ...styles.display,
+            fontSize: 28,
+            lineHeight: '34px',
             marginTop: -3,
             marginBottom: -3,
-            marginLeft: -6,
-            paddingTop: 2,
-            paddingBottom: 2,
+            marginLeft: -9,
+            paddingTop: 1,
+            paddingBottom: 1,
             width: Math.max(20, title.length) + 'ch',
           }}
         />
@@ -58,12 +61,12 @@ export function EditablePageHeaderTitle({
       style={{
         flexDirection: 'row',
         alignItems: 'center',
-        gap: 3,
+        gap: 6,
         '& .hover-visible': {
           opacity: 0,
-          transition: 'opacity .25s',
+          transition: `opacity ${motion.base} ${motion.ease}`,
         },
-        '&:hover .hover-visible': {
+        '&:hover .hover-visible, & .hover-visible[data-focus-visible]': {
           opacity: 1,
         },
       }}
@@ -73,13 +76,14 @@ export function EditablePageHeaderTitle({
       <Button
         variant="bare"
         className="hover-visible"
+        style={{ width: 26, height: 26, padding: 0, borderRadius: radius.md }}
         onPress={() => setIsEditing(true)}
       >
         <SvgPencil1
           style={{
-            width: 11,
-            height: 11,
-            color: theme.pageTextSubdued,
+            width: 12,
+            height: 12,
+            color: theme.pageTextLight,
           }}
         />
       </Button>

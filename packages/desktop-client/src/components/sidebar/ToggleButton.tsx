@@ -6,6 +6,7 @@ import { Button } from '@actual-app/components/button';
 import { SvgPin } from '@actual-app/components/icons/v1';
 import { SvgArrowButtonLeft1 } from '@actual-app/components/icons/v2';
 import { theme } from '@actual-app/components/theme';
+import { radius } from '@actual-app/components/tokens';
 import { View } from '@actual-app/components/view';
 
 type ToggleButtonProps = {
@@ -26,19 +27,24 @@ export function ToggleButton({
         variant="bare"
         aria-label={isFloating ? t('Pin sidebar') : t('Unpin sidebar')}
         onPress={onFloat}
-        style={{ color: theme.buttonMenuBorder }}
+        style={{
+          width: 26,
+          height: 26,
+          padding: 0,
+          borderRadius: radius.md,
+          color: theme.sidebarTextMuted,
+        }}
       >
         {isFloating ? (
           <SvgPin
             style={{
-              margin: -2,
-              width: 15,
-              height: 15,
+              width: 14,
+              height: 14,
               transform: 'rotate(45deg)',
             }}
           />
         ) : (
-          <SvgArrowButtonLeft1 style={{ width: 13, height: 13 }} />
+          <SvgArrowButtonLeft1 style={{ width: 11, height: 11 }} />
         )}
       </Button>
     </View>

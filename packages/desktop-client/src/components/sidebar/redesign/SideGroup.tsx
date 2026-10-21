@@ -1,4 +1,5 @@
 import { useTranslation } from 'react-i18next';
+import { useMatch } from 'react-router';
 
 import { Button } from '@actual-app/components/button';
 import { Text } from '@actual-app/components/text';
@@ -14,7 +15,15 @@ import { AccountTree } from './AccountTree';
 import { CollapseChevron } from './CollapseChevron';
 import { CountPill } from './CountPill';
 import { SidebarBalance } from './SidebarBalance';
-import { sectionLabelStyle } from './styles';
+import {
+  rowTransition,
+  sectionLabelStyle,
+  TREE_COLUMN_GAP,
+  TREE_LEAD_COLUMN,
+  TREE_ROW_PADDING_LEFT,
+  TREE_ROW_PADDING_RIGHT,
+  treeFocusRing,
+} from './styles';
 import { SyncErrorRollup } from './SyncErrorRollup';
 import type { GroupBucket, SidebarAccountSide } from './useSidebarAccountTree';
 
@@ -49,17 +58,24 @@ export function SideGroup({
   onToggleBucket,
 }: SideGroupProps) {
   const { t } = useTranslation();
+  const to = side === 'on' ? '/accounts/onbudget' : '/accounts/offbudget';
+  const isActive = useMatch({ path: to, end: true }) !== null;
 
   return (
-    <View style={{ marginTop: spacing.xxs }}>
+    <View style={{ marginTop: spacing.xs }}>
       <View
         style={{
           flexDirection: 'row',
           alignItems: 'center',
-          gap: spacing.xs,
-          paddingBlock: spacing.xs,
-          paddingLeft: spacing.xs,
-          paddingRight: spacing.sm,
+          gap: TREE_COLUMN_GAP,
+          height: 30,
+          paddingLeft: TREE_ROW_PADDING_LEFT,
+          paddingRight: TREE_ROW_PADDING_RIGHT,
+          borderRadius: radius.md,
+          backgroundColor: isActive
+            ? theme.sidebarItemBackgroundSelected
+            : 'transparent',
+          transition: rowTransition,
         }}
       >
         <Button
@@ -72,31 +88,38 @@ export function SideGroup({
           }
           onPress={onToggle}
           className={css({
-            '&[data-hovered], &[data-focus-visible]': {
-              backgroundColor: theme.sidebarItemBackgroundHover,
-            },
-          })}
-          style={{
-            padding: spacing.xxs,
+            width: TREE_LEAD_COLUMN,
+            height: TREE_LEAD_COLUMN,
+            padding: 0,
             flexShrink: 0,
             borderRadius: radius.sm,
-          }}
+            transition: rowTransition,
+            '&[data-hovered]': {
+              backgroundColor: theme.sidebarItemBackgroundHover,
+            },
+            '&[data-focus-visible]': treeFocusRing,
+          })}
         >
           <CollapseChevron isOpen={isOpen} />
         </Button>
         <Link
           variant="internal"
-          to={side === 'on' ? '/accounts/onbudget' : '/accounts/offbudget'}
+          to={to}
           isExactPathMatch
           style={{
             display: 'flex',
             flexDirection: 'row',
             alignItems: 'center',
-            gap: spacing.xs,
+            gap: spacing.xs + spacing.xxs,
             flex: 1,
             minWidth: 0,
+            alignSelf: 'stretch',
+            borderRadius: radius.sm,
             textDecoration: 'none',
-            color: theme.sidebarItemText,
+            color: theme.sidebarHeaderText,
+            transition: rowTransition,
+            ':hover': { color: theme.sidebarItemTextSelected },
+            ':focus-visible': treeFocusRing,
           }}
           activeStyle={{ color: theme.sidebarItemTextSelected }}
         >
@@ -107,7 +130,7 @@ export function SideGroup({
           <SidebarBalance
             binding={totalBinding}
             testId={balanceTestId}
-            style={{ fontSize: 12, fontWeight: 600, color: 'inherit' }}
+            style={{ fontWeight: 500, color: 'inherit' }}
           />
         </Link>
       </View>

@@ -1,6 +1,8 @@
 import React from 'react';
 
 import { useResponsive } from '@actual-app/components/hooks/useResponsive';
+import { theme } from '@actual-app/components/theme';
+import { elevation, radius } from '@actual-app/components/tokens';
 import { View } from '@actual-app/components/view';
 import { useDebounceCallback } from 'usehooks-ts';
 
@@ -44,12 +46,14 @@ export function FloatableSidebar() {
         // If not floating, the -50 takes into account the transform below
         bottom: sidebarShouldFloat ? 8 : -50,
         zIndex: 1001,
-        borderRadius: sidebarShouldFloat ? '0 6px 6px 0' : 0,
+        borderRadius: sidebarShouldFloat
+          ? `0 ${radius.lg}px ${radius.lg}px 0`
+          : 0,
         overflow: 'hidden',
+        border: sidebarShouldFloat ? `1px solid ${theme.hairline}` : undefined,
+        borderLeft: 'none',
         boxShadow:
-          !sidebarShouldFloat || sidebar.hidden
-            ? 'none'
-            : '0 15px 30px 0 rgba(0,0,0,0.25), 0 3px 15px 0 rgba(0,0,0,.5)',
+          !sidebarShouldFloat || sidebar.hidden ? 'none' : elevation.modal,
         transform: `translateY(${!sidebarShouldFloat ? -8 : 0}px)
                       translateX(${
                         sidebarShouldFloat && sidebar.hidden ? '-100' : '0'

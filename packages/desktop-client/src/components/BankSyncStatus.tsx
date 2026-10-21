@@ -2,9 +2,9 @@ import React from 'react';
 import { Trans } from 'react-i18next';
 import { animated, useTransition } from 'react-spring';
 
-import { styles } from '@actual-app/components/styles';
 import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
+import { elevation, radius } from '@actual-app/components/tokens';
 import { View } from '@actual-app/components/view';
 
 import { useSelector } from '#redux';
@@ -19,9 +19,9 @@ export function BankSyncStatus() {
   const transitions = useTransition(
     accountsSyncingCount > 0 ? 'syncing' : null,
     {
-      from: { opacity: 0, transform: 'translateY(-100px)' },
-      enter: { opacity: 1, transform: 'translateY(0)' },
-      leave: { opacity: 0, transform: 'translateY(-100px)' },
+      from: { opacity: 0 },
+      enter: { opacity: 1 },
+      leave: { opacity: 0 },
     },
   );
 
@@ -32,9 +32,10 @@ export function BankSyncStatus() {
         top: 0,
         left: 0,
         right: 0,
-        marginTop: 5,
+        marginTop: 12,
         alignItems: 'center',
         zIndex: 501,
+        pointerEvents: 'none',
       }}
     >
       {transitions(
@@ -43,20 +44,26 @@ export function BankSyncStatus() {
             <animated.div key={item} style={style}>
               <View
                 style={{
-                  borderRadius: 4,
-                  backgroundColor: theme.pillBackgroundSelected,
-                  color: theme.pillTextSelected,
-                  padding: '5px 13px',
+                  borderRadius: radius.pill,
+                  backgroundColor: theme.menuBackground,
+                  border: `1px solid ${theme.menuBorder}`,
+                  boxShadow: elevation.popover,
+                  color: theme.pageText,
+                  padding: '6px 14px 6px 12px',
+                  gap: 8,
+                  fontSize: 12.5,
+                  fontWeight: 500,
                   flexDirection: 'row',
                   alignItems: 'center',
-                  ...styles.shadow,
                 }}
               >
                 <AnimatedRefresh
                   animating
-                  iconStyle={{ color: theme.pillTextSelected }}
+                  width={12}
+                  height={12}
+                  iconStyle={{ color: theme.pageTextLight }}
                 />
-                <Text style={{ marginLeft: 5 }}>
+                <Text>
                   <Trans count={accountsSyncingCount}>
                     Syncing... {{ count }} accounts remaining
                   </Trans>

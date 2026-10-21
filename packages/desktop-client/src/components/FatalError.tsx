@@ -6,8 +6,10 @@ import { Block } from '@actual-app/components/block';
 import { Button, ButtonWithLoading } from '@actual-app/components/button';
 import { Paragraph } from '@actual-app/components/paragraph';
 import { SpaceBetween } from '@actual-app/components/space-between';
+import { styles } from '@actual-app/components/styles';
 import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
+import { radius } from '@actual-app/components/tokens';
 import { View } from '@actual-app/components/view';
 import { isElectron } from '@actual-app/core/shared/environment';
 import { LazyLoadFailedError } from '@actual-app/core/shared/errors';
@@ -398,9 +400,18 @@ export function FatalError({ error: rawError }: FatalErrorProps) {
           {showError && (
             <Block
               style={{
-                marginTop: 5,
-                height: 100,
+                ...styles.tnum,
+                marginTop: 8,
+                height: 120,
                 overflow: 'auto',
+                padding: '10px 12px',
+                fontSize: 11.5,
+                lineHeight: '17px',
+                whiteSpace: 'pre-wrap',
+                color: theme.pageTextLight,
+                backgroundColor: theme.trayBackground,
+                border: `1px solid ${theme.trayBorder}`,
+                borderRadius: radius.md,
               }}
             >
               {error.stack}
