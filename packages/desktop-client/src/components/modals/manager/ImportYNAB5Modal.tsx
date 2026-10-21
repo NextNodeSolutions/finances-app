@@ -51,7 +51,7 @@ export function ImportYNAB5Modal() {
       setError(null);
       try {
         await dispatch(importBudget({ filepath: res[0], type: 'ynab5' }));
-        void navigate('/budget');
+        void navigate('/');
       } catch (err) {
         setError(err.message);
       } finally {

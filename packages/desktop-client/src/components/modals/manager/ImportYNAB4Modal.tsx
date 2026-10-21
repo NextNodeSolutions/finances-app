@@ -41,7 +41,7 @@ export function ImportYNAB4Modal() {
       setError(null);
       try {
         await dispatch(importBudget({ filepath: res[0], type: 'ynab4' }));
-        void navigate('/budget');
+        void navigate('/');
       } catch (err) {
         setError(err.message);
       } finally {
