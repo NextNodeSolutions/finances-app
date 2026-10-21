@@ -3,15 +3,18 @@ import { memo, useMemo, useRef } from 'react';
 import type { CSSProperties } from 'react';
 import { useTranslation } from 'react-i18next';
 
+import { Button } from '@actual-app/components/button';
 import {
   SvgArrowThinRight,
   SvgBookmark,
+  SvgCheveronRight,
   SvgLightBulb,
 } from '@actual-app/components/icons/v1';
 import { theme } from '@actual-app/components/theme';
 import { motion } from '@actual-app/components/tokens';
 import { Tooltip } from '@actual-app/components/tooltip';
 import type { PayeeEntity } from '@actual-app/core/types/models';
+import { css } from '@emotion/css';
 
 import { pillStyle } from '#components/schedules/StatusBadge';
 import {
@@ -27,6 +30,12 @@ import { useSelectedDispatch, useSelectedItems } from '#hooks/useSelected';
 import { useSyncedPref } from '#hooks/useSyncedPref';
 
 import { PayeeRuleCountLabel } from './PayeeRuleCountLabel';
+import {
+  DETAILS_COLUMN_WIDTH,
+  ICON_COLUMN_WIDTH,
+  RULES_COLUMN_WIDTH,
+} from './payeeTableColumns';
+import { PayeeTransactionCountCell } from './PayeeTransactionCountCell';
 
 type RuleButtonProps = {
   ruleCount: number;
@@ -39,9 +48,9 @@ function RuleButton({ ruleCount, focused, onEdit, onClick }: RuleButtonProps) {
   return (
     <Cell
       name="rule-count"
-      width="auto"
+      width={RULES_COLUMN_WIDTH}
       focused={focused}
-      style={{ padding: '0 10px' }}
+      style={{ padding: '0 10px', alignItems: 'flex-start' }}
       plain
     >
       <CellButton
@@ -78,6 +87,8 @@ type EditablePayeeFields = keyof Pick<
 type PayeeTableRowProps = {
   payee: PayeeEntity;
   ruleCount: number;
+  /** Null while the counts load. */
+  transactionCount: number | null;
   selected: boolean;
   hovered: boolean;
   editing: boolean;
@@ -92,6 +103,7 @@ type PayeeTableRowProps = {
   onDelete: (ids: PayeeEntity['id'][]) => void;
   onViewRules: (id: PayeeEntity['id']) => void;
   onCreateRule: (id: PayeeEntity['id']) => void;
+  onOpenDetails: (id: PayeeEntity['id']) => void;
   style?: CSSProperties;
 };
 
@@ -99,12 +111,14 @@ export const PayeeTableRow = memo(
   ({
     payee,
     ruleCount,
+    transactionCount,
     selected,
     hovered,
     editing,
     focusedField,
     onViewRules,
     onCreateRule,
+    onOpenDetails,
     onHover,
     onDelete,
     onEdit,
@@ -133,6 +147,11 @@ export const PayeeTableRow = memo(
     useContextMenu({
       triggerRef,
       items: [
+        {
+          name: 'details',
+          text: t('Details'),
+          onClick: () => onOpenDetails(id),
+        },
         {
           name: 'delete',
           text: t('Delete'),
@@ -214,7 +233,7 @@ export const PayeeTableRow = memo(
           }}
         />
         <CustomCell
-          width={20}
+          width={ICON_COLUMN_WIDTH}
           exposed={!payee.transfer_acct}
           style={{
             display: 'flex',
@@ -258,6 +277,7 @@ export const PayeeTableRow = memo(
           onExpose={() => onEdit(id, 'name')}
           inputProps={{ readOnly: !!payee.transfer_acct }}
         />
+        <PayeeTransactionCountCell count={transactionCount} />
         <RuleButton
           ruleCount={ruleCount}
           focused={focusedField === 'rule-count'}
@@ -266,6 +286,29 @@ export const PayeeTableRow = memo(
             ruleCount > 0 ? onViewRules(payee.id) : onCreateRule(payee.id)
           }
         />
+        <Cell
+          name="details"
+          width={DETAILS_COLUMN_WIDTH}
+          plain
+          style={{ alignItems: 'center' }}
+        >
+          <Button
+            variant="bare"
+            aria-label={t('Payee details')}
+            onPress={() => onOpenDetails(id)}
+            className={css({
+              width: 26,
+              height: 26,
+              padding: 0,
+              color: theme.pageTextLight,
+              opacity: hovered || selected ? 1 : 0,
+              transition: `opacity ${motion.fast} ${motion.ease}`,
+              '&[data-focus-visible]': { opacity: 1 },
+            })}
+          >
+            <SvgCheveronRight width={12} height={12} />
+          </Button>
+        </Cell>
       </Row>
     );
   },

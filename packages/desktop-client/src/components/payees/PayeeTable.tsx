@@ -24,9 +24,11 @@ type PayeeWithId = PayeeEntity & Required<Pick<PayeeEntity, 'id'>>;
 type PayeeTableProps = {
   payees: PayeeWithId[];
   ruleCounts: Map<PayeeWithId['id'], number>;
+  /** Null while the counts load. */
+  transactionCounts: ReadonlyMap<PayeeWithId['id'], number> | null;
 } & Pick<
   ComponentProps<typeof PayeeTableRow>,
-  'onUpdate' | 'onDelete' | 'onViewRules' | 'onCreateRule'
+  'onUpdate' | 'onDelete' | 'onViewRules' | 'onCreateRule' | 'onOpenDetails'
 >;
 
 export const PayeeTable = forwardRef<
@@ -34,7 +36,16 @@ export const PayeeTable = forwardRef<
   PayeeTableProps
 >(
   (
-    { payees, ruleCounts, onUpdate, onDelete, onViewRules, onCreateRule },
+    {
+      payees,
+      ruleCounts,
+      transactionCounts,
+      onUpdate,
+      onDelete,
+      onViewRules,
+      onCreateRule,
+      onOpenDetails,
+    },
     ref,
   ) => {
     const [hovered, setHovered] = useState(null);
@@ -73,6 +84,11 @@ export const PayeeTable = forwardRef<
               <PayeeTableRow
                 payee={item}
                 ruleCount={ruleCounts.get(item.id) || 0}
+                transactionCount={
+                  transactionCounts == null
+                    ? null
+                    : (transactionCounts.get(item.id) ?? 0)
+                }
                 selected={selectedItems.has(item.id)}
                 editing={editing}
                 focusedField={focusedField}
@@ -83,6 +99,7 @@ export const PayeeTable = forwardRef<
                 onDelete={onDelete}
                 onViewRules={onViewRules}
                 onCreateRule={onCreateRule}
+                onOpenDetails={onOpenDetails}
               />
             );
           }}
