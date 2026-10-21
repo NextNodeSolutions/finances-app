@@ -21,6 +21,17 @@ import type { useSpreadsheet } from '#hooks/useSpreadsheet';
 
 import { getValidMonthBounds } from './MonthsContext';
 
+export {
+  budgetedInputClassName,
+  budgetedValueStyle,
+  getScheduleIndicatorColor,
+  groupFigureStyle,
+  monthColumnRule,
+  negativeBalanceChipClassName,
+  scheduleIndicatorButtonStyle,
+  spentValueClassName,
+} from './budgetCellStyles';
+
 export function addToBeBudgetedGroup(groups: CategoryGroupEntity[]) {
   return [
     {
@@ -68,18 +79,24 @@ export function makeAmountGrey(value: number | string | null): CSSProperties {
     : null;
 }
 
+// Converts an integer currency value to a normalized decimal amount.
+// First converts the integer to currency format, then to a decimal amount.
+// Uses integerToCurrency to display the value correctly according to user prefs.
+function normalizeIntegerValue(val: number | null | undefined) {
+  return typeof val === 'number' ? currencyToAmount(integerToCurrency(val)) : 0;
+}
+
+// True when the amount reads as negative once formatted, so callers agree
+// with the colour makeBalanceAmountStyle picks.
+export function isNegativeBalance(value: number | null | undefined) {
+  return normalizeIntegerValue(value) < 0;
+}
+
 export function makeBalanceAmountStyle(
   value: number,
   goalValue?: number | null,
   budgetedValue?: number | null,
 ) {
-  // Converts an integer currency value to a normalized decimal amount.
-  // First converts the integer to currency format, then to a decimal amount.
-  // Uses integerToCurrency to display the value correctly according to user prefs.
-
-  const normalizeIntegerValue = (val: number | null | undefined) =>
-    typeof val === 'number' ? currencyToAmount(integerToCurrency(val)) : 0;
-
   const currencyValue = normalizeIntegerValue(value);
 
   if (currencyValue < 0) {

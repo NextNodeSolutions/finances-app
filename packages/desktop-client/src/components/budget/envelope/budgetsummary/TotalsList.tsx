@@ -1,14 +1,16 @@
 import React from 'react';
-import type { CSSProperties } from 'react';
+import type { CSSProperties, ReactNode } from 'react';
 import { Trans } from 'react-i18next';
 
 import { AlignedText } from '@actual-app/components/aligned-text';
 import { Block } from '@actual-app/components/block';
 import { styles } from '@actual-app/components/styles';
+import { theme } from '@actual-app/components/theme';
 import { Tooltip } from '@actual-app/components/tooltip';
 import { View } from '@actual-app/components/view';
 
 import { EnvelopeCellValue } from '#components/budget/envelope/EnvelopeBudgetComponents';
+import { summaryLedgerStyle } from '#components/budget/SummaryCard';
 import { CellValueText } from '#components/spreadsheet/CellValue';
 import { useFormat } from '#hooks/useFormat';
 import type { FormatType } from '#hooks/useFormat';
@@ -27,8 +29,9 @@ function makeSignedFormatter(
 ) {
   return (value: number, type?: FormatType) => {
     const v = format(Math.abs(value), type);
+    // Zero carries no sign: a statement never prints "-0.00".
     if (value === 0) {
-      return '-' + v;
+      return v;
     }
     const isPositive = value > 0;
     return invert
@@ -38,6 +41,38 @@ function makeSignedFormatter(
       : isPositive
         ? '+' + v
         : '-' + v;
+  };
+}
+
+// One ruled stat line: label on the left, its figure on the right.
+function TotalsRow({
+  label,
+  children,
+}: {
+  label: ReactNode;
+  children: ReactNode;
+}) {
+  return (
+    <View
+      style={{
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        gap: 24,
+        minHeight: 28,
+      }}
+    >
+      <Block style={{ color: theme.pageTextLight }}>{label}</Block>
+      <View style={{ textAlign: 'right', flexShrink: 0 }}>{children}</View>
+    </View>
+  );
+}
+
+// Zero recedes, as it does in the budget table.
+function getFigureStyle(value: unknown): CSSProperties {
+  return {
+    fontWeight: 500,
+    color: value === 0 ? theme.tableTextSubdued : theme.pageText,
   };
 }
 
@@ -53,22 +88,15 @@ export function TotalsList({ prevMonthName, style }: TotalsListProps) {
   return (
     <View
       style={{
-        flexDirection: 'row',
         lineHeight: 1.5,
-        justifyContent: 'center',
         ...styles.smallText,
+        ...summaryLedgerStyle,
         ...style,
       }}
     >
-      <View
-        style={{
-          textAlign: 'right',
-          marginRight: 10,
-          minWidth: 50,
-        }}
-      >
+      <TotalsRow label={<Trans>Available funds</Trans>}>
         <Tooltip
-          style={{ ...styles.tooltip, lineHeight: 1.5, padding: '6px 10px' }}
+          style={{ ...styles.tooltip, lineHeight: 1.5 }}
           content={
             <>
               <AlignedText
@@ -97,10 +125,14 @@ export function TotalsList({ prevMonthName, style }: TotalsListProps) {
             binding={envelopeBudget.incomeAvailable}
             type="financial"
           >
-            {props => <CellValueText {...props} style={{ fontWeight: 600 }} />}
+            {props => (
+              <CellValueText {...props} style={getFigureStyle(props.value)} />
+            )}
           </EnvelopeCellValue>
         </Tooltip>
+      </TotalsRow>
 
+      <TotalsRow label={<Trans>Overspent in {{ prevMonthName }}</Trans>}>
         <EnvelopeCellValue
           binding={envelopeBudget.lastMonthOverspent}
           type="financial"
@@ -108,12 +140,14 @@ export function TotalsList({ prevMonthName, style }: TotalsListProps) {
           {props => (
             <CellValueText
               {...props}
-              style={{ fontWeight: 600 }}
+              style={getFigureStyle(props.value)}
               formatter={signedFormatter}
             />
           )}
         </EnvelopeCellValue>
+      </TotalsRow>
 
+      <TotalsRow label={<Trans>Budgeted</Trans>}>
         <EnvelopeCellValue
           binding={envelopeBudget.totalBudgeted}
           type="financial"
@@ -121,12 +155,14 @@ export function TotalsList({ prevMonthName, style }: TotalsListProps) {
           {props => (
             <CellValueText
               {...props}
-              style={{ fontWeight: 600 }}
+              style={getFigureStyle(props.value)}
               formatter={signedFormatter}
             />
           )}
         </EnvelopeCellValue>
+      </TotalsRow>
 
+      <TotalsRow label={<Trans>For next month</Trans>}>
         <EnvelopeCellValue
           binding={envelopeBudget.forNextMonth}
           type="financial"
@@ -134,30 +170,12 @@ export function TotalsList({ prevMonthName, style }: TotalsListProps) {
           {props => (
             <CellValueText
               {...props}
-              style={{ fontWeight: 600 }}
+              style={getFigureStyle(props.value)}
               formatter={invertedSignedFormatter}
             />
           )}
         </EnvelopeCellValue>
-      </View>
-
-      <View>
-        <Block>
-          <Trans>Available funds</Trans>
-        </Block>
-
-        <Block>
-          <Trans>Overspent in {{ prevMonthName }}</Trans>
-        </Block>
-
-        <Block>
-          <Trans>Budgeted</Trans>
-        </Block>
-
-        <Block>
-          <Trans>For next month</Trans>
-        </Block>
-      </View>
+      </TotalsRow>
     </View>
   );
 }

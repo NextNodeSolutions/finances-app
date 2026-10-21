@@ -14,10 +14,21 @@ import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 import * as monthUtils from '@actual-app/core/shared/months';
-import { css } from '@emotion/css';
+import { cx } from '@emotion/css';
 
 import { BalanceWithCarryover } from '#components/budget/BalanceWithCarryover';
-import { makeAmountGrey } from '#components/budget/util';
+import { BudgetCarryoverIndicator } from '#components/budget/BudgetCarryoverIndicator';
+import {
+  budgetedInputClassName,
+  budgetedValueStyle,
+  getScheduleIndicatorColor,
+  groupFigureStyle,
+  isNegativeBalance,
+  makeAmountGrey,
+  negativeBalanceChipClassName,
+  scheduleIndicatorButtonStyle,
+  spentValueClassName,
+} from '#components/budget/util';
 import { NotesButton } from '#components/NotesButton';
 import { CellValue, CellValueText } from '#components/spreadsheet/CellValue';
 import { Field, Row, SheetCell } from '#components/table';
@@ -66,11 +77,17 @@ const headerLabelStyle: CSSProperties = {
   flex: 1,
   padding: '0 5px',
   textAlign: 'right',
+  gap: 3,
+};
+
+const headerTitleStyle: CSSProperties = {
+  ...styles.monoLabel,
+  color: theme.tableHeaderText,
 };
 
 const cellStyle: CSSProperties = {
-  color: theme.tableHeaderText,
-  fontWeight: 600,
+  ...groupFigureStyle,
+  color: theme.tableText,
 };
 
 export const BudgetTotalsMonth = memo(function BudgetTotalsMonth() {
@@ -82,11 +99,10 @@ export const BudgetTotalsMonth = memo(function BudgetTotalsMonth() {
         marginRight: styles.monthRightPadding,
         paddingTop: 10,
         paddingBottom: 10,
-        backgroundColor: theme.budgetCurrentMonth,
       }}
     >
       <View style={headerLabelStyle}>
-        <Text style={{ color: theme.tableHeaderText }}>
+        <Text style={headerTitleStyle}>
           <Trans>Budgeted</Trans>
         </Text>
         <EnvelopeCellValue
@@ -94,27 +110,41 @@ export const BudgetTotalsMonth = memo(function BudgetTotalsMonth() {
           type="financial"
         >
           {props => (
-            <CellValueText {...props} value={-props.value} style={cellStyle} />
+            <CellValueText
+              {...props}
+              value={props.value ? -props.value : 0}
+              style={{ ...cellStyle, ...makeAmountGrey(props.value) }}
+            />
           )}
         </EnvelopeCellValue>
       </View>
       <View style={headerLabelStyle}>
-        <Text style={{ color: theme.tableHeaderText }}>
+        <Text style={headerTitleStyle}>
           <Trans>Spent</Trans>
         </Text>
         <EnvelopeCellValue binding={envelopeBudget.totalSpent} type="financial">
-          {props => <CellValueText {...props} style={cellStyle} />}
+          {props => (
+            <CellValueText
+              {...props}
+              style={{ ...cellStyle, ...makeAmountGrey(props.value) }}
+            />
+          )}
         </EnvelopeCellValue>
       </View>
       <View style={headerLabelStyle}>
-        <Text style={{ color: theme.tableHeaderText }}>
+        <Text style={headerTitleStyle}>
           <Trans>Balance</Trans>
         </Text>
         <EnvelopeCellValue
           binding={envelopeBudget.totalBalance}
           type="financial"
         >
-          {props => <CellValueText {...props} style={cellStyle} />}
+          {props => (
+            <CellValueText
+              {...props}
+              style={{ ...cellStyle, ...makeAmountGrey(props.value) }}
+            />
+          )}
         </EnvelopeCellValue>
       </View>
     </View>
@@ -125,10 +155,10 @@ export function IncomeHeaderMonth() {
   return (
     <Row
       style={{
+        ...styles.monoLabel,
         color: theme.tableHeaderText,
         alignItems: 'center',
         paddingRight: 10,
-        backgroundColor: theme.budgetCurrentMonth,
       }}
     >
       <View style={{ flex: 1, textAlign: 'right' }}>
@@ -158,20 +188,22 @@ export const ExpenseGroupMonth = memo(function ExpenseGroupMonth({
         name="budgeted"
         width="flex"
         textAlign="right"
-        style={{ fontWeight: 600, ...styles.tnum }}
+        style={groupFigureStyle}
         valueProps={{
           binding: envelopeBudget.groupBudgeted(id),
           type: 'financial',
+          getValueStyle: makeAmountGrey,
         }}
       />
       <EnvelopeSheetCell
         name="spent"
         width="flex"
         textAlign="right"
-        style={{ fontWeight: 600, ...styles.tnum }}
+        style={groupFigureStyle}
         valueProps={{
           binding: envelopeBudget.groupSumAmount(id),
           type: 'financial',
+          getValueStyle: makeAmountGrey,
         }}
       />
       <EnvelopeSheetCell
@@ -179,13 +211,13 @@ export const ExpenseGroupMonth = memo(function ExpenseGroupMonth({
         width="flex"
         textAlign="right"
         style={{
-          fontWeight: 600,
+          ...groupFigureStyle,
           paddingRight: styles.monthRightPadding,
-          ...styles.tnum,
         }}
         valueProps={{
           binding: envelopeBudget.groupBalance(id),
           type: 'financial',
+          getValueStyle: makeAmountGrey,
         }}
       />
     </View>
@@ -400,16 +432,7 @@ export const ExpenseCategoryMonth = memo(function ExpenseCategoryMonth({
           onExpose={() => onEdit(category.id, month)}
           style={{ ...(editing && { zIndex: 100 }), ...styles.tnum }}
           textAlign="right"
-          valueStyle={{
-            cursor: 'default',
-            margin: 1,
-            padding: '0 4px',
-            borderRadius: 4,
-            ':hover': {
-              boxShadow: 'inset 0 0 0 1px ' + theme.pageTextSubdued, //remove mobile color variable
-              backgroundColor: theme.budgetCurrentMonth,
-            },
-          }}
+          valueStyle={budgetedValueStyle}
           valueProps={{
             binding: envelopeBudget.catBudgeted(category.id),
             type: 'financial',
@@ -421,9 +444,7 @@ export const ExpenseCategoryMonth = memo(function ExpenseCategoryMonth({
             onBlur: () => {
               onEdit(null);
             },
-            style: {
-              backgroundColor: theme.budgetCurrentMonth,
-            },
+            className: budgetedInputClassName,
           }}
           onSave={(parsedIntegerAmount: number | null) => {
             onBudgetAction(month, 'budget-amount', {
@@ -451,12 +472,8 @@ export const ExpenseCategoryMonth = memo(function ExpenseCategoryMonth({
               <Button
                 variant="bare"
                 style={{
-                  color:
-                    scheduleStatus === 'missed'
-                      ? theme.budgetNumberNegative
-                      : scheduleStatus === 'due'
-                        ? theme.templateNumberUnderFunded
-                        : theme.upcomingText,
+                  ...scheduleIndicatorButtonStyle,
+                  color: getScheduleIndicatorColor(scheduleStatus),
                 }}
                 onPress={() =>
                   schedule._account
@@ -465,9 +482,9 @@ export const ExpenseCategoryMonth = memo(function ExpenseCategoryMonth({
                 }
               >
                 {isScheduleRecurring ? (
-                  <SvgArrowsSynchronize style={{ width: 12, height: 12 }} />
+                  <SvgArrowsSynchronize style={{ width: 11, height: 11 }} />
                 ) : (
-                  <SvgCalendar3 style={{ width: 12, height: 12 }} />
+                  <SvgCalendar3 style={{ width: 11, height: 11 }} />
                 )}
               </Button>
             </View>
@@ -479,11 +496,8 @@ export const ExpenseCategoryMonth = memo(function ExpenseCategoryMonth({
             {props => (
               <CellValueText
                 {...props}
-                className={css({
-                  cursor: 'pointer',
-                  ':hover': { textDecoration: 'underline' },
-                  ...makeAmountGrey(props.value),
-                })}
+                className={spentValueClassName}
+                style={makeAmountGrey(props.value)}
               />
             )}
           </EnvelopeCellValue>
@@ -493,6 +507,7 @@ export const ExpenseCategoryMonth = memo(function ExpenseCategoryMonth({
         ref={balanceMenuTriggerRef}
         name="balance"
         width="flex"
+        truncate={false}
         style={{ paddingRight: styles.monthRightPadding, textAlign: 'right' }}
       >
         <Button
@@ -524,7 +539,20 @@ export const ExpenseCategoryMonth = memo(function ExpenseCategoryMonth({
             budgeted={envelopeBudget.catBudgeted(category.id)}
             longGoal={envelopeBudget.catLongGoal(category.id)}
             tooltipDisabled={balanceMenuOpen}
-          />
+            CarryoverIndicator={BudgetCarryoverIndicator}
+          >
+            {({ type, name, value, className }) => (
+              <CellValueText
+                type={type}
+                name={name}
+                value={value}
+                className={cx(
+                  className,
+                  isNegativeBalance(value) && negativeBalanceChipClassName,
+                )}
+              />
+            )}
+          </BalanceWithCarryover>
         </Button>
 
         <Popover
@@ -562,9 +590,8 @@ export function IncomeGroupMonth({ month }: IncomeGroupMonthProps) {
         width="flex"
         textAlign="right"
         style={{
-          fontWeight: 600,
+          ...groupFigureStyle,
           paddingRight: styles.monthRightPadding,
-          ...styles.tnum,
           backgroundColor: monthUtils.isCurrentMonth(month)
             ? theme.budgetHeaderCurrentMonth
             : theme.budgetHeaderOtherMonth,
@@ -656,6 +683,7 @@ export function IncomeCategoryMonth({
               goal={envelopeBudget.catGoal(category.id)}
               budgeted={envelopeBudget.catBudgeted(category.id)}
               longGoal={envelopeBudget.catLongGoal(category.id)}
+              CarryoverIndicator={BudgetCarryoverIndicator}
             />
           </Button>
           <Popover

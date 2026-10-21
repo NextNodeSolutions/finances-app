@@ -5,6 +5,7 @@ import { useTranslation } from 'react-i18next';
 import { Block } from '@actual-app/components/block';
 import { styles } from '@actual-app/components/styles';
 import { theme } from '@actual-app/components/theme';
+import { motion } from '@actual-app/components/tokens';
 import { Tooltip } from '@actual-app/components/tooltip';
 import { View } from '@actual-app/components/view';
 import { css } from '@emotion/css';
@@ -91,20 +92,23 @@ export function ToBudgetAmount({
                     : isNegative
                       ? theme.toBudgetNegative
                       : theme.toBudgetZero,
-                  marginBottom: -1,
-                  borderBottom: '1px solid transparent',
+                  textDecorationLine: 'underline',
+                  textDecorationThickness: 1,
+                  textUnderlineOffset: '0.18em',
+                  textDecorationColor: 'transparent',
+                  transition: `text-decoration-color ${motion.base} ${motion.ease}`,
                   ':hover': {
-                    borderColor: isPositive
-                      ? theme.toBudgetPositive
-                      : isNegative
-                        ? theme.toBudgetNegative
-                        : theme.toBudgetZero,
+                    textDecorationColor: 'currentColor',
                   },
                 },
                 amountStyle,
               ])}
             >
-              <FinancialText>{format(num, 'financial')}</FinancialText>
+              <FinancialText
+                style={{ ...styles.display, fontWeight: 'inherit' }}
+              >
+                {format(num, 'financial')}
+              </FinancialText>
             </Block>
           </PrivacyFilter>
         </Tooltip>

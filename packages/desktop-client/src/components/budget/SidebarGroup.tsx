@@ -9,6 +9,7 @@ import { SvgCheveronDown } from '@actual-app/components/icons/v1';
 import { Menu } from '@actual-app/components/menu';
 import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
+import { motion, radius } from '@actual-app/components/tokens';
 import { Tooltip } from '@actual-app/components/tooltip';
 import { View } from '@actual-app/components/view';
 import type {
@@ -131,10 +132,11 @@ export function SidebarGroup({
           width={8}
           height={8}
           style={{
-            marginRight: 5,
-            marginLeft: 5,
+            marginRight: 6,
+            marginLeft: 3,
             flexShrink: 0,
-            transition: 'transform .1s',
+            color: theme.tableTextLight,
+            transition: `transform ${motion.fast} ${motion.ease}`,
             transform: collapsed ? 'rotate(-90deg)' : '',
           }}
         />
@@ -145,6 +147,7 @@ export function SidebarGroup({
           whiteSpace: 'nowrap',
           overflow: 'hidden',
           minWidth: 0,
+          color: theme.tableRowHeaderText,
         }}
       >
         {dragPreview && <Text style={{ fontWeight: 500 }}>Group: </Text>}
@@ -156,10 +159,14 @@ export function SidebarGroup({
             <Button
               variant="bare"
               className="hover-visible"
-              style={{ padding: 3 }}
+              style={{
+                padding: 3,
+                borderRadius: radius.sm,
+                color: theme.pageTextLight,
+              }}
               onPress={handleContextMenu}
             >
-              <SvgCheveronDown width={14} height={14} />
+              <SvgCheveronDown width={13} height={13} />
             </Button>
           </View>
           <View style={{ flex: 1 }} />
@@ -177,6 +184,8 @@ export function SidebarGroup({
                 className={cx(
                   css({
                     color: theme.pageTextLight,
+                    padding: 5,
+                    borderRadius: radius.sm,
                   }),
                   'hover-visible',
                 )}
@@ -244,7 +253,7 @@ export function SidebarGroup({
         onBlur={() => onEdit(null)}
         style={{ fontWeight: 600 }}
         inputProps={{
-          style: { marginLeft: 20 },
+          style: { marginLeft: 17 },
           placeholder: temporary ? t('New group name') : '',
         }}
       />

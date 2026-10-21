@@ -255,8 +255,11 @@ export function BudgetTable(props: BudgetTableProps) {
             backgroundColor: 'transparent',
           },
           '& ::-webkit-scrollbar-thumb:vertical': {
-            backgroundColor: theme.pageTextSubdued,
-            // changed from tableHeaderBackground. pageTextSubdued is always visible on pageBackground
+            // A slim pill in the subdued table tone, inset from the gutter.
+            backgroundColor: theme.tableTextSubdued,
+            backgroundClip: 'padding-box',
+            border: '3px solid transparent',
+            borderRadius: 999,
           },
         }),
       }}
@@ -272,7 +275,11 @@ export function BudgetTable(props: BudgetTableProps) {
           paddingRight: 5 + getScrollbarWidth(),
         }}
       >
-        <View style={{ width: 200 + 100 * categoryExpandedState }} />
+        {/* A single month's summary spans the category column too, so the
+            card and the table below share both edges. */}
+        {numMonths > 1 && (
+          <View style={{ width: 200 + 100 * categoryExpandedState }} />
+        )}
         <MonthsProvider
           startMonth={prewarmStartMonth}
           numMonths={numMonths}

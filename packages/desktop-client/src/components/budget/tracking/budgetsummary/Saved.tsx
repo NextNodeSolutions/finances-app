@@ -20,8 +20,9 @@ import { trackingBudget } from '#spreadsheet/bindings';
 type SavedProps = {
   projected: boolean;
   style?: CSSProperties;
+  amountStyle?: CSSProperties;
 };
-export function Saved({ projected, style }: SavedProps) {
+export function Saved({ projected, style, amountStyle }: SavedProps) {
   const { t } = useTranslation();
   const budgetedSaved =
     useTrackingSheetValue(trackingBudget.totalBudgetedSaved) || 0;
@@ -44,7 +45,7 @@ export function Saved({ projected, style }: SavedProps) {
       )}
 
       <Tooltip
-        style={{ ...styles.tooltip, fontSize: 14, padding: 10 }}
+        style={{ ...styles.tooltip, fontSize: 13, lineHeight: 1.6 }}
         content={
           <>
             <AlignedText
@@ -73,15 +74,19 @@ export function Saved({ projected, style }: SavedProps) {
         <View
           className={css({
             fontSize: 25,
+            fontWeight: 400,
             color: projected
               ? theme.templateNumberUnderFunded
               : isNegative
                 ? theme.budgetNumberNegative
                 : theme.templateNumberFunded,
+            ...amountStyle,
           })}
         >
           <PrivacyFilter>
-            <FinancialText>{format(saved, 'financial')}</FinancialText>
+            <FinancialText style={{ ...styles.display, fontWeight: 'inherit' }}>
+              {format(saved, 'financial')}
+            </FinancialText>
           </PrivacyFilter>
         </View>
       </Tooltip>

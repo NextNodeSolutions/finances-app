@@ -37,26 +37,24 @@ export function BudgetTotal<
         lineHeight: 1.5,
         flexDirection: 'row',
         alignItems: 'center',
-        fontSize: 14,
+        fontSize: 13,
         ...style,
       }}
     >
       <ProgressComponent current={current} target={target} />
 
-      <View style={{ marginLeft: 10, ...styles.tnum }}>
+      <View style={{ marginLeft: 10 }}>
         <View>
           <Text style={{ color: theme.pageTextLight }}>{title}</Text>
         </View>
 
-        <Text>
+        <Text style={{ ...styles.tnum, fontWeight: 500 }}>
           <Trans
             i18nKey="<allocatedAmount /> <italic>of <totalAmount /></italic>"
             components={{
               allocatedAmount: <CellValue binding={current} type="financial" />,
               italic: (
-                <Text
-                  style={{ color: theme.pageTextLight, fontStyle: 'italic' }}
-                />
+                <Text style={{ color: theme.pageTextLight, fontWeight: 400 }} />
               ),
               totalAmount: <CellValue binding={target} type="financial" />,
             }}

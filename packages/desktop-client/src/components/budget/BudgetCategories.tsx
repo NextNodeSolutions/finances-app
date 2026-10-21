@@ -2,6 +2,7 @@ import React, { memo, useMemo, useState } from 'react';
 
 import { styles } from '@actual-app/components/styles';
 import { theme } from '@actual-app/components/theme';
+import { elevation, radius } from '@actual-app/components/tokens';
 import { View } from '@actual-app/components/view';
 import type {
   CategoryEntity,
@@ -34,6 +35,27 @@ type BudgetItem =
   | { type: 'income-separator' }
   | { type: 'income-group'; value: CategoryGroupEntity }
   | { type: 'income-category'; value: CategoryEntity };
+
+// Category rows take a translucent wash on hover so the tint reads over
+// the current and other-month columns alike. It steps aside while a cell
+// is being edited.
+const rowHoverTintStyle = {
+  '&:hover:not(:focus-within)::after': {
+    content: '""',
+    position: 'absolute',
+    top: 0,
+    right: 0,
+    bottom: 0,
+    left: 0,
+    zIndex: 1,
+    pointerEvents: 'none',
+    backgroundColor: theme.buttonBareBackgroundHover,
+  },
+};
+
+function isHoverTintedRow(type: BudgetItem['type']) {
+  return type === 'expense-category' || type === 'income-category';
+}
 
 type LocalDragState =
   | DragState<CategoryEntity>
@@ -237,11 +259,13 @@ export const BudgetCategories = memo<BudgetCategoriesProps>(
     return (
       <View
         style={{
-          marginBottom: 10,
+          marginBottom: 16,
           backgroundColor: theme.budgetCurrentMonth, // match budget colors, not generic table colors.
           overflow: 'hidden',
-          boxShadow: styles.cardShadow,
-          borderRadius: '0 0 4px 4px',
+          boxShadow: elevation.card,
+          border: '1px solid ' + theme.hairline,
+          borderTopWidth: 0,
+          borderRadius: `0 0 ${radius.lg}px ${radius.lg}px`,
           flex: 1,
         }}
       >
@@ -388,11 +412,9 @@ export const BudgetCategories = memo<BudgetCategoriesProps>(
             >
               <View
                 style={
-                  dragState
-                    ? {}
-                    : {
-                        ':hover': { backgroundColor: theme.budgetCurrentMonth },
-                      }
+                  !dragState && isHoverTintedRow(item.type)
+                    ? rowHoverTintStyle
+                    : undefined
                 }
               >
                 {content}

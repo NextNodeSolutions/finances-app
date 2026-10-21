@@ -7,6 +7,7 @@ import { Button } from '@actual-app/components/button';
 import { SvgCheveronDown } from '@actual-app/components/icons/v1';
 import { TextOneLine } from '@actual-app/components/text-one-line';
 import { theme } from '@actual-app/components/theme';
+import { radius } from '@actual-app/components/tokens';
 import { View } from '@actual-app/components/view';
 import type {
   CategoryEntity,
@@ -98,17 +99,26 @@ export function SidebarCategory({
       }}
       ref={triggerRef}
     >
-      <TextOneLine data-testid="category-name">{category.name}</TextOneLine>
+      <TextOneLine
+        data-testid="category-name"
+        style={{ color: theme.tableText }}
+      >
+        {category.name}
+      </TextOneLine>
       <View style={{ flexShrink: 0, marginLeft: 5 }}>
         <Button
           variant="bare"
           className="hover-visible"
-          style={{ color: 'currentColor', padding: 3 }}
+          style={{
+            color: theme.pageTextLight,
+            padding: 3,
+            borderRadius: radius.sm,
+          }}
           onPress={handleContextMenu}
         >
           <SvgCheveronDown
-            width={14}
-            height={14}
+            width={13}
+            height={13}
             style={{ color: 'currentColor' }}
           />
         </Button>
@@ -173,7 +183,7 @@ export function SidebarCategory({
           }
         }}
         onBlur={() => onEditName(null)}
-        style={{ paddingLeft: 13, ...(isLast && { borderBottomWidth: 0 }) }}
+        style={{ paddingLeft: 17, ...(isLast && { borderBottomWidth: 0 }) }}
         inputProps={{
           placeholder: temporary ? t('New category name') : '',
         }}

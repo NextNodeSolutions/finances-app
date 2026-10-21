@@ -30,8 +30,8 @@ export function IncomeProgress({ current, target }: IncomeProgressProps) {
     <PieProgress
       progress={frac}
       color={over ? theme.numberNegative : theme.numberPositive}
-      backgroundColor={over ? theme.errorBackground : theme.budgetCurrentMonth}
-      style={{ width: 20, height: 20 }}
+      backgroundColor={over ? theme.errorBackground : theme.hairline}
+      style={{ width: 16, height: 16, flexShrink: 0 }}
     />
   );
 }
