@@ -12,6 +12,9 @@ export const ADD_ACCOUNT_STEP_ID = 'add-account';
 export type TourStepDeps = {
   navigate: (to: string) => void;
   budgetType: 'envelope' | 'tracking';
+  /** Optional features: the tour only mentions the ones that are on. */
+  isBankSyncOn: boolean;
+  isTagsOn: boolean;
 };
 
 function getDisplayedMonths(): string[] {
@@ -59,7 +62,12 @@ function waitForElement(selector: string, timeoutMs = 4000): Promise<void> {
   });
 }
 
-function getBudgetTourSteps({ navigate, budgetType }: TourStepDeps): Step[] {
+function getBudgetTourSteps({
+  navigate,
+  budgetType,
+  isBankSyncOn,
+  isTagsOn,
+}: TourStepDeps): Step[] {
   return [
     {
       id: 'welcome',
@@ -188,12 +196,19 @@ function getBudgetTourSteps({ navigate, budgetType }: TourStepDeps): Step[] {
       target: '[data-testid="sidebar-primary-buttons"]',
       placement: 'right',
       title: <Trans>Getting Around</Trans>,
-      content: (
+      content: isTagsOn ? (
         <Trans>
           Commonly used pages live in the sidebar, like your budget, reports,
           and scheduled transactions. Other less common ones are in{' '}
           <strong>Settings</strong>, such as the payees, rules and tags pages.
           You can also change these defaults in <strong>Settings</strong>.
+        </Trans>
+      ) : (
+        <Trans>
+          Commonly used pages live in the sidebar, like your budget, reports,
+          and scheduled transactions. Other less common ones are in{' '}
+          <strong>Settings</strong>, such as the payees and rules pages. You can
+          also change these defaults in <strong>Settings</strong>.
         </Trans>
       ),
     },
@@ -202,7 +217,7 @@ function getBudgetTourSteps({ navigate, budgetType }: TourStepDeps): Step[] {
       target: '[data-testid="sidebar-add-account"]',
       placement: 'right',
       title: <Trans>Add Your Accounts</Trans>,
-      content: (
+      content: isBankSyncOn ? (
         <Trans>
           Transactions live in accounts, so adding your first account is the
           best way to get started with {{ appName: 'Actual' }}. Click here to
@@ -214,6 +229,13 @@ function getBudgetTourSteps({ navigate, budgetType }: TourStepDeps): Step[] {
             link the account to your bank
           </Link>{' '}
           to import them automatically.
+        </Trans>
+      ) : (
+        <Trans>
+          Transactions live in accounts, so adding your first account is the
+          best way to get started with {{ appName: 'Actual' }}. Click here to
+          add one. You can enter transactions yourself, or import them from a
+          file your bank provides.
         </Trans>
       ),
     },
