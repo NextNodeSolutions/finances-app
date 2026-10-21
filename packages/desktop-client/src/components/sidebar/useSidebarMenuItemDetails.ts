@@ -2,6 +2,7 @@ import type { ComponentType, SVGProps } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import {
+  SvgChartPie,
   SvgLibrary,
   SvgReports,
   SvgTag,
@@ -27,6 +28,7 @@ export function useSidebarMenuItemDetails(): Record<
   const { t } = useTranslation();
 
   return {
+    overview: { title: t('Overview'), Icon: SvgChartPie },
     budget: { title: t('Budget'), Icon: SvgWallet },
     reports: { title: t('Reports'), Icon: SvgReports },
     schedules: { title: t('Schedules'), Icon: SvgCalendar3 },

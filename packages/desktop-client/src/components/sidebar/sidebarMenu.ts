@@ -1,10 +1,11 @@
 export const SIDEBAR_MENU_ITEM_IDS = [
+  'overview',
   'budget',
-  'reports',
   'schedules',
+  'reports',
   'payees',
-  'tags',
   'rules',
+  'tags',
   'bank-sync',
 ] as const;
 
@@ -41,6 +42,30 @@ export function isSettingsSectionOnMobile(id: SettingsSectionId): boolean {
 
 export function isInMobileSettingsNav(id: SettingsSectionId): boolean {
   return isSettingsSectionOnMobile(id) && id !== 'tags';
+}
+
+export type SidebarMenuAvailability = {
+  isUsingServer: boolean;
+  isBankSyncOn: boolean;
+  isTagsOn: boolean;
+};
+
+/**
+ * Whether a page can be reached at all. Unavailable pages leave the sidebar,
+ * the Settings nav and the command bar, and their routes redirect away.
+ */
+export function isSidebarMenuItemAvailable(
+  id: SidebarMenuItemId,
+  { isUsingServer, isBankSyncOn, isTagsOn }: SidebarMenuAvailability,
+): boolean {
+  switch (id) {
+    case 'bank-sync':
+      return isUsingServer && isBankSyncOn;
+    case 'tags':
+      return isTagsOn;
+    default:
+      return true;
+  }
 }
 
 function isHiddenByDefault(id: SidebarMenuItemId): boolean {
@@ -114,11 +139,17 @@ export function parseSidebarMenuItems(
   return saved;
 }
 
+const DEFAULT_START_PAGE: SidebarMenuItemId = 'overview';
+
 export function parseSidebarStartPage(
   raw: string | undefined,
   items: SidebarMenuItem[],
 ): SidebarMenuItemId {
-  return (items.find(item => item.id === raw) ?? items[0]).id;
+  return (
+    items.find(item => item.id === raw) ??
+    items.find(item => item.id === DEFAULT_START_PAGE) ??
+    items[0]
+  ).id;
 }
 
 export function moveSidebarMenuItem(

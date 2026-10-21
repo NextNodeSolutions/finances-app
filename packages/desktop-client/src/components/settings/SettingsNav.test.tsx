@@ -18,6 +18,10 @@ vi.mock('#hooks/useIsTestEnv', () => ({
 
 function renderNav(initialPath: string, sidebarMenuItems?: unknown[]) {
   const store = createTestAppStore();
+  // Bank sync and Tags are optional features; list them as switched on.
+  store.dispatch(
+    mergeSyncedPrefs({ 'features.bankSync': 'true', 'features.tags': 'true' }),
+  );
   if (sidebarMenuItems) {
     store.dispatch(
       mergeSyncedPrefs({
@@ -51,8 +55,8 @@ describe('SettingsNav', () => {
     expect(hrefs).toEqual([
       '/settings/general',
       '/settings/payees',
-      '/settings/tags',
       '/settings/rules',
+      '/settings/tags',
       '/settings/bank-sync',
       '/settings/advanced',
       '/settings/experimental',
@@ -73,8 +77,8 @@ describe('SettingsNav', () => {
     expect(hrefs).toEqual([
       '/settings/general',
       '/settings/schedules',
-      '/settings/tags',
       '/settings/rules',
+      '/settings/tags',
       '/settings/bank-sync',
       '/settings/advanced',
       '/settings/experimental',

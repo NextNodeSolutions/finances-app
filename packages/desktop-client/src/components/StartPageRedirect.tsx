@@ -1,12 +1,14 @@
 import { Navigate } from 'react-router';
 
-import { useResponsive } from '@actual-app/components/hooks/useResponsive';
-
 import { useSidebarMenu } from '#hooks/useSidebarMenu';
 
 export function StartPageRedirect() {
-  const { isNarrowWidth } = useResponsive();
-  const { startPath } = useSidebarMenu();
+  const { startPath, isAvailabilityResolved } = useSidebarMenu();
 
-  return <Navigate to={isNarrowWidth ? '/budget' : startPath} replace />;
+  // A saved start page may be one whose availability is still loading.
+  if (!isAvailabilityResolved) {
+    return null;
+  }
+
+  return <Navigate to={startPath} replace />;
 }
