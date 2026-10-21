@@ -46,6 +46,7 @@ import type { CategoryGroupMonthProps, CategoryMonthProps } from '..';
 
 import { BalanceMenu } from './BalanceMenu';
 import { BudgetMenu } from './BudgetMenu';
+import { IncomeVarianceCell } from './IncomeVarianceCell';
 
 export const useTrackingSheetValue = <
   FieldName extends SheetFields<'tracking-budget'>,
@@ -126,7 +127,7 @@ export const BudgetTotalsMonth = memo(function BudgetTotalsMonth() {
       </View>
       <View style={headerLabelStyle}>
         <Text style={headerTitleStyle}>
-          <Trans>Balance</Trans>
+          <Trans>Remaining</Trans>
         </Text>
         <TrackingCellValue
           binding={trackingBudget.totalLeftover}
@@ -155,12 +156,17 @@ export function IncomeHeaderMonth() {
     >
       <View style={headerLabelStyle}>
         <Text style={headerTitleStyle}>
-          <Trans>Budgeted</Trans>
+          <Trans>Expected</Trans>
         </Text>
       </View>
       <View style={headerLabelStyle}>
         <Text style={headerTitleStyle}>
           <Trans>Received</Trans>
+        </Text>
+      </View>
+      <View style={headerLabelStyle}>
+        <Text style={headerTitleStyle}>
+          <Trans>Variance</Trans>
         </Text>
       </View>
     </View>
@@ -221,6 +227,7 @@ export const GroupMonth = memo(function GroupMonth({
           }}
         />
       )}
+      {group.is_income && <IncomeVarianceCell id={id} month={month} isGroup />}
     </View>
   );
 });
@@ -471,6 +478,9 @@ export const CategoryMonth = memo(function CategoryMonth({
         </View>
       </Field>
 
+      {category.is_income && (
+        <IncomeVarianceCell id={category.id} month={month} />
+      )}
       {!category.is_income && (
         <Field
           name="balance"
@@ -533,8 +543,6 @@ export const CategoryMonth = memo(function CategoryMonth({
     </View>
   );
 });
-
-export { BudgetSummary } from './budgetsummary/BudgetSummary';
 
 export const ExpenseGroupMonth = GroupMonth;
 export const ExpenseCategoryMonth = CategoryMonth;
