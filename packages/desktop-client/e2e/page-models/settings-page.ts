@@ -43,11 +43,18 @@ export class SettingsPage {
       exact: true,
     });
 
-    // Narrow layouts only show the settings nav on the settings landing page
+    // Narrow layouts only show the settings nav on the settings landing page.
+    // A section can stay on screen for a moment after the landing route
+    // opens, taking its Back button with it, so retry until the nav shows.
     const viewport = this.page.viewportSize();
     const isNarrow = viewport != null && viewport.width < 512;
-    if (isNarrow && !(await sectionLink.isVisible())) {
-      await this.backButton.click();
+    if (isNarrow) {
+      await expect(async () => {
+        if (!(await sectionLink.isVisible())) {
+          await this.backButton.click({ timeout: 1000 });
+        }
+        await expect(sectionLink).toBeVisible({ timeout: 1000 });
+      }).toPass({ timeout: 15_000 });
     }
 
     await sectionLink.click();

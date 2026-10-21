@@ -179,11 +179,13 @@ test.describe('Transactions', () => {
 
       await textInput.fill('l');
       await filterTooltip.applyButton.click();
-      // Assert that all Payees DO NOT contain the letter 'l'
-      for (let i = 0; i < 19; i++) {
-        await expect(accountPage.getNthTransaction(i).payee).not.toHaveText(
-          /l/,
-        );
+      // Assert that all Payees DO NOT contain the letter 'l'. The register
+      // renders only the rows in view, so check every rendered row.
+      await expect(accountPage.getNthTransaction(0).payee).not.toHaveText(/l/);
+      const payees = accountPage.transactionTableRow.getByTestId('payee');
+      expect(await payees.count()).toBeGreaterThanOrEqual(10);
+      for (const payee of await payees.allTextContents()) {
+        expect(payee).not.toMatch(/l/);
       }
 
       await expect(page).toMatchThemeScreenshots();

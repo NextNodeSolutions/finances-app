@@ -66,9 +66,13 @@ test.describe('Mobile Overview', () => {
 
   test('opens an account from its row', async () => {
     const overviewPage = await navigation.goToOverviewPage();
-    const accountPage = await overviewPage.openAccount('Bank of America');
+    await overviewPage.openAccount('Bank of America');
 
-    await expect(accountPage.heading).toHaveText('Bank of America');
+    // The Overview's headings stay on screen for a moment after the route
+    // changes, so look for the account's own heading.
+    await expect(
+      page.getByRole('heading', { name: 'Bank of America', exact: true }),
+    ).toBeVisible();
   });
 
   test('lists the secondary pages in the More sheet', async () => {
@@ -85,10 +89,10 @@ test.describe('Mobile Overview', () => {
         moreSheet.getByRole('link', { name, exact: true }),
       ).toBeVisible();
     }
-    // Tags is an optional feature, off in a new budget.
+    // Optional features default to on under Playwright, so Tags is listed.
     await expect(
       moreSheet.getByRole('link', { name: 'Tags', exact: true }),
-    ).toHaveCount(0);
+    ).toBeVisible();
 
     // Following a row drops the sheet with the page change.
     const payeesPage = await navigation.goToPayeesPage();

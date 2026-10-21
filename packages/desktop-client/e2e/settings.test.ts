@@ -123,9 +123,9 @@ test.describe('Settings', () => {
     for (const width of [1024, 800, 375]) {
       await page.setViewportSize({ width, height: 900 });
       if (width === 375) {
-        // The sidebar stays in the DOM, hidden, beside the mobile tabs.
+        // The layout switches to the mobile tab bar once the resize settles.
         await expect(
-          page.getByRole('navigation').filter({ visible: true }),
+          page.getByRole('navigation', { name: 'Main', exact: true }),
         ).toBeVisible();
       }
       await indicator.scrollIntoViewIfNeeded();

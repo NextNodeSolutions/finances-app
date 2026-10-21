@@ -88,7 +88,10 @@ test.describe('Reports', () => {
     await expect(rows.first()).toContainText('In progress');
     expect(await rows.count()).toBeLessThanOrEqual(12);
 
-    await rows.nth(1).getByRole('button', { name: 'December 2016' }).click();
+    await rows
+      .nth(1)
+      .getByRole('button', { name: 'December 2016', exact: true })
+      .click();
     await page.waitForURL(/\/budget/);
   });
 
