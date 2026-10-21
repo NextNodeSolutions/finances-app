@@ -8,12 +8,15 @@ import { SpaceBetween } from '@actual-app/components/space-between';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 import type { TagEntity } from '@actual-app/core/types/models';
+import { cx } from '@emotion/css';
 
 import { InputCell, Row, useTableNavigator } from '#components/table';
 import { useInitialMount } from '#hooks/useInitialMount';
 import { useProperFocus } from '#hooks/useProperFocus';
 import { useTagCSS } from '#hooks/useTagCSS';
 import { useCreateTagMutation } from '#tags';
+
+import { tagPillClassName } from './tagPillClassName';
 
 type TagCreationRowProps = {
   tags: TagEntity[];
@@ -119,9 +122,7 @@ export const TagCreationRow = ({ onClose, tags }: TagCreationRowProps) => {
           exposed={tableNavigator.focusedField === 'tag'}
           onExpose={name => tableNavigator.onEdit('new-tag', name)}
           value={tag || t('New tag')}
-          valueStyle={
-            tag ? {} : { fontStyle: 'italic', color: theme.tableTextLight }
-          }
+          valueStyle={tag ? {} : { color: theme.tableTextLight }}
           inputProps={{
             value: tag || '',
             onChange: e => setTag(e.target.value.replace(/\s/g, '')),
@@ -138,11 +139,7 @@ export const TagCreationRow = ({ onClose, tags }: TagCreationRowProps) => {
           exposed={tableNavigator.focusedField === 'description'}
           onExpose={name => tableNavigator.onEdit('new-tag', name)}
           value={description || t('Tag description')}
-          valueStyle={
-            description
-              ? {}
-              : { fontStyle: 'italic', color: theme.tableTextLight }
-          }
+          valueStyle={description ? {} : { color: theme.tableTextLight }}
           inputProps={{
             value: description || '',
             onUpdate: setDescription,
@@ -159,7 +156,8 @@ export const TagCreationRow = ({ onClose, tags }: TagCreationRowProps) => {
           backgroundColor: theme.tableBackground,
           gap: 10,
           alignItems: 'center',
-          borderBottom: '1px solid ' + theme.tableBorderHover,
+          borderBottom: '1px solid ' + theme.hairline,
+          color: theme.pageTextLight,
         }}
         collapsed
       >
@@ -171,7 +169,7 @@ export const TagCreationRow = ({ onClose, tags }: TagCreationRowProps) => {
           <Button
             ref={colorButtonRef}
             variant="bare"
-            className={getTagCSS('', { color })}
+            className={cx(getTagCSS('', { color }), tagPillClassName)}
           >
             #{tag}
           </Button>

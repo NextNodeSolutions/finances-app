@@ -12,11 +12,23 @@ import {
 } from '@actual-app/components/icons/v2';
 import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
+import { radius, spacing } from '@actual-app/components/tokens';
 import { View } from '@actual-app/components/view';
 import type { ScheduleStatusType } from '@actual-app/core/shared/schedules';
 import { titleFirst } from '@actual-app/core/shared/util';
 
 import { getStatusLabel } from '#util/schedule';
+
+// Shape and type of the small pills (statuses, stages, roles, counts): a
+// tinted chip, never a full capsule. Callers add the tint and ink.
+export const pillStyle = {
+  borderRadius: radius.sm,
+  padding: '2px 8px',
+  fontSize: 11.5,
+  lineHeight: '16px',
+  fontWeight: 500,
+  whiteSpace: 'nowrap',
+} as const;
 
 // Consists of Schedule Statuses + Transaction statuses
 export type StatusTypes =
@@ -35,13 +47,13 @@ export function getStatusProps(status: StatusTypes | null | undefined) {
   switch (status) {
     case 'missed':
       return {
-        color: theme.errorTextDarker,
+        color: theme.errorText,
         backgroundColor: theme.errorBackground,
         Icon: SvgEditSkull1,
       };
     case 'due':
       return {
-        color: theme.warningTextDark,
+        color: theme.warningText,
         backgroundColor: theme.warningBackground,
         Icon: SvgAlertTriangle,
       };
@@ -54,25 +66,25 @@ export function getStatusProps(status: StatusTypes | null | undefined) {
     case 'paid':
       return {
         color: theme.noticeText,
-        backgroundColor: theme.noticeBackgroundLight,
+        backgroundColor: theme.noticeBackground,
         Icon: SvgValidationCheck,
       };
     case 'completed':
       return {
-        color: theme.tableHeaderText,
-        backgroundColor: theme.tableRowHeaderBackground,
+        color: theme.tableTextLight,
+        backgroundColor: theme.pillBackgroundLight,
         Icon: SvgFavoriteStar,
       };
     case 'pending':
       return {
-        color: theme.noticeTextLight,
+        color: theme.noticeText,
         backgroundColor: theme.noticeBackgroundLight,
         Icon: SvgCalendar3,
       };
     case 'scheduled':
       return {
-        color: theme.tableRowHeaderText,
-        backgroundColor: theme.tableRowHeaderBackground,
+        color: theme.pillText,
+        backgroundColor: theme.pillBackground,
         Icon: SvgCalendar3,
       };
     case 'cleared':
@@ -92,30 +104,33 @@ export function getStatusProps(status: StatusTypes | null | undefined) {
   }
 }
 
+const STATUS_DOT_SIZE = 6;
+
 export function StatusBadge({ status }: { status: ScheduleStatusType }) {
-  const { color, backgroundColor, Icon } = getStatusProps(status);
+  const { color, backgroundColor } = getStatusProps(status);
   return (
     <View
       style={{
         color,
         backgroundColor,
-        padding: '6px 8px',
-        borderRadius: 4,
+        ...pillStyle,
         flexDirection: 'row',
         alignItems: 'center',
+        gap: spacing.xs + spacing.xxs,
         flexShrink: 0,
       }}
     >
-      <Icon
+      <View
+        aria-hidden
         style={{
-          width: 13,
-          height: 13,
-          marginRight: 7,
+          width: STATUS_DOT_SIZE,
+          height: STATUS_DOT_SIZE,
+          borderRadius: radius.pill,
+          backgroundColor: 'currentColor',
+          flexShrink: 0,
         }}
       />
-      <Text style={{ lineHeight: '1em' }}>
-        {titleFirst(getStatusLabel(status))}
-      </Text>
+      <Text>{titleFirst(getStatusLabel(status))}</Text>
     </View>
   );
 }

@@ -4,7 +4,7 @@ import { useResponsive } from '@actual-app/components/hooks/useResponsive';
 import { SvgCog, SvgPylon } from '@actual-app/components/icons/v1';
 import { SvgSettingsSliderAlternate } from '@actual-app/components/icons/v2';
 import { theme } from '@actual-app/components/theme';
-import { spacing } from '@actual-app/components/tokens';
+import { elevation, radius, spacing } from '@actual-app/components/tokens';
 import { View } from '@actual-app/components/view';
 
 import {
@@ -17,6 +17,10 @@ import { useSidebarMenuItemDetails } from '#components/sidebar/useSidebarMenuIte
 import { useSidebarMenu } from '#hooks/useSidebarMenu';
 
 import { SettingsNavLink } from './SettingsNavLink';
+
+// The wide nav is a tray holding the selected page as a white pill; its
+// corner follows the pill's radius plus the tray padding.
+const TRAY_PADDING = 5;
 
 export function SettingsNav() {
   const { t } = useTranslation();
@@ -43,9 +47,20 @@ export function SettingsNav() {
               flexShrink: 0,
               backgroundColor: theme.settingsCardBackground,
               border: `1px solid ${theme.settingsCardBorder}`,
-              borderRadius: 6,
+              borderRadius: radius.lg,
+              boxShadow: elevation.card,
+              overflow: 'hidden',
             }
-          : { width: 180, flexShrink: 0, gap: spacing.xxs }
+          : {
+              width: 196,
+              flexShrink: 0,
+              alignSelf: 'flex-start',
+              gap: spacing.xxs,
+              padding: TRAY_PADDING,
+              backgroundColor: theme.trayBackground,
+              border: `1px solid ${theme.trayBorder}`,
+              borderRadius: radius.md + TRAY_PADDING,
+            }
       }
     >
       <SettingsNavLink

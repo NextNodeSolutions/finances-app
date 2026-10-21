@@ -3,7 +3,6 @@ import type { CSSProperties } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { Text } from '@actual-app/components/text';
-import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 import type {
   AppendNoteRuleActionEntity,
@@ -17,12 +16,13 @@ import type {
 
 import { friendlyOp, getAllocationMethods, mapField } from '#util/rule';
 
+import {
+  expressionChipStyle,
+  expressionFieldStyle,
+  expressionValueStyle,
+} from './expressionStyles';
 import { ScheduleValue } from './ScheduleValue';
 import { Value } from './Value';
-
-const valueStyle = {
-  color: theme.pillTextHighlighted,
-};
 
 type ActionExpressionProps = RuleActionEntity & {
   style?: CSSProperties;
@@ -32,15 +32,7 @@ export function ActionExpression({ style, ...props }: ActionExpressionProps) {
   return (
     <View
       style={{
-        display: 'block',
-        maxWidth: '100%',
-        color: theme.pillText,
-        backgroundColor: theme.pillBackgroundLight,
-        borderRadius: 4,
-        padding: '3px 5px',
-        whiteSpace: 'nowrap',
-        overflow: 'hidden',
-        textOverflow: 'ellipsis',
+        ...expressionChipStyle,
         ...style,
       }}
     >
@@ -71,20 +63,20 @@ function SetActionExpression({
   return (
     <>
       <Text>{friendlyOp(op)}</Text>{' '}
-      <Text style={valueStyle}>{mapField(field, options)}</Text>{' '}
+      <Text style={expressionFieldStyle}>{mapField(field, options)}</Text>{' '}
       <Text>{t('to ')}</Text>
       {options?.formula ? (
         <>
           <Text>{t('formula ')}</Text>
-          <Text style={valueStyle}>{options.formula}</Text>
+          <Text style={expressionValueStyle}>{options.formula}</Text>
         </>
       ) : options?.template ? (
         <>
           <Text>{t('template ')}</Text>
-          <Text style={valueStyle}>{options.template}</Text>
+          <Text style={expressionValueStyle}>{options.template}</Text>
         </>
       ) : (
-        <Value style={valueStyle} value={value} field={field} />
+        <Value style={expressionValueStyle} value={value} field={field} />
       )}
     </>
   );
@@ -104,17 +96,17 @@ function SetSplitAmountActionExpression({
   return (
     <>
       <Text>{friendlyOp(op)}</Text>{' '}
-      <Text style={valueStyle}>{getAllocationMethods()[method]}</Text>
+      <Text style={expressionValueStyle}>{getAllocationMethods()[method]}</Text>
       {method !== 'remainder' && ': '}
       {options?.method === 'formula' ? (
         <>
           <Text>{t('formula ')}</Text>
-          <Text style={valueStyle}>{options.formula}</Text>
+          <Text style={expressionValueStyle}>{options.formula}</Text>
         </>
       ) : method === 'fixed-amount' ? (
-        <Value style={valueStyle} value={value} field="amount" />
+        <Value style={expressionValueStyle} value={value} field="amount" />
       ) : method === 'fixed-percent' ? (
-        <Text style={valueStyle}>{value}%</Text>
+        <Text style={expressionValueStyle}>{value}%</Text>
       ) : null}
     </>
   );
@@ -138,7 +130,7 @@ function PrependNoteActionExpression({
   return (
     <>
       <Text>{friendlyOp(op)}</Text>{' '}
-      <Value style={valueStyle} value={value} field="notes" />
+      <Value style={expressionValueStyle} value={value} field="notes" />
     </>
   );
 }
@@ -147,7 +139,7 @@ function AppendNoteActionExpression({ op, value }: AppendNoteRuleActionEntity) {
   return (
     <>
       <Text>{friendlyOp(op)}</Text>{' '}
-      <Value style={valueStyle} value={value} field="notes" />
+      <Value style={expressionValueStyle} value={value} field="notes" />
     </>
   );
 }

@@ -63,6 +63,14 @@ export type ScheduleItemAction =
 
 export const ROW_HEIGHT = 43;
 
+const amountQualifierStyle = {
+  ...styles.tnum,
+  textAlign: 'left',
+  color: theme.pageTextSubdued,
+  lineHeight: '1em',
+  marginRight: 6,
+} as const;
+
 export function ScheduleAmountCell({
   amount,
   op,
@@ -98,40 +106,25 @@ export function ScheduleAmountCell({
         textAlign: 'right',
         flexDirection: 'row',
         alignItems: 'center',
+        justifyContent: 'flex-end',
         padding: '0 5px',
       }}
       name="amount"
     >
       {isApprox && (
-        <View
-          style={{
-            textAlign: 'left',
-            color: theme.pageTextSubdued,
-            lineHeight: '1em',
-            marginRight: 10,
-          }}
-          title={cellText}
-        >
+        <View style={amountQualifierStyle} title={cellText}>
           ~
         </View>
       )}
       {isBetween && (
-        <View
-          style={{
-            textAlign: 'left',
-            color: theme.pageTextSubdued,
-            lineHeight: '1em',
-            marginRight: 10,
-          }}
-          title={cellText}
-        >
+        <View style={amountQualifierStyle} title={cellText}>
           ±
         </View>
       )}
       <FinancialText
         style={{
-          flex: 1,
-          color: num > 0 ? theme.noticeTextLight : theme.tableText,
+          minWidth: 0,
+          color: num > 0 ? theme.numberPositive : theme.tableText,
           whiteSpace: 'nowrap',
           overflow: 'hidden',
           textOverflow: 'ellipsis',
@@ -224,8 +217,8 @@ function ScheduleRow({
         <Text
           style={
             schedule.name == null
-              ? { color: theme.buttonNormalDisabledText }
-              : null
+              ? { color: theme.tableTextLight }
+              : { color: theme.pageText }
           }
           title={schedule.name ? schedule.name : ''}
         >
@@ -238,7 +231,7 @@ function ScheduleRow({
       <Field width="flex" name="account">
         <DisplayId type="accounts" id={schedule._account} />
       </Field>
-      <Field width={110} name="date">
+      <Field width={110} name="date" style={styles.tnum}>
         {schedule.next_date
           ? monthUtilFormat(schedule.next_date, dateFormat)
           : null}
@@ -252,7 +245,9 @@ function ScheduleRow({
           {schedule._date &&
             typeof schedule._date === 'object' &&
             schedule._date.frequency && (
-              <SvgCheck style={{ width: 13, height: 13 }} />
+              <SvgCheck
+                style={{ width: 12, height: 12, color: theme.tableTextLight }}
+              />
             )}
         </Field>
       )}
@@ -263,6 +258,7 @@ function ScheduleRow({
               ref={buttonRef}
               variant="bare"
               aria-label={t('Menu')}
+              style={{ color: theme.pageTextLight }}
               onPress={() => {
                 if (rowRef.current) {
                   const rect = buttonRef.current?.getBoundingClientRect();
@@ -382,9 +378,9 @@ export function SchedulesTable({
           <Field
             width="flex"
             style={{
-              fontStyle: 'italic',
               textAlign: 'center',
-              color: theme.tableText,
+              fontWeight: 500,
+              color: theme.pageTextLight,
             }}
           >
             <Trans>Show completed schedules</Trans>
@@ -402,7 +398,7 @@ export function SchedulesTable({
 
   return (
     <View style={{ ...styles.tableContainer, ...tableStyle }}>
-      <TableHeader height={ROW_HEIGHT} inset={15}>
+      <TableHeader inset={15}>
         <Field width="flex">
           <Trans>Name</Trans>
         </Field>

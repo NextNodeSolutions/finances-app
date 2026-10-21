@@ -177,7 +177,7 @@ function UserAccessContent({ isModal }: ManageUserAccessContentProps) {
         style={{
           paddingBlock: 15,
           paddingInline: isModal ? 13 : 0,
-          borderTop: isModal && '1px solid ' + theme.pillBorder,
+          borderTop: isModal && '1px solid ' + theme.hairline,
           flexShrink: 0,
         }}
       />

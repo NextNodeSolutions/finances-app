@@ -10,6 +10,7 @@ import { usePayeesById } from '#hooks/usePayees';
 import { useSchedules } from '#hooks/useSchedules';
 import { describeSchedule } from '#util/schedule';
 
+import { expressionValueStyle } from './expressionStyles';
 import { Value } from './Value';
 
 type ScheduleValueProps = {
@@ -35,5 +36,12 @@ export function ScheduleValue({ value }: ScheduleValueProps) {
     ? describeSchedule(schedule, byId[schedule._payee])
     : t('(deleted)');
 
-  return <Value value={display} field="notes" valueIsRaw />;
+  return (
+    <Value
+      style={expressionValueStyle}
+      value={display}
+      field="notes"
+      valueIsRaw
+    />
+  );
 }

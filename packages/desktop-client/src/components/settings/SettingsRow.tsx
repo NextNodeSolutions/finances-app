@@ -6,6 +6,10 @@ import { theme } from '@actual-app/components/theme';
 import { spacing } from '@actual-app/components/tokens';
 import { View } from '@actual-app/components/view';
 
+// A touch more air than the table rows: settings read as a statement, not
+// a grid.
+const ROW_PADDING = `${spacing.md + spacing.xxs}px ${spacing.lg + spacing.xs}px`;
+
 type SettingsRowProps = {
   title: ReactNode;
   description?: ReactNode;
@@ -23,16 +27,19 @@ export function SettingsRow({
   isNested = false,
   children,
 }: SettingsRowProps) {
-  const titleStyle = { ...styles.smallText, fontWeight: 500 };
+  const titleStyle = {
+    ...styles.smallText,
+    lineHeight: '18px',
+    fontWeight: 500,
+    color: theme.settingsCardText,
+  };
 
   return (
     <View
       style={{
         flexShrink: 0,
         gap: spacing.md,
-        padding: isNested
-          ? `0 0 0 ${spacing.lg}px`
-          : `${spacing.md}px ${spacing.lg}px`,
+        padding: isNested ? `0 0 0 ${spacing.lg}px` : ROW_PADDING,
       }}
     >
       <View
@@ -55,7 +62,7 @@ export function SettingsRow({
             <Text
               style={{
                 ...styles.smallText,
-                lineHeight: 1.5,
+                lineHeight: '18px',
                 color: theme.settingsCardTextSubdued,
               }}
             >

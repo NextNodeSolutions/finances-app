@@ -275,7 +275,7 @@ function UserDirectoryContent({ isModal }: ManageUserDirectoryContentProps) {
           <UserDirectoryHeader />
           <InfiniteScrollWrapper loadMore={loadMore}>
             {filteredUsers.length === 0 ? (
-              <EmptyMessage text={t('No users')} style={{ marginTop: 15 }} />
+              <EmptyMessage text={t('No users')} />
             ) : (
               <UsersList
                 users={filteredUsers}
@@ -291,7 +291,7 @@ function UserDirectoryContent({ isModal }: ManageUserDirectoryContentProps) {
           style={{
             paddingBlock: 15,
             paddingInline: isModal ? 13 : 0,
-            borderTop: isModal && '1px solid ' + theme.pillBorder,
+            borderTop: isModal && '1px solid ' + theme.hairline,
             flexShrink: 0,
           }}
         >
@@ -326,10 +326,9 @@ function EmptyMessage({ text, style }: EmptyMessageProps) {
     <View
       style={{
         textAlign: 'center',
-        color: theme.pageTextSubdued,
-        fontStyle: 'italic',
+        color: theme.pageTextLight,
         fontSize: 13,
-        marginTop: 5,
+        padding: '20px 0',
         ...style,
       }}
     >

@@ -15,7 +15,7 @@ import type { Diff } from '@actual-app/core/shared/util';
 import type { PayeeEntity } from '@actual-app/core/types/models';
 
 import { Search } from '#components/common/Search';
-import { Cell, SelectCell, TableHeader } from '#components/table';
+import { Cell, Field, SelectCell, TableHeader } from '#components/table';
 import {
   SelectedProvider,
   useSelected,
@@ -48,6 +48,8 @@ function PayeeTableHeader() {
             dispatchSelected({ type: 'select-all', isRangeSelect: e.shiftKey })
           }
         />
+        {/* Matches the rows' favourite/learning icon column. */}
+        <Field width={20} />
         <Cell value={t('Name')} width="flex" />
       </TableHeader>
     </View>
@@ -296,10 +298,9 @@ export const ManagePayees = ({
             <View
               style={{
                 textAlign: 'center',
-                color: theme.pageTextSubdued,
-                fontStyle: 'italic',
+                color: theme.pageTextLight,
                 fontSize: 13,
-                marginTop: 5,
+                padding: '20px 0',
               }}
             >
               <Trans>No payees</Trans>

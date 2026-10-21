@@ -2,14 +2,16 @@
 import React, { memo, useRef } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 
-import { Button } from '@actual-app/components/button';
 import { SvgRightArrow2 } from '@actual-app/components/icons/v0';
 import { SpaceBetween } from '@actual-app/components/space-between';
 import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
+import { radius, spacing } from '@actual-app/components/tokens';
 import { View } from '@actual-app/components/view';
 import type { RuleEntity } from '@actual-app/core/types/models';
 
+import { pillStyle } from '#components/schedules/StatusBadge';
+import { QuietRowActionButton } from '#components/settings/QuietRowActionButton';
 import { Cell, Field, Row, SelectCell } from '#components/table';
 import { useContextMenu } from '#hooks/useContextMenu';
 import { useSelectedDispatch } from '#hooks/useSelected';
@@ -85,6 +87,7 @@ export const RuleRow = memo(
               : theme.tableBackground,
         }}
         collapsed
+        data-quiet-actions
         onMouseEnter={() => onHover && onHover(rule.id)}
         onMouseLeave={() => onHover && onHover(null)}
       >
@@ -106,11 +109,10 @@ export const RuleRow = memo(
             <View
               style={{
                 alignSelf: 'flex-start',
-                margin: 5,
-                backgroundColor: theme.pillBackgroundSelected,
-                color: theme.pillTextSelected,
-                borderRadius: 4,
-                padding: '3px 5px',
+                margin: `${spacing.md + spacing.xxs}px ${spacing.xs}px`,
+                ...pillStyle,
+                backgroundColor: theme.pillBackground,
+                color: theme.pillText,
               }}
             >
               {translateRuleStage(rule.stage)}
@@ -118,8 +120,12 @@ export const RuleRow = memo(
           )}
         </Cell>
 
-        <Field width="flex" style={{ padding: '15px 0' }} truncate={false}>
-          <SpaceBetween style={{ alignItems: 'center' }}>
+        <Field
+          width="flex"
+          style={{ padding: `${spacing.md}px 0` }}
+          truncate={false}
+        >
+          <SpaceBetween gap={spacing.md} style={{ alignItems: 'center' }}>
             <View
               style={{ flex: 1, alignItems: 'flex-start' }}
               data-testid="conditions"
@@ -133,14 +139,14 @@ export const RuleRow = memo(
                   value={cond.value}
                   options={cond.options}
                   prefix={i > 0 ? friendlyOp(rule.conditionsOp) : null}
-                  style={i !== 0 && { marginTop: 3 }}
+                  style={i !== 0 && { marginTop: spacing.xs }}
                 />
               ))}
             </View>
 
             <Text>
               <SvgRightArrow2
-                style={{ width: 12, height: 12, color: theme.tableText }}
+                style={{ width: 11, height: 11, color: theme.tableTextLight }}
               />
             </Text>
 
@@ -157,17 +163,17 @@ export const RuleRow = memo(
                         display: 'flex',
                         flexDirection: 'column',
                         alignItems: 'flex-start',
-                        marginTop: i > 0 ? 3 : 0,
-                        padding: '5px',
-                        borderColor: theme.tableBorder,
+                        marginTop: i > 0 ? spacing.xs : 0,
+                        padding: spacing.sm,
+                        borderColor: theme.hairline,
                         borderWidth: '1px',
-                        borderRadius: '5px',
+                        borderRadius: radius.md + 2,
                       }}
                     >
                       <Text
-                        size="medium"
                         style={{
                           color: theme.pageTextLight,
+                          fontWeight: 500,
                           marginBottom: 6,
                         }}
                       >
@@ -177,7 +183,7 @@ export const RuleRow = memo(
                         <ActionExpression
                           key={j}
                           {...action}
-                          style={j !== 0 && { marginTop: 3 }}
+                          style={j !== 0 && { marginTop: spacing.xs }}
                         />
                       ))}
                     </View>
@@ -186,7 +192,7 @@ export const RuleRow = memo(
                     <ActionExpression
                       key={i}
                       {...action}
-                      style={i !== 0 && { marginTop: 3 }}
+                      style={i !== 0 && { marginTop: spacing.xs }}
                     />
                   ))}
             </View>
@@ -194,9 +200,9 @@ export const RuleRow = memo(
         </Field>
 
         <Cell name="edit" plain style={{ padding: '0 15px', paddingLeft: 5 }}>
-          <Button onPress={() => onEditRule(rule)}>
+          <QuietRowActionButton onPress={() => onEditRule(rule)}>
             <Trans>Edit</Trans>
-          </Button>
+          </QuietRowActionButton>
         </Cell>
       </Row>
     );

@@ -119,13 +119,15 @@ export function Schedules() {
           onSelect={onEdit}
           onAction={onAction}
           style={{ backgroundColor: theme.tableBackground }}
+          // The card hugs its rows and only scrolls once they outgrow the page.
+          tableStyle={{ flex: '0 1 auto' }}
         />
 
         <View
           style={{
             flexDirection: 'row',
             justifyContent: 'space-between',
-            margin: '20px 0',
+            margin: '16px 0 20px',
             flexShrink: 0,
           }}
         >

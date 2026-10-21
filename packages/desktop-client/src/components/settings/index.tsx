@@ -93,7 +93,7 @@ function About() {
           (versionInfo?.isOutdated ? (
             <Trans>New version available: {versionInfo.latestVersion}</Trans>
           ) : (
-            <Text style={{ color: theme.noticeText, fontWeight: 600 }}>
+            <Text style={{ color: theme.noticeText, fontWeight: 500 }}>
               <Trans>You're up to date!</Trans>
             </Text>
           ))
@@ -103,7 +103,7 @@ function About() {
             <Link
               variant="external"
               to="https://actualbudget.org/docs/releases"
-              linkColor="purple"
+              linkColor="muted"
             >
               <Trans>Release Notes</Trans>
             </Link>
@@ -151,7 +151,13 @@ function AdvancedAbout() {
   const [budgetId] = useMetadataPref('id');
   const [groupId] = useMetadataPref('groupId');
   const { t } = useTranslation();
-  const idStyle = { userSelect: 'text', wordBreak: 'break-all' } as const;
+  const idStyle = {
+    ...styles.tnum,
+    fontSize: 12,
+    userSelect: 'text',
+    wordBreak: 'break-all',
+    color: theme.pageTextLight,
+  } as const;
 
   return (
     <SettingsGroup
@@ -192,7 +198,7 @@ function SettingsSections({ title, children }: SettingsSectionsProps) {
         flexShrink: 0,
         maxWidth: 640,
         width: '100%',
-        gap: spacing.xl,
+        gap: spacing.xl + spacing.sm,
         paddingBottom: MOBILE_NAV_HEIGHT,
       }}
     >
@@ -353,8 +359,8 @@ export function Settings() {
         style={{
           flexDirection: 'row',
           flex: 1,
-          gap: spacing.xl,
-          paddingTop: 10,
+          gap: spacing.xl + spacing.sm,
+          paddingTop: spacing.sm,
         }}
       >
         <SettingsNav />

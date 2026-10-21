@@ -1,6 +1,6 @@
 // @ts-strict-ignore
 import { useEffect, useMemo, useRef, useState } from 'react';
-import type { CSSProperties, ReactNode } from 'react';
+import type { CSSProperties } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 
 import { Button } from '@actual-app/components/button';
@@ -20,6 +20,7 @@ import { SpaceBetween } from '@actual-app/components/space-between';
 import { styles } from '@actual-app/components/styles';
 import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
+import { fontFamily, radius, spacing } from '@actual-app/components/tokens';
 import { Tooltip } from '@actual-app/components/tooltip';
 import { View } from '@actual-app/components/view';
 import { send } from '@actual-app/core/platform/client/connection';
@@ -62,6 +63,8 @@ import { disableUndo, enableUndo } from '#undo';
 import { friendlyOp, getAllocationMethods, mapField } from '#util/rule';
 
 import { FormulaActionEditor } from './FormulaActionEditor';
+import { SegmentedControl } from './SegmentedControl';
+import { SegmentedControlItem } from './SegmentedControlItem';
 
 function updateValue(array, value, update) {
   return array.map(v => (v === value ? update() : v));
@@ -209,6 +212,42 @@ function SplitAmountMethodSelect({
   );
 }
 
+const editorButtonStyle = {
+  width: 26,
+  height: 26,
+  padding: 0,
+  color: theme.pageTextLight,
+};
+
+// Each condition and action sits on a soft band so the selects and inputs
+// inside it read as one sentence.
+const editorRowStyle = {
+  backgroundColor: theme.pillBackgroundLight,
+  border: `1px solid ${theme.hairlineSubtle}`,
+  borderRadius: radius.md + 2,
+  padding: `${spacing.xs}px ${spacing.xs + spacing.xxs}px`,
+};
+
+// The formula toggle and indicator show a serif italic f; when active they
+// take the ink of a primary control.
+function getFormulaMarkStyle(isActive: boolean) {
+  return {
+    padding: 5,
+    height: 24,
+    width: 24,
+    borderRadius: radius.sm,
+    backgroundColor: isActive ? theme.buttonPrimaryBackground : undefined,
+    color: isActive ? theme.buttonPrimaryText : theme.pageTextLight,
+  };
+}
+
+const formulaGlyphStyle = {
+  fontSize: 15,
+  fontFamily: fontFamily.display,
+  fontStyle: 'italic',
+  textAlign: 'center',
+} as const;
+
 function EditorButtons({ onAdd, onDelete }) {
   const { t } = useTranslation();
   return (
@@ -217,7 +256,7 @@ function EditorButtons({ onAdd, onDelete }) {
         <Button
           variant="bare"
           onPress={onDelete}
-          style={{ padding: 7 }}
+          style={editorButtonStyle}
           aria-label={t('Delete entry')}
         >
           <SvgSubtract style={{ width: 8, height: 8, color: 'inherit' }} />
@@ -227,7 +266,7 @@ function EditorButtons({ onAdd, onDelete }) {
         <Button
           variant="bare"
           onPress={onAdd}
-          style={{ padding: 7 }}
+          style={editorButtonStyle}
           aria-label={t('Add entry')}
         >
           <SvgAdd style={{ width: 10, height: 10, color: 'inherit' }} />
@@ -575,14 +614,7 @@ function ActionEditor({
               <Button
                 variant="bare"
                 isDisabled={templated}
-                style={{
-                  padding: 5,
-                  backgroundColor: hasFormula
-                    ? theme.buttonPrimaryBackground
-                    : undefined,
-                  height: 24,
-                  width: 24,
-                }}
+                style={getFormulaMarkStyle(hasFormula)}
                 aria-label={
                   hasFormula ? t('Disable formula') : t('Enable formula')
                 }
@@ -592,15 +624,7 @@ function ActionEditor({
                     : onChange('formula', options.formula || value || '=')
                 }
               >
-                <span
-                  style={{
-                    fontSize: 14,
-                    fontFamily: 'serif',
-                    textAlign: 'center',
-                  }}
-                >
-                  ƒ
-                </span>
+                <span style={formulaGlyphStyle}>ƒ</span>
               </Button>
             )}
           {isTemplatingEnabled &&
@@ -608,12 +632,7 @@ function ActionEditor({
               <Button
                 variant="bare"
                 isDisabled={hasFormula}
-                style={{
-                  padding: 5,
-                  backgroundColor: templated
-                    ? theme.buttonPrimaryBackground
-                    : undefined,
-                }}
+                style={getFormulaMarkStyle(templated)}
                 aria-label={
                   templated ? t('Disable templating') : t('Enable templating')
                 }
@@ -670,27 +689,15 @@ function ActionEditor({
           {options.method === 'formula' && (
             <View
               style={{
-                padding: 5,
-                backgroundColor: theme.buttonPrimaryBackground,
-                height: 24,
-                width: 24,
+                ...getFormulaMarkStyle(true),
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                borderRadius: 4,
               }}
               aria-label={t('Formula mode indicator')}
               role="img"
             >
-              <span
-                style={{
-                  fontSize: 14,
-                  fontFamily: 'serif',
-                  textAlign: 'center',
-                }}
-              >
-                ƒ
-              </span>
+              <span style={formulaGlyphStyle}>ƒ</span>
             </View>
           )}
         </>
@@ -765,8 +772,6 @@ function StageInfo() {
         placement="bottom start"
         style={{
           ...styles.tooltip,
-          padding: 10,
-          color: theme.pageTextLight,
           maxWidth: 450,
           lineHeight: 1.5,
         }}
@@ -776,36 +781,6 @@ function StageInfo() {
         />
       </Tooltip>
     </View>
-  );
-}
-
-type StageButtonProps = {
-  selected: boolean;
-  children: ReactNode;
-  style?: CSSProperties;
-  onSelect: () => void;
-};
-function StageButton({
-  selected,
-  children,
-  style,
-  onSelect,
-}: StageButtonProps) {
-  return (
-    <Button
-      variant="bare"
-      style={{
-        fontSize: 'inherit',
-        ...(selected && {
-          backgroundColor: theme.pillBackgroundSelected,
-          ':hover': { backgroundColor: theme.pillBackgroundSelected },
-        }),
-        ...style,
-      }}
-      onPress={onSelect}
-    >
-      {children}
-    </Button>
   );
 }
 
@@ -994,6 +969,11 @@ function ConditionsList({
     </SpaceBetween>
   );
 }
+
+const sectionLabelStyle = {
+  fontWeight: 500,
+  color: theme.pageText,
+};
 
 const getActions = splits => splits.flatMap(s => s.actions);
 const getUnparsedActions = splits => getActions(splits).map(unparse);
@@ -1339,29 +1319,31 @@ export function RuleEditor({
           padding: '0 20px',
         }}
       >
-        <Text style={{ marginRight: 15 }}>
+        <Text style={{ ...sectionLabelStyle, marginRight: spacing.md }}>
           <Trans>Stage of rule:</Trans>
         </Text>
 
-        <SpaceBetween gap={5} style={{ alignItems: 'center' }}>
-          <StageButton
-            selected={stage === 'pre'}
-            onSelect={() => onChangeStage('pre')}
-          >
-            <Trans>Pre</Trans>
-          </StageButton>
-          <StageButton
-            selected={stage === null}
-            onSelect={() => onChangeStage(null)}
-          >
-            <Trans>Default</Trans>
-          </StageButton>
-          <StageButton
-            selected={stage === 'post'}
-            onSelect={() => onChangeStage('post')}
-          >
-            <Trans>Post</Trans>
-          </StageButton>
+        <SpaceBetween gap={spacing.sm} style={{ alignItems: 'center' }}>
+          <SegmentedControl>
+            <SegmentedControlItem
+              isSelected={stage === 'pre'}
+              onPress={() => onChangeStage('pre')}
+            >
+              <Trans>Pre</Trans>
+            </SegmentedControlItem>
+            <SegmentedControlItem
+              isSelected={stage === null}
+              onPress={() => onChangeStage(null)}
+            >
+              <Trans>Default</Trans>
+            </SegmentedControlItem>
+            <SegmentedControlItem
+              isSelected={stage === 'post'}
+              onPress={() => onChangeStage('post')}
+            >
+              <Trans>Post</Trans>
+            </SegmentedControlItem>
+          </SegmentedControl>
 
           <StageInfo />
         </SpaceBetween>
@@ -1370,7 +1352,7 @@ export function RuleEditor({
       <View
         innerRef={scrollableEl}
         style={{
-          borderBottom: '1px solid ' + theme.tableBorder,
+          borderBottom: '1px solid ' + theme.hairline,
           padding: '0 20px 20px 20px',
           overflow: 'auto',
           maxHeight: 'calc(100% - 300px)',
@@ -1381,7 +1363,7 @@ export function RuleEditor({
       >
         <View style={{ flexShrink: 0 }}>
           <View style={{ marginBottom: 30 }}>
-            <Text style={{ marginBottom: 15 }}>
+            <Text style={{ ...sectionLabelStyle, marginBottom: spacing.md }}>
               <Trans>
                 If{' '}
                 <FieldSelect
@@ -1401,13 +1383,13 @@ export function RuleEditor({
             <ConditionsList
               conditionsOp={conditionsOp}
               conditions={conditions}
-              editorStyle={styles.editorPill}
+              editorStyle={editorRowStyle}
               isSchedule={isSchedule}
               onChangeConditions={conds => setConditions(conds)}
             />
           </View>
 
-          <Text style={{ marginBottom: 15 }}>
+          <Text style={{ ...sectionLabelStyle, marginBottom: spacing.md }}>
             <Trans>Then apply these actions:</Trans>
           </Text>
           <View style={{ flex: 1 }}>
@@ -1431,10 +1413,10 @@ export function RuleEditor({
                   nativeStyle={
                     actionSplits.length > 1
                       ? {
-                          borderColor: theme.tableBorder,
+                          borderColor: theme.hairline,
                           borderWidth: '1px',
-                          borderRadius: '5px',
-                          padding: '5px',
+                          borderRadius: `${radius.lg}px`,
+                          padding: `${spacing.sm}px`,
                         }
                       : {}
                   }
@@ -1448,6 +1430,8 @@ export function RuleEditor({
                         size="medium"
                         style={{
                           marginBottom: '10px',
+                          fontWeight: 500,
+                          color: theme.pageTextLight,
                         }}
                       >
                         {splitIndex === 0
@@ -1484,7 +1468,7 @@ export function RuleEditor({
                       <View key={actionIndex} style={{ width: '100%' }}>
                         <ActionEditor
                           action={action}
-                          editorStyle={styles.editorPill}
+                          editorStyle={editorRowStyle}
                           onChange={(name, value, extraOptions) =>
                             onChangeAction(action, name, value, extraOptions)
                           }
@@ -1560,8 +1544,9 @@ export function RuleEditor({
             transactions={transactions}
             fields={getTransactionFields(conditions, getActions(actionSplits))}
             style={{
-              border: '1px solid ' + theme.tableBorder,
-              borderRadius: '6px 6px 0 0',
+              border: '1px solid ' + theme.hairline,
+              borderRadius: radius.lg,
+              overflow: 'hidden',
             }}
           />
 

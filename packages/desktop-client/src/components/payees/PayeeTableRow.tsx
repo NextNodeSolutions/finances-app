@@ -9,9 +9,11 @@ import {
   SvgLightBulb,
 } from '@actual-app/components/icons/v1';
 import { theme } from '@actual-app/components/theme';
+import { motion } from '@actual-app/components/tokens';
 import { Tooltip } from '@actual-app/components/tooltip';
 import type { PayeeEntity } from '@actual-app/core/types/models';
 
+import { pillStyle } from '#components/schedules/StatusBadge';
 import {
   Cell,
   CellButton,
@@ -44,19 +46,24 @@ function RuleButton({ ruleCount, focused, onEdit, onClick }: RuleButtonProps) {
     >
       <CellButton
         style={{
-          borderRadius: 4,
-          padding: '3px 6px',
-          backgroundColor: theme.noticeBackground,
-          border: '1px solid ' + theme.noticeBackground,
-          color: theme.noticeTextDark,
-          fontSize: 12,
+          ...pillStyle,
+          gap: 6,
+          border: '1px solid transparent',
           cursor: 'pointer',
-          ':hover': { backgroundColor: theme.noticeBackgroundLight },
+          transition: `background-color ${motion.base} ${motion.ease}, color ${motion.base} ${motion.ease}`,
+          ...(ruleCount > 0
+            ? { backgroundColor: theme.pillBackground, color: theme.pillText }
+            : { backgroundColor: 'transparent', color: theme.pageTextLight }),
+          ':hover': {
+            backgroundColor: theme.buttonNormalBackgroundHover,
+            borderColor: theme.hairlineStrong,
+            color: theme.pageText,
+          },
         }}
         onEdit={onEdit}
         onSelect={onClick}
       >
-        <PayeeRuleCountLabel count={ruleCount} style={{ paddingRight: 5 }} />
+        <PayeeRuleCountLabel count={ruleCount} />
         <SvgArrowThinRight style={{ width: 8, height: 8 }} />
       </CellButton>
     </Cell>
@@ -219,10 +226,16 @@ export const PayeeTableRow = memo(
           {() => {
             return (
               <>
-                {payee.favorite ? <SvgBookmark style={{ width: 10 }} /> : null}
+                {payee.favorite ? (
+                  <SvgBookmark
+                    style={{ width: 10, color: theme.pageTextLight }}
+                  />
+                ) : null}
                 {isLearnCategoriesEnabled && !payee.learn_categories && (
                   <Tooltip content={t('Category learning disabled')}>
-                    <SvgLightBulb style={{ color: 'red', width: 10 }} />
+                    <SvgLightBulb
+                      style={{ color: theme.warningText, width: 10 }}
+                    />
                   </Tooltip>
                 )}
               </>

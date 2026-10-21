@@ -54,7 +54,6 @@ export function ManageTags() {
           style={{
             flexDirection: 'row',
             alignItems: 'center',
-            padding: '0 0 15px',
             flexShrink: 0,
           }}
         >
@@ -70,8 +69,8 @@ export function ManageTags() {
           </View>
         </View>
         <SpaceBetween gap={10} style={{ marginTop: 12, alignItems: 'center' }}>
-          <Button variant="bare" onPress={() => setCreate(true)}>
-            <SvgAdd width={10} height={10} style={{ marginRight: 3 }} />
+          <Button variant="normal" onPress={() => setCreate(true)}>
+            <SvgAdd width={9} height={9} style={{ marginRight: 6 }} />
             <Trans>Add New</Trans>
           </Button>
           <View style={{ flex: 1 }} />
@@ -101,7 +100,7 @@ export function ManageTags() {
             <View
               style={{
                 background: theme.tableBackground,
-                fontStyle: 'italic',
+                color: theme.pageTextLight,
               }}
             >
               <Text style={{ margin: 'auto', padding: '20px' }}>

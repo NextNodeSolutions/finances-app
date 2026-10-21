@@ -101,9 +101,9 @@ export function PayeeMenu({
       footer={
         <View
           style={{
-            padding: 3,
+            padding: '4px 6px',
             fontSize: 11,
-            fontStyle: 'italic',
+            lineHeight: '15px',
             color: theme.pageTextSubdued,
           }}
         >

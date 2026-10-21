@@ -3,10 +3,13 @@ import { Trans, useTranslation } from 'react-i18next';
 
 import { styles } from '@actual-app/components/styles';
 import { Text } from '@actual-app/components/text';
+import { theme } from '@actual-app/components/theme';
+import { spacing } from '@actual-app/components/tokens';
 import { View } from '@actual-app/components/view';
 import type { AccountEntity } from '@actual-app/core/types/models';
 
 import { MOBILE_NAV_HEIGHT } from '#components/mobile/MobileNavTabs';
+import { sectionHeadingStyle } from '#components/settings/SettingsGroup';
 import { useAccounts } from '#hooks/useAccounts';
 import { pushModal } from '#modals/modalsSlice';
 import { useDispatch } from '#redux';
@@ -92,7 +95,7 @@ export function BankSync() {
       {hasLinkedAccounts && <AutomaticSyncSettings />}
 
       {openAccounts.length === 0 && (
-        <Text style={{ fontSize: '1.1rem' }}>
+        <Text style={{ fontSize: 13, color: theme.pageTextLight }}>
           <Trans>
             No accounts yet. Once a provider is set up, use{' '}
             <strong>Link bank account</strong> to connect your bank and create
@@ -106,7 +109,9 @@ export function BankSync() {
         return (
           <View key={syncProvider} style={{ minHeight: 'initial' }}>
             {groupedAccountEntries.length > 1 && (
-              <Text style={{ fontWeight: 500, fontSize: 20, margin: '.5em 0' }}>
+              <Text
+                style={{ ...sectionHeadingStyle, marginBottom: spacing.md }}
+              >
                 {syncSourceReadable[syncProvider]}
               </Text>
             )}
