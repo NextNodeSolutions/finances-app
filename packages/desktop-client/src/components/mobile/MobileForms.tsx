@@ -42,7 +42,8 @@ export function FieldLabel({ title, flush, style }: FieldLabelProps) {
   );
 }
 
-const FIELD_HEIGHT = 44;
+/** Height of every mobile form field; desktop inputs placed beside one match it. */
+export const MOBILE_FIELD_HEIGHT = 44;
 
 const valueStyle = {
   borderWidth: 1,
@@ -51,7 +52,7 @@ const valueStyle = {
   borderRadius: radius.md,
   marginLeft: styles.mobileEditingPadding,
   marginRight: styles.mobileEditingPadding,
-  height: FIELD_HEIGHT,
+  height: MOBILE_FIELD_HEIGHT,
   transition: `border-color ${motion.base} ${motion.ease}, box-shadow ${motion.base} ${motion.ease}, background-color ${motion.base} ${motion.ease}`,
 };
 
