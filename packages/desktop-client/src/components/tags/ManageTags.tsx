@@ -49,7 +49,9 @@ export function ManageTags() {
 
   return (
     <SelectedProvider instance={selectedInst}>
-      <View>
+      {/* The tag list is sized to its rows, so the page scrolls rather than
+        squeezing the header and the new-tag row under the list. */}
+      <View style={{ flexShrink: 0 }}>
         <View
           style={{
             flexDirection: 'row',
@@ -84,7 +86,7 @@ export function ManageTags() {
           />
           <TagsMenuButton />
         </SpaceBetween>
-        <View style={{ marginTop: 12, ...styles.tableContainer }}>
+        <View style={{ marginTop: 12, ...styles.tableContainer, flex: 'none' }}>
           <TagsHeader />
           {create && (
             <TagCreationRow onClose={() => setCreate(false)} tags={tags} />

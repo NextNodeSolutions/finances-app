@@ -97,6 +97,9 @@ export const TagCreationRow = ({ onClose, tags }: TagCreationRowProps) => {
   return (
     <View
       style={{
+        // Never squeezed: a shrunk block lets the first tag row slide over
+        // its Add button.
+        flexShrink: 0,
         paddingBottom: 1,
         backgroundColor: theme.tableBackground,
       }}
