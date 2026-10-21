@@ -103,6 +103,7 @@ import { useLocalPref } from '#hooks/useLocalPref';
 import { useLocationPermission } from '#hooks/useLocationPermission';
 import { useNavigate } from '#hooks/useNavigate';
 import { useNearbyPayees } from '#hooks/useNearbyPayees';
+import { useOptionalFeature } from '#hooks/useOptionalFeature';
 import { usePayees } from '#hooks/usePayees';
 import {
   SingleActiveEditFormProvider,
@@ -477,6 +478,8 @@ const ChildTransactionEdit = forwardRef<
     const { editingField, onRequestActiveEdit, onClearActiveEdit } =
       useSingleActiveEditForm()!;
     const noteRef = useRef<HTMLInputElement | null>(null);
+    // Tag entry (the # button and its suggestions) exists only with tags on.
+    const [isTagsOn] = useOptionalFeature('tags');
 
     const prettyPayee = getPrettyPayee({
       t,
@@ -580,7 +583,9 @@ const ChildTransactionEdit = forwardRef<
           <InputField
             ref={noteRef}
             iconStart={<SvgNotesPaper width={17} height={17} />}
-            iconEnd={<NoteInsertHashButton inputRef={noteRef} />}
+            iconEnd={
+              isTagsOn ? <NoteInsertHashButton inputRef={noteRef} /> : undefined
+            }
             placeholder={t('Add a note (optional)')}
             disabled={
               !!editingField &&
@@ -592,7 +597,7 @@ const ChildTransactionEdit = forwardRef<
             }
             onUpdate={value => onUpdate(transaction, 'notes', value)}
           />
-          <NoteTagAutocomplete inputRef={noteRef} />
+          {isTagsOn && <NoteTagAutocomplete inputRef={noteRef} />}
         </View>
 
         <View style={{ alignItems: 'center' }}>
@@ -690,6 +695,8 @@ const TransactionEditInner = memo<TransactionEditInnerProps>(
     const { data: { grouped: categoryGroups } = { grouped: [] } } =
       useCategories();
     const noteRef = useRef<HTMLInputElement | null>(null);
+    // Tag entry (the # button and its suggestions) exists only with tags on.
+    const [isTagsOn] = useOptionalFeature('tags');
 
     useEffect(() => {
       if (window.history.length === 1) {
@@ -1285,6 +1292,54 @@ const TransactionEditInner = memo<TransactionEditInnerProps>(
             />
           </View>
 
+          {/* Desktop order under the amount headline: account, date,
+              payee, category, notes, cleared, then the split editor. */}
+          <View>
+            <FieldLabel title={t('Account')} />
+            <TapField
+              icon={<SvgWallet width={17} height={17} />}
+              placeholder={t('Select an account')}
+              rightContent={dropdownChevron}
+              isDisabled={
+                !!editingField &&
+                editingField !== getFieldName(transaction.id, 'account')
+              }
+              value={account?.name}
+              onPress={() => onEditFieldInner(transaction.id, 'account')}
+              data-testid="account-field"
+            />
+          </View>
+
+          <View>
+            <FieldLabel title={t('Date')} />
+            <InputField
+              type="date"
+              iconStart={<SvgCalendar width={17} height={17} />}
+              disabled={
+                !!editingField &&
+                editingField !== getFieldName(transaction.id, 'date')
+              }
+              required
+              style={{
+                color: theme.tableText,
+                minWidth: '150px',
+                appearance: 'none',
+              }}
+              defaultValue={dateDefaultValue}
+              onBlur={() => onClearActiveEdit()}
+              onFocus={() =>
+                onRequestActiveEdit(getFieldName(transaction.id, 'date'))
+              }
+              onChange={event =>
+                onUpdateInner(
+                  transaction,
+                  'date',
+                  formatDate(parseISO(event.target.value), dateFormat),
+                )
+              }
+            />
+          </View>
+
           <View>
             <FieldLabel title={t('Payee')} />
             <TapField
@@ -1387,6 +1442,71 @@ const TransactionEditInner = memo<TransactionEditInnerProps>(
             </View>
           )}
 
+          <View>
+            <FieldLabel title={t('Notes')} />
+            <InputField
+              ref={noteRef}
+              iconStart={<SvgNotesPaper width={17} height={17} />}
+              iconEnd={
+                isTagsOn ? (
+                  <NoteInsertHashButton inputRef={noteRef} />
+                ) : undefined
+              }
+              placeholder={t('Add a note (optional)')}
+              disabled={
+                !!editingField &&
+                editingField !== getFieldName(transaction.id, 'notes')
+              }
+              defaultValue={transaction.notes}
+              onFocus={() => {
+                onRequestActiveEdit(getFieldName(transaction.id, 'notes'));
+              }}
+              onBlur={() => onClearActiveEdit()}
+              onChange={event =>
+                onUpdateInner(transaction, 'notes', event.target.value)
+              }
+            />
+            {isTagsOn && <NoteTagAutocomplete inputRef={noteRef} />}
+          </View>
+
+          <View
+            style={{
+              flexDirection: 'row',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              marginTop: 20,
+              paddingRight: styles.mobileEditingPadding,
+            }}
+          >
+            {transaction.reconciled ? (
+              <>
+                <FieldLabel
+                  title={t('Reconciled')}
+                  flush
+                  style={{ marginBottom: 0 }}
+                />
+                <ToggleField
+                  id="reconciled"
+                  isOn
+                  onToggle={() => onUnlockReconciledInner(transaction)}
+                />
+              </>
+            ) : (
+              <>
+                <FieldLabel
+                  title={t('Cleared')}
+                  flush
+                  style={{ marginBottom: 0 }}
+                />
+                <ToggleField
+                  id="cleared"
+                  isOn={!!transaction.cleared}
+                  onToggle={on => onUpdateInner(transaction, 'cleared', on)}
+                />
+              </>
+            )}
+          </View>
+
           {childTransactions.map((childTrans, i, arr) => (
             <ChildTransactionEdit
               key={childTrans.id}
@@ -1454,96 +1574,6 @@ const TransactionEditInner = memo<TransactionEditInnerProps>(
               </Button>
             </View>
           )}
-
-          <View>
-            <FieldLabel title={t('Account')} />
-            <TapField
-              icon={<SvgWallet width={17} height={17} />}
-              placeholder={t('Select an account')}
-              rightContent={dropdownChevron}
-              isDisabled={
-                !!editingField &&
-                editingField !== getFieldName(transaction.id, 'account')
-              }
-              value={account?.name}
-              onPress={() => onEditFieldInner(transaction.id, 'account')}
-              data-testid="account-field"
-            />
-          </View>
-
-          <View style={{ flexDirection: 'row' }}>
-            <View style={{ flex: 1 }}>
-              <FieldLabel title={t('Date')} />
-              <InputField
-                type="date"
-                iconStart={<SvgCalendar width={17} height={17} />}
-                disabled={
-                  !!editingField &&
-                  editingField !== getFieldName(transaction.id, 'date')
-                }
-                required
-                style={{
-                  color: theme.tableText,
-                  minWidth: '150px',
-                  appearance: 'none',
-                }}
-                defaultValue={dateDefaultValue}
-                onBlur={() => onClearActiveEdit()}
-                onFocus={() =>
-                  onRequestActiveEdit(getFieldName(transaction.id, 'date'))
-                }
-                onChange={event =>
-                  onUpdateInner(
-                    transaction,
-                    'date',
-                    formatDate(parseISO(event.target.value), dateFormat),
-                  )
-                }
-              />
-            </View>
-            {transaction.reconciled ? (
-              <View style={{ alignItems: 'center' }}>
-                <FieldLabel title={t('Reconciled')} />
-                <ToggleField
-                  id="reconciled"
-                  isOn
-                  onToggle={() => onUnlockReconciledInner(transaction)}
-                />
-              </View>
-            ) : (
-              <View style={{ alignItems: 'center' }}>
-                <FieldLabel title={t('Cleared')} />
-                <ToggleField
-                  id="cleared"
-                  isOn={!!transaction.cleared}
-                  onToggle={on => onUpdateInner(transaction, 'cleared', on)}
-                />
-              </View>
-            )}
-          </View>
-
-          <View>
-            <FieldLabel title={t('Notes')} />
-            <InputField
-              ref={noteRef}
-              iconStart={<SvgNotesPaper width={17} height={17} />}
-              iconEnd={<NoteInsertHashButton inputRef={noteRef} />}
-              placeholder={t('Add a note (optional)')}
-              disabled={
-                !!editingField &&
-                editingField !== getFieldName(transaction.id, 'notes')
-              }
-              defaultValue={transaction.notes}
-              onFocus={() => {
-                onRequestActiveEdit(getFieldName(transaction.id, 'notes'));
-              }}
-              onBlur={() => onClearActiveEdit()}
-              onChange={event =>
-                onUpdateInner(transaction, 'notes', event.target.value)
-              }
-            />
-            <NoteTagAutocomplete inputRef={noteRef} />
-          </View>
 
           {!isAdding && (
             <View style={{ alignItems: 'center' }}>

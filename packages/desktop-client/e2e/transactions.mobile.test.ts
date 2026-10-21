@@ -63,21 +63,21 @@ test.describe('Mobile Transactions', () => {
     await expect(page.getByTestId('transaction-form'))
       .toMatchAriaSnapshot(`- text: Amount
 - textbox
-- text: 23.42 Payee
-- button "Kroger" [disabled]
-- text: Category
-- button "Food" [disabled]
-- button "Split" [disabled]:
-  - img
-  - text: Split
-- text: Account
+- text: 23.42 Account
 - button "HSBC" [disabled]
 - text: Date
 - textbox [disabled]: 2025-10-31
+- text: Payee
+- button "Kroger" [disabled]
+- text: Category
+- button "Food" [disabled]
+- text: Notes
+- textbox [disabled]: just a note
 - text: Cleared
 - checkbox [checked]
-- text: Notes
-- textbox [disabled]: just a note`);
+- button "Split" [disabled]:
+  - img
+  - text: Split`);
   });
 
   test('removes the payee from a new transaction', async () => {
