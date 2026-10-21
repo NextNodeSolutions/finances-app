@@ -12,6 +12,7 @@ import { useClosedAccounts } from '#hooks/useClosedAccounts';
 import { useLocalPref } from '#hooks/useLocalPref';
 import { useOffBudgetAccounts } from '#hooks/useOffBudgetAccounts';
 import { useOnBudgetAccounts } from '#hooks/useOnBudgetAccounts';
+import { useOptionalFeature } from '#hooks/useOptionalFeature';
 import { useUpdatedAccounts } from '#hooks/useUpdatedAccounts';
 import { useSelector } from '#redux';
 import * as bindings from '#spreadsheet/bindings';
@@ -30,6 +31,7 @@ export function Accounts() {
   const { data: onBudgetAccounts = [] } = useOnBudgetAccounts();
   const { data: closedAccounts = [] } = useClosedAccounts();
   const syncingAccountIds = useSelector(state => state.account.accountsSyncing);
+  const [isBankSyncOn] = useOptionalFeature('bankSync');
 
   const getAccountPath = (account: AccountEntity) => `/accounts/${account.id}`;
 
@@ -73,6 +75,7 @@ export function Accounts() {
 
   return (
     <View
+      data-testid="sidebar-accounts"
       style={{
         flexGrow: 1,
         '@media screen and (max-height: 480px)': {
@@ -119,9 +122,9 @@ export function Accounts() {
             key={account.id}
             name={account.name}
             account={account}
-            connected={!!account.bank}
-            pending={syncingAccountIds.includes(account.id)}
-            failed={isAccountFailedSync(account)}
+            connected={isBankSyncOn && !!account.bank}
+            pending={isBankSyncOn && syncingAccountIds.includes(account.id)}
+            failed={isBankSyncOn && isAccountFailedSync(account)}
             updated={updatedAccounts.includes(account.id)}
             to={getAccountPath(account)}
             query={bindings.accountBalance(account.id)}
@@ -151,9 +154,9 @@ export function Accounts() {
             key={account.id}
             name={account.name}
             account={account}
-            connected={!!account.bank}
-            pending={syncingAccountIds.includes(account.id)}
-            failed={isAccountFailedSync(account)}
+            connected={isBankSyncOn && !!account.bank}
+            pending={isBankSyncOn && syncingAccountIds.includes(account.id)}
+            failed={isBankSyncOn && isAccountFailedSync(account)}
             updated={updatedAccounts.includes(account.id)}
             to={getAccountPath(account)}
             query={bindings.accountBalance(account.id)}

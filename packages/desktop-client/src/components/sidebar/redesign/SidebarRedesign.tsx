@@ -10,11 +10,12 @@ import { ToggleButton } from '#components/sidebar/ToggleButton';
 import { useGlobalPref } from '#hooks/useGlobalPref';
 
 import { AccountsSection } from './AccountsSection';
+import { ManageLinks } from './ManageLinks';
 import { PrimaryNav } from './PrimaryNav';
 import { SidebarFooter } from './SidebarFooter';
 import { SidebarHeader } from './SidebarHeader';
 
-const DEFAULT_SIDEBAR_WIDTH = 270;
+const DEFAULT_SIDEBAR_WIDTH = 240;
 
 export function SidebarRedesign() {
   const { t } = useTranslation();
@@ -50,6 +51,8 @@ export function SidebarRedesign() {
         <PrimaryNav />
 
         <AccountsSection />
+
+        <ManageLinks />
 
         <SidebarFooter />
       </View>

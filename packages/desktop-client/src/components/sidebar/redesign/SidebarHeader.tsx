@@ -2,19 +2,15 @@ import { useState } from 'react';
 import type { ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 
-import { Button } from '@actual-app/components/button';
 import { SvgLogo } from '@actual-app/components/icons/logo';
-import { styles } from '@actual-app/components/styles';
 import { theme } from '@actual-app/components/theme';
 import { motion, radius, spacing } from '@actual-app/components/tokens';
-import { Tooltip } from '@actual-app/components/tooltip';
 import { View } from '@actual-app/components/view';
-import { css } from '@emotion/css';
 
-import { closeBudget } from '#budgetfiles/budgetfilesSlice';
+import { Link } from '#components/common/Link';
+import { useSidebar } from '#components/sidebar/SidebarProvider';
 import { hasMacOSWindowButtons } from '#components/sidebar/SidebarShell';
 import { TITLEBAR_HEIGHT } from '#components/Titlebar';
-import { useDispatch } from '#redux';
 
 import { SidebarBudgetName } from './SidebarBudgetName';
 import { SyncStatusLine } from './SyncStatusLine';
@@ -29,7 +25,7 @@ type SidebarHeaderProps = {
 
 export function SidebarHeader({ children }: SidebarHeaderProps) {
   const { t } = useTranslation();
-  const dispatch = useDispatch();
+  const sidebar = useSidebar();
   const [isEditingName, setIsEditingName] = useState(false);
   const hasWindowButtons = hasMacOSWindowButtons();
 
@@ -49,52 +45,43 @@ export function SidebarHeader({ children }: SidebarHeaderProps) {
         flexShrink: 0,
       }}
     >
-      <Tooltip
-        content={t('Switch file')}
-        placement="bottom start"
-        style={styles.tooltip}
-        triggerProps={{ delay: 500 }}
+      <Link
+        variant="internal"
+        to="/overview"
+        style={{
+          display: 'flex',
+          flexShrink: 0,
+          borderRadius: radius.md,
+          transition: `opacity ${motion.base} ${motion.ease}`,
+          ':hover': { opacity: 0.82 },
+          ':focus-visible': {
+            outline: `2px solid ${theme.focusRing}`,
+            outlineOffset: 2,
+          },
+        }}
       >
-        <Button
-          variant="bare"
-          aria-label={t('Switch file')}
-          className={css({
-            padding: 0,
-            borderRadius: radius.md,
-            backgroundColor: 'transparent',
-            flexShrink: 0,
-            transition: `opacity ${motion.base} ${motion.ease}`,
-            '&[data-hovered]': {
-              backgroundColor: 'transparent',
-              opacity: 0.82,
-            },
-            '&[data-pressed]': { backgroundColor: 'transparent' },
-            '&[data-focus-visible]': {
-              outline: `2px solid ${theme.focusRing}`,
-              outlineOffset: 2,
-            },
-          })}
-          onPress={() => void dispatch(closeBudget())}
+        <View
+          aria-label={t('{{appName}} home', { appName: 'Actual' })}
+          role="img"
+          style={{
+            width: LOGO_TILE_SIZE,
+            height: LOGO_TILE_SIZE,
+            borderRadius: radius.md - 1,
+            alignItems: 'center',
+            justifyContent: 'center',
+            backgroundColor: theme.sidebarBrand,
+            color: theme.sidebarBackground,
+          }}
         >
-          <View
-            style={{
-              width: LOGO_TILE_SIZE,
-              height: LOGO_TILE_SIZE,
-              borderRadius: radius.md - 1,
-              alignItems: 'center',
-              justifyContent: 'center',
-              backgroundColor: theme.sidebarBrand,
-              color: theme.sidebarBackground,
-            }}
-          >
-            <SvgLogo width={LOGO_GLYPH_SIZE} height={LOGO_GLYPH_SIZE} />
-          </View>
-        </Button>
-      </Tooltip>
+          <SvgLogo width={LOGO_GLYPH_SIZE} height={LOGO_GLYPH_SIZE} />
+        </View>
+      </Link>
       <View style={{ position: 'relative', minWidth: 0, flex: 1 }}>
         <SidebarBudgetName
           isEditing={isEditingName}
           onEditingChange={setIsEditingName}
+          // A floating sidebar slides in so the switcher has its anchor.
+          onFileSwitcherRequest={() => sidebar.setHidden(false)}
         />
         <View style={{ visibility: isEditingName ? 'hidden' : undefined }}>
           <SyncStatusLine />

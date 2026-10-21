@@ -3,6 +3,7 @@ import type { Locator, Page } from '@playwright/test';
 import { AccountPage } from './account-page';
 import { BankSyncPage } from './bank-sync-page';
 import { BudgetPage } from './budget-page';
+import { OverviewPage } from './overview-page';
 import { PayeesPage } from './payees-page';
 import { ReportsPage } from './reports-page';
 import { RulesPage } from './rules-page';
@@ -66,27 +67,47 @@ async function fillReactInput(locator: Locator, value: string): Promise<void> {
 
 export class Navigation {
   readonly page: Page;
+  readonly primaryButtons: Locator;
+  readonly accounts: Locator;
+  readonly footer: Locator;
 
   constructor(page: Page) {
     this.page = page;
+    this.primaryButtons = page.getByTestId('sidebar-primary-buttons');
+    this.accounts = page.getByTestId('sidebar-accounts');
+    this.footer = page.getByTestId('sidebar-footer');
   }
 
   async goToAccountPage(accountName: string) {
-    await this.page
+    await this.accounts
       .getByRole('link', { name: new RegExp(`^${accountName}`) })
       .click();
 
     return new AccountPage(this.page);
   }
 
+  async goToOverviewPage() {
+    await this.primaryButtons
+      .getByRole('link', { name: 'Overview', exact: true })
+      .click();
+
+    const overviewPage = new OverviewPage(this.page);
+    await overviewPage.waitFor({ state: 'visible' });
+    return overviewPage;
+  }
+
   async goToReportsPage() {
-    await this.page.getByRole('link', { name: 'Reports' }).click();
+    await this.primaryButtons
+      .getByRole('link', { name: 'Reports', exact: true })
+      .click();
 
     return new ReportsPage(this.page);
   }
 
   async goToBudgetPage() {
-    await this.page.getByRole('link', { name: 'Budget', exact: true }).click();
+    await this.primaryButtons
+      .getByRole('link', { name: 'Budget', exact: true })
+      .click();
 
     const budgetPage = new BudgetPage(this.page);
     await budgetPage.waitFor({ state: 'visible' });
@@ -94,7 +115,9 @@ export class Navigation {
   }
 
   async goToSchedulesPage() {
-    await this.page.getByRole('link', { name: 'Schedules' }).click();
+    await this.primaryButtons
+      .getByRole('link', { name: 'Schedules', exact: true })
+      .click();
 
     return new SchedulesPage(this.page);
   }
@@ -121,13 +144,15 @@ export class Navigation {
   }
 
   async goToSettingsPage() {
-    await this.page.getByRole('link', { name: 'Settings' }).click();
+    await this.footer
+      .getByRole('link', { name: 'Settings', exact: true })
+      .click();
 
     return new SettingsPage(this.page);
   }
 
   async createAccount(data: AccountEntry) {
-    await this.page.getByRole('button', { name: 'Add account' }).click();
+    await this.page.getByTestId('sidebar-add-account').click();
 
     // Wait for the form heading to confirm it is fully mounted before
     // touching any fields.
@@ -159,7 +184,7 @@ export class Navigation {
   }
 
   async rightClickAccount(accountName: string) {
-    await this.page
+    await this.accounts
       .getByRole('link', { name: new RegExp(`^${accountName}`) })
       .click({ button: 'right' });
   }

@@ -6,14 +6,17 @@ import { theme } from '@actual-app/components/theme';
 import { radius, spacing } from '@actual-app/components/tokens';
 import { View } from '@actual-app/components/view';
 
+import { useOptionalFeature } from '#hooks/useOptionalFeature';
+
 type SyncErrorRollupProps = {
   count: number;
 };
 
 export function SyncErrorRollup({ count }: SyncErrorRollupProps) {
   const { t } = useTranslation();
+  const [isBankSyncOn] = useOptionalFeature('bankSync');
 
-  if (count === 0) {
+  if (count === 0 || !isBankSyncOn) {
     return null;
   }
 

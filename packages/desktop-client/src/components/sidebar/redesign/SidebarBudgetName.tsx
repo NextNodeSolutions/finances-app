@@ -1,52 +1,76 @@
+import { useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { Button } from '@actual-app/components/button';
-import { SvgTime } from '@actual-app/components/icons/v1';
-import { SvgPencil1 } from '@actual-app/components/icons/v2';
+import { SvgCheveronDown } from '@actual-app/components/icons/v1';
 import { InitialFocus } from '@actual-app/components/initial-focus';
 import { Input } from '@actual-app/components/input';
 import { styles } from '@actual-app/components/styles';
 import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import { motion, radius, spacing } from '@actual-app/components/tokens';
-import { Tooltip } from '@actual-app/components/tooltip';
-import { View } from '@actual-app/components/view';
 import { isElectron } from '@actual-app/core/shared/environment';
-import { css, cx } from '@emotion/css';
+import { css } from '@emotion/css';
 
+import { useContextMenu } from '#hooks/useContextMenu';
 import { useMetadataPref } from '#hooks/useMetadataPref';
+import { useNavigate } from '#hooks/useNavigate';
 import { pushModal } from '#modals/modalsSlice';
 import { useDispatch } from '#redux';
+
+import { FileSwitcher, useFileSwitcherState } from './FileSwitcher';
 
 type SidebarBudgetNameProps = {
   isEditing: boolean;
   onEditingChange: (isEditing: boolean) => void;
+  /** Called before the file switcher opens on request (⌘O, the palette). */
+  onFileSwitcherRequest?: () => void;
 };
 
+/**
+ * The budget's name: a click opens the file switcher, a right-click the
+ * file's menu (rename, settings, backups).
+ */
 export function SidebarBudgetName({
   isEditing,
   onEditingChange,
+  onFileSwitcherRequest,
 }: SidebarBudgetNameProps) {
   const { t } = useTranslation();
   const [budgetName, setBudgetNamePref] = useMetadataPref('budgetName');
   const dispatch = useDispatch();
-
-  const iconButtonClassName = cx(
-    'hover-visible',
-    css({
-      width: 20,
-      height: 20,
-      padding: 0,
-      borderRadius: radius.sm,
-      backgroundColor: 'transparent',
-      color: theme.sidebarTextMuted,
-      transition: `opacity ${motion.base} ${motion.ease}, background-color ${motion.base} ${motion.ease}`,
-      '&[data-hovered], &[data-focus-visible]': {
-        backgroundColor: theme.sidebarItemBackgroundHover,
-        color: theme.sidebarItemTextSelected,
-      },
-    }),
+  const navigate = useNavigate();
+  const triggerRef = useRef<HTMLButtonElement>(null);
+  const [isSwitcherOpen, setIsSwitcherOpen] = useFileSwitcherState(
+    onFileSwitcherRequest,
   );
+
+  useContextMenu({
+    triggerRef,
+    items: [
+      {
+        name: 'rename',
+        text: t('Rename budget'),
+        onClick: () => onEditingChange(true),
+      },
+      {
+        name: 'settings',
+        text: t('Settings'),
+        onClick: () => void navigate('/settings'),
+      },
+      isElectron() && {
+        name: 'loadBackup',
+        text: t('Load Backup…'),
+        onClick: () =>
+          dispatch(pushModal({ modal: { name: 'load-backup', options: {} } })),
+      },
+      {
+        name: 'close',
+        text: t('Switch file'),
+        onClick: () => setIsSwitcherOpen(true),
+      },
+    ],
+  });
 
   function saveBudgetName(newBudgetName: string) {
     if (newBudgetName.trim() !== '' && newBudgetName !== budgetName) {
@@ -57,63 +81,55 @@ export function SidebarBudgetName({
 
   return (
     <>
-      <View
-        style={{
-          flexDirection: 'row',
-          alignItems: 'center',
-          gap: spacing.xxs,
-          minWidth: 0,
+      <Button
+        ref={triggerRef}
+        variant="bare"
+        data-testid="budget-name"
+        aria-haspopup="dialog"
+        aria-expanded={isSwitcherOpen}
+        onPress={() => setIsSwitcherOpen(!isSwitcherOpen)}
+        className={css({
+          justifyContent: 'flex-start',
+          gap: spacing.xs,
+          maxWidth: '100%',
+          padding: '1px 4px',
+          marginLeft: -4,
+          borderRadius: radius.sm,
+          backgroundColor: 'transparent',
+          color: theme.sidebarHeaderText,
           visibility: isEditing ? 'hidden' : undefined,
-          '& .hover-visible': {
-            opacity: 0,
+          transition: `background-color ${motion.base} ${motion.ease}`,
+          '&[data-hovered], &[data-pressed]': {
+            backgroundColor: theme.sidebarItemBackgroundHover,
           },
-          '&:hover .hover-visible, & .hover-visible[data-focus-visible]': {
-            opacity: 1,
+          '&[data-focus-visible]': {
+            outline: `2px solid ${theme.focusRing}`,
+            outlineOffset: 1,
           },
-        }}
+        })}
       >
         <Text
-          data-testid="budget-name"
           style={{
             ...styles.display,
-            color: theme.sidebarHeaderText,
-            fontSize: 17,
-            lineHeight: '21px',
             ...styles.ellipsisText,
+            fontSize: 18,
+            lineHeight: '22px',
           }}
         >
           {budgetName || t('Unnamed')}
         </Text>
-        <Button
-          variant="bare"
-          className={iconButtonClassName}
-          aria-label={t('Rename budget')}
-          onPress={() => onEditingChange(true)}
-        >
-          <SvgPencil1 width={10} height={10} />
-        </Button>
-        {isElectron() && (
-          <Tooltip
-            content={t('Load Backup…')}
-            placement="bottom start"
-            style={styles.tooltip}
-            triggerProps={{ delay: 500 }}
-          >
-            <Button
-              variant="bare"
-              className={iconButtonClassName}
-              aria-label={t('Load Backup…')}
-              onPress={() =>
-                dispatch(
-                  pushModal({ modal: { name: 'load-backup', options: {} } }),
-                )
-              }
-            >
-              <SvgTime width={10} height={10} />
-            </Button>
-          </Tooltip>
-        )}
-      </View>
+        <SvgCheveronDown
+          aria-hidden
+          width={10}
+          height={10}
+          style={{ flexShrink: 0, color: theme.sidebarTextMuted }}
+        />
+      </Button>
+      <FileSwitcher
+        triggerRef={triggerRef}
+        isOpen={isSwitcherOpen}
+        onOpenChange={setIsSwitcherOpen}
+      />
       {isEditing && (
         <InitialFocus>
           <Input

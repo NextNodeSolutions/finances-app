@@ -1,17 +1,18 @@
 import { useState } from 'react';
 import { TreeItem, TreeItemContent } from 'react-aria-components';
 import { useTranslation } from 'react-i18next';
-import { useLocation } from 'react-router';
+import { Link, useLocation } from 'react-router';
 
 import { InitialFocus } from '@actual-app/components/initial-focus';
 import { Input } from '@actual-app/components/input';
 import { styles } from '@actual-app/components/styles';
+import type { CSSProperties } from '@actual-app/components/styles';
 import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import { radius } from '@actual-app/components/tokens';
 import { View } from '@actual-app/components/view';
 import type { AccountEntity } from '@actual-app/core/types/models';
-import { css } from '@emotion/css';
+import { css, cx } from '@emotion/css';
 
 import { useReopenAccountMutation, useUpdateAccountMutation } from '#accounts';
 import { isAccountFailedSync } from '#accounts/syncStatus';
@@ -38,6 +39,29 @@ import { SyncDot, useSyncDotLabel } from './SyncDot';
 import type { SyncDotStatus } from './SyncDot';
 import { useTreeItemEditing } from './treeItemEditing';
 import { treeKeys } from './treeKeys';
+
+const leadColumnStyle = {
+  width: TREE_LEAD_COLUMN,
+  flexShrink: 0,
+  alignItems: 'center',
+} satisfies CSSProperties;
+
+const rowContentClassName = css({
+  display: 'flex',
+  flexDirection: 'row',
+  alignItems: 'center',
+  gap: TREE_COLUMN_GAP,
+  flex: 1,
+  minWidth: 0,
+  alignSelf: 'stretch',
+});
+
+const rowLinkClassName = css({
+  color: 'inherit',
+  textDecoration: 'inherit',
+  cursor: 'inherit',
+  outline: 'none',
+});
 
 type AccountRowProps = {
   account: AccountEntity;
@@ -127,11 +151,6 @@ export function AccountRow({
       id={treeKeys.account(account.id)}
       textValue={account.name}
       href={isEditing ? undefined : href}
-      onAuxClick={e => {
-        if (e.button === 1 && !isEditing) {
-          window.open(href, '_blank');
-        }
-      }}
       className={css({
         outline: 'none',
         borderRadius: radius.md,
@@ -184,51 +203,62 @@ export function AccountRow({
                 textDecoration: isClosed ? 'line-through' : 'none',
               }}
             >
-              <View
-                style={{
-                  width: TREE_LEAD_COLUMN,
-                  flexShrink: 0,
-                  alignItems: 'center',
-                }}
-              >
-                {showSyncDot && <SyncDot status={status} />}
-              </View>
               {isEditing ? (
-                <InitialFocus>
-                  <Input
-                    aria-label={t('Account name')}
-                    style={{ flex: 1, padding: '2px 6px', fontSize: 13 }}
-                    defaultValue={account.name}
-                    onKeyDown={e => e.stopPropagation()}
-                    onEnter={newAccountName => {
-                      if (newAccountName.trim() !== '') {
-                        updateAccount.mutate({
-                          account: { id: account.id, name: newAccountName },
-                        });
-                      }
-                      setIsEditing(false);
-                    }}
-                    onEscape={() => setIsEditing(false)}
-                    onBlur={() => setIsEditing(false)}
-                  />
-                </InitialFocus>
+                <View className={rowContentClassName}>
+                  <View style={leadColumnStyle} />
+                  <InitialFocus>
+                    <Input
+                      aria-label={t('Account name')}
+                      style={{ flex: 1, padding: '2px 6px', fontSize: 13 }}
+                      defaultValue={account.name}
+                      onKeyDown={e => e.stopPropagation()}
+                      onEnter={newAccountName => {
+                        if (newAccountName.trim() !== '') {
+                          updateAccount.mutate({
+                            account: { id: account.id, name: newAccountName },
+                          });
+                        }
+                        setIsEditing(false);
+                      }}
+                      onEscape={() => setIsEditing(false)}
+                      onBlur={() => setIsEditing(false)}
+                    />
+                  </InitialFocus>
+                </View>
               ) : (
-                <Text style={{ flex: 1, ...styles.ellipsisText }}>
-                  {account.name}
-                </Text>
+                // A real link, so the row reads as one and opens in a new
+                // tab natively. The tree row performs the navigation on
+                // press and keeps keyboard focus, so the link's own click
+                // stands down instead of navigating a second time.
+                <Link
+                  to={href}
+                  tabIndex={-1}
+                  draggable={false}
+                  className={cx(rowContentClassName, rowLinkClassName)}
+                  onClick={event => event.preventDefault()}
+                >
+                  <View style={leadColumnStyle}>
+                    {showSyncDot && <SyncDot status={status} />}
+                  </View>
+                  <Text style={{ flex: 1, ...styles.ellipsisText }}>
+                    {account.name}
+                  </Text>
+                  {showSyncDot && (
+                    <Text style={styles.visuallyHidden}>{statusLabel}</Text>
+                  )}
+                  <SidebarBalance
+                    binding={bindings.accountBalance(account.id)}
+                    style={{
+                      color: isClosed
+                        ? theme.sidebarTextMuted
+                        : isActive
+                          ? theme.sidebarItemTextSelected
+                          : theme.sidebarTextSubdued,
+                      marginLeft: TREE_COLUMN_GAP,
+                    }}
+                  />
+                </Link>
               )}
-              <Text style={styles.visuallyHidden}>{statusLabel}</Text>
-              <SidebarBalance
-                binding={bindings.accountBalance(account.id)}
-                style={{
-                  color: isClosed
-                    ? theme.sidebarTextMuted
-                    : isActive
-                      ? theme.sidebarItemTextSelected
-                      : theme.sidebarTextSubdued,
-                  marginLeft: TREE_COLUMN_GAP,
-                }}
-              />
               <DragHandle />
             </View>
           </AccountHoverCard>

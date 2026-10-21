@@ -12,6 +12,7 @@ export function SidebarFooter() {
 
   return (
     <View
+      data-testid="sidebar-footer"
       style={{
         flexShrink: 0,
         borderTop: `1px solid ${theme.sidebarBorder}`,
