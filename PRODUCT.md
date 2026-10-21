@@ -10,16 +10,19 @@ People managing their own household finances: privacy-minded budgeters, self-hos
 
 ## Product Purpose
 
-Actual Budget is a local-first personal finance tool built around envelope budgeting. It exists so people can track and plan their money without handing data to a third party — everything runs on their own device or server, with optional sync. Success looks like users trusting the numbers, completing routine money tasks quickly, and sticking with their budget over months and years.
+Actual Budget is a local-first personal finance tool built around a statement of position: what the user owns and owes, and a budget (envelope or tracking) that plans each month. It exists so people can track and plan their money without handing data to a third party — everything runs on their own device or server, with optional sync. Success looks like users trusting the numbers, completing routine money tasks quickly, and sticking with their budget over months and years.
 
 ## Brand Personality
 
 Calm, trustworthy, practical. The interface should feel like a dependable tool that stays out of the way: quiet confidence, no flash, no urgency theatrics. Money is stressful enough — the UI's job is to make it feel manageable and under control.
 
+Visually it commits to the register of a private-banking statement: ink on a quiet stone canvas, hairline rules, one soft sky accent, exact mono figures and a single serif headline figure per page. Premium through restraint and precision, never through ornament.
+
 ## Anti-references
 
 - Fintech-startup gloss: gradient heroes, glassmorphism, crypto-dashboard neon.
-- Corporate banking UI: navy-and-gold, enterprise-portal density, legalese energy.
+- Corporate banking portals: navy-and-gold, enterprise-portal density, legalese energy. A private bank's statement is the reference; its back-office portal is not.
+- The original Actual look (navy sidebar, purple accent, dense gray grid), except in the midnight theme, which keeps its legacy palette.
 
 ## Design Principles
 
