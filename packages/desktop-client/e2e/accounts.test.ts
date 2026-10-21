@@ -68,8 +68,31 @@ test.describe('Accounts', () => {
     await expect(page).toMatchThemeScreenshots();
     await modal.closeAccount();
 
-    await expect(accountPage.accountName).toHaveText('Closed: Roth IRA');
+    await expect(accountPage.accountName).toHaveText('Roth IRA');
+    await expect(accountPage.closedPill).toBeVisible();
+    // A closed account's actions reduce to the account menu.
+    await expect(accountPage.addNewTransactionButton).not.toBeVisible();
+    await expect(accountPage.reconcileButton).not.toBeVisible();
     await expect(page).toMatchThemeScreenshots();
+  });
+
+  test('updates the value of an off-budget account without locking', async () => {
+    accountPage = await navigation.goToAccountPage('Vanguard 401k');
+    await accountPage.waitFor();
+    await expect(accountPage.offBudgetPill).toBeVisible();
+
+    await accountPage.updateValue('100000');
+
+    await expect(accountPage.reconcileStrip).not.toBeVisible();
+    await expect(accountPage.accountBalance).toHaveText('100,000.00');
+
+    const adjustment = accountPage.transactionTableRow.filter({
+      hasText: 'Valuation adjustment',
+    });
+    await expect(adjustment).toHaveCount(1);
+    await expect(
+      page.getByRole('button', { name: 'Lock transactions' }),
+    ).not.toBeVisible();
   });
 
   test('right clicking an account in sidebar opens context menu', async () => {
@@ -197,13 +220,11 @@ test.describe('Accounts', () => {
       .getByTestId('cleared')
       .click();
 
-    await page.getByRole('button', { name: 'Reconcile' }).click();
-    // The reconciliation amount is pre-filled with the cleared balance,
-    // so submitting right away results in a zero difference.
-    const reconcilePopover = page.locator('[data-popover]');
-    await reconcilePopover.getByRole('textbox').waitFor();
-    await reconcilePopover.getByRole('button', { name: 'Reconcile' }).click();
-    await page.getByRole('button', { name: 'Lock transactions' }).click();
+    // The statement balance is pre-filled with the cleared balance, so
+    // submitting right away results in a zero difference.
+    await accountPage.reconcile();
+    await expect(accountPage.reconcileStrip).toContainText('All reconciled!');
+    await accountPage.lockReconciledTransactions();
 
     // Showing the running balance keeps reconciled transactions loaded
     // even when they are hidden; they must still be excluded from
@@ -230,7 +251,7 @@ test.describe('Accounts', () => {
 
     // Only the two visible transactions should be selected — not the
     // hidden reconciled one in between.
-    await expect(accountPage.selectButton).toHaveText('2 transactions');
+    await expect(accountPage.selectionBar).toContainText('2 selected');
   });
 
   test.describe('On Budget Accounts', () => {
@@ -302,7 +323,7 @@ test.describe('Accounts', () => {
 
     async function importCsv(screenshot = false) {
       const fileChooserPromise = page.waitForEvent('filechooser');
-      await accountPage.page.getByRole('button', { name: 'Import' }).click();
+      await accountPage.importButton.click();
 
       const fileChooser = await fileChooserPromise;
       await fileChooser.setFiles(join(__dirname, 'data/test.csv'));
@@ -326,7 +347,7 @@ test.describe('Accounts', () => {
 
     test('preserves QIF categories in preview and imported transactions', async () => {
       const fileChooserPromise = page.waitForEvent('filechooser');
-      await accountPage.page.getByRole('button', { name: 'Import' }).click();
+      await accountPage.importButton.click();
 
       const fileChooser = await fileChooserPromise;
       await fileChooser.setFiles(join(__dirname, 'data/qif-categories.qif'));
@@ -353,7 +374,7 @@ test.describe('Accounts', () => {
       await importCsv(false);
 
       const fileChooserPromise = page.waitForEvent('filechooser');
-      await accountPage.page.getByRole('button', { name: 'Import' }).click();
+      await accountPage.importButton.click();
 
       const fileChooser = await fileChooserPromise;
       await fileChooser.setFiles(join(__dirname, 'data/test.csv'));
@@ -377,7 +398,7 @@ test.describe('Accounts', () => {
     test('imports a new transaction when an unchecked match has the same amount', async () => {
       async function openCsv(content: string) {
         const fileChooserPromise = page.waitForEvent('filechooser');
-        await accountPage.page.getByRole('button', { name: 'Import' }).click();
+        await accountPage.importButton.click();
         const fileChooser = await fileChooserPromise;
         await fileChooser.setFiles({
           name: 'same-amount.csv',
@@ -425,7 +446,7 @@ test.describe('Accounts', () => {
 
     test('import notes checkbox is not shown for CSV files', async () => {
       const fileChooserPromise = page.waitForEvent('filechooser');
-      await accountPage.page.getByRole('button', { name: 'Import' }).click();
+      await accountPage.importButton.click();
 
       const fileChooser = await fileChooserPromise;
       await fileChooser.setFiles(join(__dirname, 'data/test.csv'));

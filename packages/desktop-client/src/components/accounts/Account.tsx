@@ -7,11 +7,9 @@ import React, {
 } from 'react';
 import type { ReactElement, RefObject } from 'react';
 import { ErrorBoundary } from 'react-error-boundary';
-import { Trans } from 'react-i18next';
 import { Navigate, useLocation, useParams } from 'react-router';
 
 import { styles } from '@actual-app/components/styles';
-import { theme } from '@actual-app/components/theme';
 import { tokens } from '@actual-app/components/tokens';
 import { View } from '@actual-app/components/view';
 import { listen, send } from '@actual-app/core/platform/client/connection';
@@ -50,6 +48,8 @@ import { markAccountRead } from '#accounts/accountsSlice';
 import * as reconciliation from '#accounts/reconciliation';
 import { FeatureErrorFallback } from '#components/FeatureErrorFallback';
 import type { SavedFilter } from '#components/filters/SavedFilterMenuButton';
+import { usePanels } from '#components/panels/PanelProvider';
+import { SelectedTransactionsButton } from '#components/transactions/SelectedTransactionsButton';
 import type {
   TransactionTableColumn,
   TransactionTableColumnId,
@@ -96,6 +96,7 @@ import { updateNewTransactions } from '#transactions/transactionsSlice';
 
 import { AccountEmptyMessage } from './AccountEmptyMessage';
 import { AccountHeader } from './Header';
+import { RegisterEmptyState } from './RegisterEmptyState';
 
 // The title sits as far below the titlebar as on every other desktop page
 // (PAGE_TOP_SPACE in components/Page.tsx), so it does not jump between pages.
@@ -124,6 +125,7 @@ type AllTransactionsProps = {
   children: (
     transactions: TransactionEntity[],
     balances: Record<TransactionEntity['id'], IntegerAmount> | null,
+    previewTransactions: readonly TransactionEntity[],
   ) => ReactElement;
 };
 
@@ -196,9 +198,9 @@ function AllTransactions({
   }, [filtered, prependBalances, balances]);
 
   if (!previewTransactions?.length || filtered) {
-    return children(transactions, balances);
+    return children(transactions, balances, previewTransactions);
   }
-  return children(allTransactions, allBalances);
+  return children(allTransactions, allBalances, previewTransactions);
 }
 
 function getField(field?: string) {
@@ -237,8 +239,6 @@ type AccountInternalProps = {
   showReconciled: boolean;
   setShowReconciled: (newValue: boolean) => void;
   showGroup: boolean;
-  showExtraBalances?: boolean;
-  setShowExtraBalances: (newValue: boolean) => void;
   transactionColumns: TransactionTableColumn[];
   columnOrder: TransactionTableColumnId[];
   saveColumns: (columns: TransactionTableColumn[], applyToAll: boolean) => void;
@@ -814,10 +814,6 @@ class AccountInternal extends PureComponent<
       this.props.onUpdateAccount({ ...account, name });
       this.setState({ nameError: '' });
     }
-  };
-
-  onToggleExtraBalances = () => {
-    this.props.setShowExtraBalances(!this.props.showExtraBalances);
   };
 
   onMenuSelect = async (
@@ -1790,7 +1786,6 @@ class AccountInternal extends PureComponent<
       dateFormat,
       hideFraction,
       accountsSyncing,
-      showExtraBalances,
       accountId,
       categoryId,
     } = this.props;
@@ -1847,7 +1842,7 @@ class AccountInternal extends PureComponent<
         showBalances={showBalances}
         filtered={transactionsFiltered}
       >
-        {(allTransactions, allBalances) => (
+        {(allTransactions, allBalances, previewTransactions) => (
           <SelectedProviderWithItems
             name="transactions"
             // When reconciled transactions are hidden they are still
@@ -1876,51 +1871,43 @@ class AccountInternal extends PureComponent<
                 accountName={accountName}
                 accountsSyncing={accountsSyncing}
                 accounts={accounts}
-                transactions={transactions}
-                showExtraBalances={showExtraBalances ?? false}
                 showReconciled={showReconciled ?? false}
                 showEmptyMessage={showEmptyMessage ?? false}
                 balanceQuery={balanceQuery}
+                upcomingTransactions={previewTransactions}
                 filteredAmount={filteredAmount}
                 isFiltered={transactionsFiltered ?? false}
                 isSorted={this.state.sort !== null}
-                reconcileAmount={reconcileAmount}
+                reconcile={{
+                  reconcileAmount,
+                  onReconcile: this.onReconcile,
+                  onDone: this.onDoneReconciling,
+                  onExit: () =>
+                    this.setState(state => ({
+                      reconcileAmount: null,
+                      showCleared: state.prevShowCleared,
+                    })),
+                  onCreateTransaction: this.onCreateReconciliationTransaction,
+                  onValuationRecorded: this.refetchTransactions,
+                }}
                 search={this.state.search}
                 // @ts-expect-error fix me
                 filterConditions={this.state.filterConditions}
                 filterConditionsOp={this.state.filterConditionsOp}
                 onSearch={this.onSearch}
-                onShowTransactions={this.onShowTransactions}
                 onMenuSelect={this.onMenuSelect}
                 onAddTransaction={this.onAddTransaction}
-                onToggleExtraBalances={this.onToggleExtraBalances}
                 onSaveName={this.onSaveName}
                 saveNameError={this.state.nameError}
-                onReconcile={this.onReconcile}
-                onDoneReconciling={this.onDoneReconciling}
-                onCreateReconciliationTransaction={
-                  this.onCreateReconciliationTransaction
-                }
                 onSync={this.onSync}
                 onImport={this.onImport}
-                onBatchDelete={this.onBatchDelete}
-                onBatchDuplicate={this.onBatchDuplicate}
-                onRunRules={this.onRunRules}
-                onBatchEdit={this.onBatchEdit}
-                onBatchLinkSchedule={this.onBatchLinkSchedule}
-                onBatchUnlinkSchedule={this.onBatchUnlinkSchedule}
-                onCreateRule={this.onCreateRule}
+                onRefetch={this.refetchTransactions}
                 onUpdateFilter={this.onUpdateFilter}
                 onClearFilters={this.onClearFilters}
                 onReloadSavedFilter={this.onReloadSavedFilter}
                 onConditionsOpChange={this.onConditionsOpChange}
                 onDeleteFilter={this.onDeleteFilter}
                 onApplyFilter={this.onApplyFilter}
-                onScheduleAction={this.onScheduleAction}
-                onSetTransfer={this.onSetTransfer}
-                onMakeAsSplitTransaction={this.onMakeAsSplitTransaction}
-                onMakeAsNonSplitTransactions={this.onMakeAsNonSplitTransactions}
-                onMergeTransactions={this.onMergeTransactions}
               />
 
               <View
@@ -1930,7 +1917,9 @@ class AccountInternal extends PureComponent<
                   paddingBottom: 20,
                 }}
               >
-                <View style={styles.tableContainer}>
+                <View
+                  style={{ ...styles.tableContainer, position: 'relative' }}
+                >
                   <TransactionList
                     headerContent={undefined}
                     // @ts-expect-error - fix me
@@ -1975,17 +1964,24 @@ class AccountInternal extends PureComponent<
                             )
                           }
                         />
-                      ) : !loading ? (
-                        <View
-                          style={{
-                            color: theme.tableTextLight,
-                            marginTop: 28,
-                            textAlign: 'center',
-                          }}
-                        >
-                          <Trans>No transactions</Trans>
-                        </View>
-                      ) : null
+                      ) : (
+                        <RegisterEmptyState
+                          isLoading={loading}
+                          isFiltered={transactionsFiltered ?? false}
+                          hasFilterConditions={
+                            this.state.filterConditions.length > 0
+                          }
+                          onAddTransaction={
+                            account?.closed ? undefined : this.onAddTransaction
+                          }
+                          onImport={
+                            account && !account.closed
+                              ? this.onImport
+                              : undefined
+                          }
+                          onClearFilters={this.onClearFilters}
+                        />
+                      )
                     }
                     onSort={this.onSort}
                     sortField={this.state.sort?.field ?? ''}
@@ -2006,6 +2002,26 @@ class AccountInternal extends PureComponent<
                     }
                     onCreatePayee={this.onCreatePayee}
                     onApplyFilter={this.onApplyFilter}
+                  />
+                  <SelectedTransactionsButton
+                    account={account}
+                    getTransaction={id => transactions.find(t => t.id === id)}
+                    onShow={this.onShowTransactions}
+                    onDuplicate={this.onBatchDuplicate}
+                    onDelete={this.onBatchDelete}
+                    onEdit={this.onBatchEdit}
+                    onRunRules={this.onRunRules}
+                    onLinkSchedule={this.onBatchLinkSchedule}
+                    onUnlinkSchedule={this.onBatchUnlinkSchedule}
+                    onCreateRule={this.onCreateRule}
+                    onSetTransfer={this.onSetTransfer}
+                    onScheduleAction={this.onScheduleAction}
+                    showMakeTransfer={!account}
+                    onMakeAsSplitTransaction={this.onMakeAsSplitTransaction}
+                    onMakeAsNonSplitTransactions={
+                      this.onMakeAsNonSplitTransactions
+                    }
+                    onMergeTransactions={this.onMergeTransactions}
                   />
                 </View>
               </View>
@@ -2079,9 +2095,6 @@ export function Account() {
   const [hideReconciled, setHideReconciled] = useSyncedPref(
     `hide-reconciled-${params.id}`,
   );
-  const [showExtraBalances, setShowExtraBalances] = useSyncedPref(
-    `show-extra-balances-${params.id || 'all-accounts'}`,
-  );
   const {
     transactionColumns,
     columnOrder,
@@ -2092,6 +2105,8 @@ export function Account() {
   } = useTransactionTableColumns(params.id);
 
   const modalShowing = useSelector(state => state.modals.modalStack.length > 0);
+  // A side panel edits transactions like a modal does; closing it refetches.
+  const { current: openPanel } = usePanels();
   const accountsSyncing = useSelector(state => state.account.accountsSyncing);
   const filterConditions = location?.state?.filterConditions || [];
 
@@ -2140,15 +2155,11 @@ export function Account() {
             showReconciled={String(hideReconciled) !== 'true'}
             setShowReconciled={val => setHideReconciled(String(!val))}
             showGroup={showGroup}
-            showExtraBalances={String(showExtraBalances) === 'true'}
-            setShowExtraBalances={extraBalances =>
-              setShowExtraBalances(String(extraBalances))
-            }
             transactionColumns={transactionColumns}
             columnOrder={columnOrder}
             saveColumns={saveColumns}
             payees={payees}
-            modalShowing={modalShowing}
+            modalShowing={modalShowing || openPanel !== null}
             accountsSyncing={accountsSyncing}
             filterConditions={filterConditions}
             categoryGroups={categoryGroups}

@@ -1,73 +1,48 @@
-import React, { useRef, useState } from 'react';
-import type { ComponentProps, ReactNode } from 'react';
-import { Dialog, DialogTrigger } from 'react-aria-components';
-import { useHotkeys } from 'react-hotkeys-hook';
-import { Trans, useTranslation } from 'react-i18next';
+import { useRef, useState } from 'react';
+import type { ComponentProps } from 'react';
+import { Trans } from 'react-i18next';
 
 import { Button } from '@actual-app/components/button';
-import { AnimatedLoading } from '@actual-app/components/icons/AnimatedLoading';
-import {
-  SvgAdd,
-  SvgDotsHorizontalTriple,
-} from '@actual-app/components/icons/v1';
-import {
-  SvgArrowsExpand3,
-  SvgArrowsShrink3,
-  SvgDownloadThickBottom,
-  SvgLockClosed,
-  SvgPencil1,
-} from '@actual-app/components/icons/v2';
-import { InitialFocus } from '@actual-app/components/initial-focus';
-import { Input } from '@actual-app/components/input';
-import { Menu } from '@actual-app/components/menu';
-import { Popover } from '@actual-app/components/popover';
-import { SpaceBetween } from '@actual-app/components/space-between';
+import { SvgAdd } from '@actual-app/components/icons/v1';
+import { SvgDownloadThickBottom } from '@actual-app/components/icons/v2';
 import { styles } from '@actual-app/components/styles';
-import { theme } from '@actual-app/components/theme';
-import { motion, radius } from '@actual-app/components/tokens';
-import { Tooltip } from '@actual-app/components/tooltip';
+import { spacing } from '@actual-app/components/tokens';
 import { View } from '@actual-app/components/view';
-import { tsToRelativeTime } from '@actual-app/core/shared/util';
 import type {
   AccountEntity,
   RuleConditionEntity,
   TransactionEntity,
-  TransactionFilterEntity,
 } from '@actual-app/core/types/models';
-import { format as formatDate } from 'date-fns';
 
-import { isAccountFailedSync } from '#accounts/syncStatus';
-import { AnimatedRefresh } from '#components/AnimatedRefresh';
-import { Search } from '#components/common/Search';
-import { FilterButton } from '#components/filters/FiltersMenu';
 import { FiltersStack } from '#components/filters/FiltersStack';
-import type { SavedFilter } from '#components/filters/SavedFilterMenuButton';
-import { NotesButton } from '#components/NotesButton';
-import { SelectedTransactionsButton } from '#components/transactions/SelectedTransactionsButton';
-import { useDateFormat } from '#hooks/useDateFormat';
-import { useFeatureFlag } from '#hooks/useFeatureFlag';
-import { useLocale } from '#hooks/useLocale';
+import { PageHeader } from '#components/Page';
 import { useLocalPref } from '#hooks/useLocalPref';
+import { useOptionalFeature } from '#hooks/useOptionalFeature';
 import { useSplitsExpanded } from '#hooks/useSplitsExpanded';
 import { useSyncedPref } from '#hooks/useSyncedPref';
 import { useSyncServerStatus } from '#hooks/useSyncServerStatus';
 
 import type { TableRef } from './Account';
-import { Balances } from './Balance';
+import { AccountMenu } from './AccountMenu';
+import type { AccountMenuItem } from './AccountMenu';
+import { AccountMenuButton } from './AccountMenuButton';
+import type { AccountNameFieldProps } from './AccountNameField';
+import { AccountTitle } from './AccountTitle';
+import { AllAccountsMenu } from './AllAccountsMenu';
 import { BalanceHistoryGraph } from './BalanceHistoryGraph';
-import { ReconcileMenu, ReconcilingMessage } from './Reconcile';
+import { headerLabelIconStyle } from './headerStyles';
+import { HeadlineBalance } from './HeadlineBalance';
+import { ImportAccountPicker } from './ImportAccountPicker';
+import { InstrumentStrip } from './InstrumentStrip';
+import { ReconcileButton } from './ReconcileButton';
+import { ReconcileStrip } from './ReconcileStrip';
+import type { ReconcileHandlers } from './ReconcileStrip';
+import { RegisterToolbar } from './RegisterToolbar';
+import { SyncButton } from './SyncButton';
+import { useAccountHeaderHotkeys } from './useAccountHeaderHotkeys';
+import type { BalanceQuery } from './useClearedBalances';
 
-// Icon-only toolbar actions: a square bare button with the glyph in the
-// secondary ink.
-const toolbarIconButtonStyle = {
-  width: 30,
-  height: 30,
-  padding: 0,
-  borderRadius: radius.md,
-  color: theme.pageTextLight,
-};
-const toolbarIconStyle = { width: 14, height: 14 };
-const toolbarLabelIconStyle = { width: 12, height: 12, flexShrink: 0 };
+type FiltersStackProps = ComponentProps<typeof FiltersStack>;
 
 type AccountHeaderProps = {
   tableRef: TableRef;
@@ -76,16 +51,14 @@ type AccountHeaderProps = {
   accountName: string;
   accountId?: string;
   account?: AccountEntity;
-  filterId?: SavedFilter;
-  savedFilters: TransactionFilterEntity[];
   accountsSyncing: string[];
   accounts: AccountEntity[];
-  transactions: TransactionEntity[];
-  showExtraBalances: boolean;
   showReconciled: boolean;
   showEmptyMessage: boolean;
-  balanceQuery: ComponentProps<typeof ReconcilingMessage>['balanceQuery'];
-  reconcileAmount?: number | null;
+  balanceQuery: BalanceQuery;
+  /** The upcoming (preview) transactions the register already loaded. */
+  upcomingTransactions: readonly TransactionEntity[];
+  reconcile: ReconcileHandlers;
   isFiltered: boolean;
   filteredAmount?: number | null;
   isSorted: boolean;
@@ -94,53 +67,30 @@ type AccountHeaderProps = {
   filterConditionsOp: 'and' | 'or';
   onSearch: (newSearch: string) => void;
   onAddTransaction: () => void;
-  onShowTransactions: ComponentProps<
-    typeof SelectedTransactionsButton
-  >['onShow'];
-  onDoneReconciling: ComponentProps<typeof ReconcilingMessage>['onDone'];
-  onCreateReconciliationTransaction: ComponentProps<
-    typeof ReconcilingMessage
-  >['onCreateTransaction'];
-  onToggleExtraBalances: ComponentProps<
-    typeof Balances
-  >['onToggleExtraBalances'];
   onSaveName: AccountNameFieldProps['onSaveName'];
   saveNameError: AccountNameFieldProps['saveNameError'];
   onSync: () => void;
   onImport: () => void;
-  onMenuSelect: AccountMenuProps['onMenuSelect'];
-  onReconcile: ComponentProps<typeof ReconcileMenu>['onReconcile'];
-  onBatchEdit: ComponentProps<typeof SelectedTransactionsButton>['onEdit'];
-  onRunRules: ComponentProps<typeof SelectedTransactionsButton>['onRunRules'];
-  onBatchDelete: ComponentProps<typeof SelectedTransactionsButton>['onDelete'];
-  onBatchDuplicate: ComponentProps<
-    typeof SelectedTransactionsButton
-  >['onDuplicate'];
-  onBatchLinkSchedule: ComponentProps<
-    typeof SelectedTransactionsButton
-  >['onLinkSchedule'];
-  onBatchUnlinkSchedule: ComponentProps<
-    typeof SelectedTransactionsButton
-  >['onUnlinkSchedule'];
+  /** Reloads the register, e.g. after an import from a multi-account view. */
+  onRefetch: () => void;
+  onMenuSelect: (item: AccountMenuItem) => void;
   onApplyFilter: (filter: RuleConditionEntity) => void;
 } & Pick<
-  ComponentProps<typeof SelectedTransactionsButton>,
-  | 'onCreateRule'
-  | 'onScheduleAction'
-  | 'onSetTransfer'
-  | 'onMakeAsSplitTransaction'
-  | 'onMakeAsNonSplitTransactions'
-  | 'onMergeTransactions'
-> &
-  Pick<
-    ComponentProps<typeof FiltersStack>,
-    | 'onUpdateFilter'
-    | 'onDeleteFilter'
-    | 'onConditionsOpChange'
-    | 'onClearFilters'
-    | 'onReloadSavedFilter'
-  >;
+  FiltersStackProps,
+  | 'filterId'
+  | 'savedFilters'
+  | 'onUpdateFilter'
+  | 'onDeleteFilter'
+  | 'onConditionsOpChange'
+  | 'onClearFilters'
+  | 'onReloadSavedFilter'
+>;
 
+/**
+ * The register's statement header: title and actions, the headline
+ * balance, the instrument strip, the reconcile strip, then search and
+ * filters.
+ */
 export function AccountHeader({
   tableRef,
   isNameEditable,
@@ -152,12 +102,11 @@ export function AccountHeader({
   savedFilters,
   accountsSyncing,
   accounts,
-  transactions,
-  showExtraBalances,
   showReconciled,
   showEmptyMessage,
   balanceQuery,
-  reconcileAmount,
+  upcomingTransactions,
+  reconcile,
   isFiltered,
   filteredAmount,
   isSorted,
@@ -166,430 +115,195 @@ export function AccountHeader({
   filterConditionsOp,
   onSearch,
   onAddTransaction,
-  onShowTransactions,
-  onDoneReconciling,
-  onCreateReconciliationTransaction,
-  onToggleExtraBalances,
   onSaveName,
   saveNameError,
   onSync,
   onImport,
+  onRefetch,
   onMenuSelect,
-  onReconcile,
-  onBatchDelete,
-  onBatchDuplicate,
-  onBatchEdit,
-  onBatchLinkSchedule,
-  onBatchUnlinkSchedule,
-  onCreateRule,
   onApplyFilter,
   onUpdateFilter,
   onClearFilters,
   onReloadSavedFilter,
   onConditionsOpChange,
   onDeleteFilter,
-  onScheduleAction,
-  onSetTransfer,
-  onRunRules,
-  onMakeAsSplitTransaction,
-  onMakeAsNonSplitTransactions,
-  onMergeTransactions,
 }: AccountHeaderProps) {
-  const { t } = useTranslation();
-
-  const [reconcileOpen, setReconcileOpen] = useState(false);
-  const searchInput = useRef<HTMLInputElement>(null);
-  const reconcileRef = useRef(null);
+  const [isReconcileOpen, setIsReconcileOpen] = useState(false);
+  const searchInputRef = useRef<HTMLInputElement>(null);
   const splitsExpanded = useSplitsExpanded();
   const syncServerStatus = useSyncServerStatus();
-  const isUsingServer = syncServerStatus !== 'no-server';
-  const isServerOffline = syncServerStatus === 'offline';
-  const [_, setExpandSplitsPref] = useLocalPref('expand-splits');
-  const [showNetWorthChartPref, _setShowNetWorthChartPref] = useSyncedPref(
+  const [isBankSyncOn] = useOptionalFeature('bankSync');
+  const [, setExpandSplitsPref] = useLocalPref('expand-splits');
+  const [showNetWorthChartPref] = useSyncedPref(
     `show-account-${accountId}-net-worth-chart`,
   );
   const showNetWorthChart = showNetWorthChartPref === 'true';
+  const isServerOffline = syncServerStatus === 'offline';
+  const isOpenAccount = !!account && !account.closed;
+  const canSync =
+    isBankSyncOn &&
+    syncServerStatus !== 'no-server' &&
+    (account
+      ? !!account.account_id
+      : accounts.some(candidate => !!candidate.account_id));
+  const isReconcileShown =
+    isOpenAccount && (isReconcileOpen || reconcile.reconcileAmount != null);
+  const importableAccounts = getImportableAccounts(accounts, accountId);
 
-  const dateFormat = useDateFormat() || 'MM/dd/yyyy';
-  const locale = useLocale();
-
-  let canSync = !!(account?.account_id && isUsingServer);
-  if (!account) {
-    // All accounts - check for any syncable account
-    canSync = !!accounts.find(account => !!account.account_id) && isUsingServer;
-  }
-
-  // Only show the ability to make linked transfers on multi-account views.
-  const showMakeTransfer = !account;
+  useAccountHeaderHotkeys({
+    searchInputRef,
+    canSync: canSync && !isServerOffline,
+    onAddTransaction,
+    onImport,
+    onSync,
+  });
 
   function onToggleSplits() {
-    if (tableRef.current) {
-      splitsExpanded.dispatch({
-        type: 'switch-mode',
-        id: tableRef.current.getScrolledItem(),
-      });
-
-      setExpandSplitsPref(!(splitsExpanded.state.mode === 'expand'));
+    if (!tableRef.current) {
+      return;
     }
+    splitsExpanded.dispatch({
+      type: 'switch-mode',
+      id: tableRef.current.getScrolledItem(),
+    });
+    setExpandSplitsPref(!(splitsExpanded.state.mode === 'expand'));
   }
 
-  const graphRef = useRef<HTMLDivElement>(null);
+  function onToggleReconcile() {
+    if (reconcile.reconcileAmount != null) {
+      reconcile.onExit();
+      return;
+    }
+    setIsReconcileOpen(!isReconcileOpen);
+  }
 
-  useHotkeys(
-    'ctrl+f, cmd+f, meta+f',
-    e => {
-      if (searchInput.current) {
-        // Trigger browser-native find if user pressed search twice in a row
-        if (document.activeElement === searchInput.current) {
-          searchInput.current.blur();
-        } else {
-          e.preventDefault();
-          searchInput.current.focus();
-        }
-      }
+  const stripReconcile: ReconcileHandlers = {
+    ...reconcile,
+    onReconcile: amount => {
+      setIsReconcileOpen(false);
+      reconcile.onReconcile(amount);
     },
-    {
-      enableOnFormTags: true,
-      preventDefault: false,
-      scopes: ['app'],
-    },
-    [searchInput],
-  );
-  useHotkeys(
-    't',
-    () => onAddTransaction(),
-    {
-      preventDefault: true,
-      scopes: ['app'],
-    },
-    [onAddTransaction],
-  );
-  useHotkeys(
-    'ctrl+i, cmd+i, meta+i',
-    () => onImport(),
-    {
-      scopes: ['app'],
-    },
-    [onImport],
-  );
-  useHotkeys(
-    'ctrl+b, cmd+b, meta+b',
-    () => onSync(),
-    {
-      enabled: canSync && !isServerOffline,
-      preventDefault: true,
-      scopes: ['app'],
-    },
-    [onSync],
-  );
+  };
 
   return (
-    <>
-      <View style={{ ...styles.pageContent, paddingBottom: 14, flexShrink: 0 }}>
-        <View
-          style={{
-            flexDirection: 'column',
-            justifyContent: 'space-between',
-            gap: 12,
-          }}
-        >
-          <View
-            style={{
-              flexGrow: 1,
-              alignItems: 'flex-start',
-              // The title and the headline figure read as two lines, title
-              // first.
-              gap: 8,
-            }}
-          >
-            <View
-              style={{
-                flexDirection: 'row',
-                alignItems: 'center',
-                gap: 10,
-              }}
-            >
-              {!!account?.bank && (
-                <AccountSyncSidebar
-                  account={account}
-                  accountsSyncing={accountsSyncing}
+    <View style={{ flexShrink: 0 }}>
+      <View data-testid="account-header">
+        <PageHeader
+          title={
+            <AccountTitle
+              account={account}
+              accountName={accountName}
+              accountsSyncing={accountsSyncing}
+              isNameEditable={isNameEditable}
+              saveNameError={saveNameError}
+              onSaveName={onSaveName}
+            />
+          }
+          actions={
+            <>
+              {canSync && !account?.closed && (
+                <SyncButton
+                  isSyncing={
+                    account
+                      ? accountsSyncing.includes(account.id)
+                      : accountsSyncing.length > 0
+                  }
+                  isServerOffline={isServerOffline}
+                  onSync={onSync}
                 />
               )}
-              <AccountNameField
-                account={account}
-                accountName={accountName}
-                isNameEditable={isNameEditable}
-                saveNameError={saveNameError}
-                onSaveName={onSaveName}
-              />
-            </View>
-
-            <Balances
+              {isOpenAccount && (
+                <ReconcileButton
+                  account={account}
+                  isPressed={isReconcileShown}
+                  onPress={onToggleReconcile}
+                />
+              )}
+              {isOpenAccount && (
+                <Button onPress={onImport} style={{ gap: 7 }}>
+                  <SvgDownloadThickBottom style={headerLabelIconStyle} />
+                  <Trans>Import</Trans>
+                </Button>
+              )}
+              {!account && importableAccounts.length > 0 && (
+                <ImportAccountPicker
+                  accounts={importableAccounts}
+                  onImported={onRefetch}
+                />
+              )}
+              {!showEmptyMessage && !account?.closed && (
+                <Button
+                  variant="primary"
+                  onPress={onAddTransaction}
+                  style={{ gap: 7 }}
+                >
+                  <SvgAdd style={{ width: 10, height: 10, flexShrink: 0 }} />
+                  <Trans>Add transaction</Trans>
+                </Button>
+              )}
+              <AccountMenuButton>
+                {account ? (
+                  <AccountMenu
+                    account={account}
+                    canSync={canSync}
+                    showNetWorthChart={showNetWorthChart}
+                    isSorted={isSorted}
+                    showReconciled={showReconciled}
+                    onMenuSelect={onMenuSelect}
+                  />
+                ) : (
+                  <AllAccountsMenu
+                    isSorted={isSorted}
+                    showNetWorthChart={showNetWorthChart}
+                    onMenuSelect={onMenuSelect}
+                  />
+                )}
+              </AccountMenuButton>
+            </>
+          }
+          headline={<HeadlineBalance balanceQuery={balanceQuery} />}
+          meta={
+            <InstrumentStrip
               balanceQuery={balanceQuery}
-              showExtraBalances={showExtraBalances}
-              onToggleExtraBalances={onToggleExtraBalances}
               account={account}
+              upcomingTransactions={upcomingTransactions}
               isFiltered={isFiltered}
               filteredAmount={filteredAmount}
             />
-          </View>
-
-          <BalanceHistoryGraph
-            ref={graphRef}
-            accountId={accountId}
-            style={{
-              height: 'calc(5vh + 5vw)',
-              margin: 0,
-              display: showNetWorthChart ? 'flex' : 'none',
-            }}
+          }
+          style={{ marginBottom: spacing.lg }}
+        />
+      </View>
+      <View
+        style={{ ...styles.pageContent, gap: spacing.md, paddingBottom: 14 }}
+      >
+        <BalanceHistoryGraph
+          accountId={accountId}
+          style={{
+            height: 'calc(5vh + 5vw)',
+            margin: 0,
+            display: showNetWorthChart ? 'flex' : 'none',
+          }}
+        />
+        {isReconcileShown && account && (
+          <ReconcileStrip
+            account={account}
+            balanceQuery={balanceQuery}
+            reconcile={stripReconcile}
+            onClose={() => setIsReconcileOpen(false)}
           />
-        </View>
-        <SpaceBetween gap={8} style={{ marginTop: 20 }}>
-          {!showEmptyMessage && (
-            <Button
-              variant="normal"
-              onPress={onAddTransaction}
-              style={{ gap: 7 }}
-            >
-              <SvgAdd style={{ width: 10, height: 10, flexShrink: 0 }} />
-              <Trans>Add New</Trans>
-            </Button>
-          )}
-
-          {account && !account.closed && (
-            <Button variant="normal" onPress={onImport} style={{ gap: 7 }}>
-              <SvgDownloadThickBottom style={toolbarLabelIconStyle} />
-              <Trans>Import</Trans>
-            </Button>
-          )}
-
-          {canSync && (
-            <Button
-              variant="normal"
-              onPress={onSync}
-              isDisabled={isServerOffline}
-              style={{ gap: 7 }}
-            >
-              <AnimatedRefresh
-                width={12}
-                height={12}
-                animating={
-                  account
-                    ? accountsSyncing.includes(account.id)
-                    : accountsSyncing.length > 0
-                }
-              />
-              {isServerOffline ? t('Bank Sync Offline') : t('Bank Sync')}
-            </Button>
-          )}
-
-          <View style={{ flexShrink: 0 }}>
-            {/* @ts-expect-error fix me */}
-            <FilterButton onApply={onApplyFilter} />
-          </View>
-          <View style={{ flex: 1 }} />
-
-          <Search
-            placeholder={t('Search')}
-            value={search}
-            onChange={onSearch}
-            ref={searchInput}
-            width={240}
-            height={30}
-            style={{
-              borderColor: theme.formInputBorder,
-              borderRadius: radius.md,
-              backgroundColor: theme.formInputBackground,
-              transition: `border-color ${motion.base} ${motion.ease}, box-shadow ${motion.base} ${motion.ease}`,
-              ':hover': { borderColor: theme.hairlineStrong },
-              ':focus-within': {
-                borderColor: theme.formInputBorderSelected,
-                boxShadow: '0 0 0 3px ' + theme.formInputShadowSelected,
-              },
-            }}
-          />
-          {workingHard ? (
-            <View>
-              <AnimatedLoading style={{ width: 16, height: 16 }} />
-            </View>
-          ) : (
-            <SelectedTransactionsButton
-              getTransaction={id => transactions.find(t => t.id === id)}
-              onShow={onShowTransactions}
-              onDuplicate={onBatchDuplicate}
-              onDelete={onBatchDelete}
-              onEdit={onBatchEdit}
-              onRunRules={onRunRules}
-              onLinkSchedule={onBatchLinkSchedule}
-              onUnlinkSchedule={onBatchUnlinkSchedule}
-              onCreateRule={onCreateRule}
-              onSetTransfer={onSetTransfer}
-              onScheduleAction={onScheduleAction}
-              showMakeTransfer={showMakeTransfer}
-              onMakeAsSplitTransaction={onMakeAsSplitTransaction}
-              onMakeAsNonSplitTransactions={onMakeAsNonSplitTransactions}
-              onMergeTransactions={onMergeTransactions}
-            />
-          )}
-          <View style={{ flex: '0 0 auto' }}>
-            {account && (
-              <Tooltip
-                style={{
-                  ...styles.tooltip,
-                  marginBottom: 10,
-                }}
-                content={
-                  account?.last_reconciled
-                    ? t(
-                        'Reconciled {{ relativeTimeAgo }} ({{ absoluteDate }})',
-                        {
-                          relativeTimeAgo: tsToRelativeTime(
-                            account.last_reconciled,
-                            locale,
-                          ),
-                          absoluteDate: formatDate(
-                            new Date(
-                              parseInt(account.last_reconciled ?? '0', 10),
-                            ),
-                            dateFormat,
-                            { locale },
-                          ),
-                        },
-                      )
-                    : t('Not yet reconciled')
-                }
-                placement="top"
-                triggerProps={{
-                  isDisabled: reconcileOpen,
-                }}
-              >
-                <Button
-                  ref={reconcileRef}
-                  variant="bare"
-                  aria-label={t('Reconcile')}
-                  style={toolbarIconButtonStyle}
-                  onPress={() => {
-                    setReconcileOpen(true);
-                  }}
-                >
-                  <View>
-                    <SvgLockClosed style={toolbarIconStyle} />
-                  </View>
-                </Button>
-                <Popover
-                  placement="bottom"
-                  triggerRef={reconcileRef}
-                  style={{ width: 288, padding: 14 }}
-                  isOpen={reconcileOpen}
-                  onOpenChange={() => setReconcileOpen(false)}
-                >
-                  <ReconcileMenu
-                    account={account}
-                    onClose={() => setReconcileOpen(false)}
-                    onReconcile={onReconcile}
-                  />
-                </Popover>
-              </Tooltip>
-            )}
-          </View>
-          <Button
-            variant="bare"
-            aria-label={
-              splitsExpanded.state.mode === 'collapse'
-                ? t('Collapse split transactions')
-                : t('Expand split transactions')
-            }
-            style={toolbarIconButtonStyle}
-            onPress={onToggleSplits}
-          >
-            <View
-              title={
-                splitsExpanded.state.mode === 'collapse'
-                  ? t('Collapse split transactions')
-                  : t('Expand split transactions')
-              }
-            >
-              {splitsExpanded.state.mode === 'collapse' ? (
-                <SvgArrowsShrink3 style={toolbarIconStyle} />
-              ) : (
-                <SvgArrowsExpand3 style={toolbarIconStyle} />
-              )}
-            </View>
-          </Button>
-          {account ? (
-            <View style={{ flex: '0 0 auto' }}>
-              <DialogTrigger>
-                <Button
-                  variant="bare"
-                  aria-label={t('Account menu')}
-                  style={toolbarIconButtonStyle}
-                >
-                  <SvgDotsHorizontalTriple
-                    style={{ ...toolbarIconStyle, transform: 'rotateZ(90deg)' }}
-                  />
-                </Button>
-
-                <Popover style={{ minWidth: 275 }}>
-                  <Dialog>
-                    <AccountMenu
-                      account={account}
-                      canSync={canSync}
-                      showNetWorthChart={showNetWorthChart}
-                      isSorted={isSorted}
-                      showReconciled={showReconciled}
-                      onMenuSelect={onMenuSelect}
-                    />
-                  </Dialog>
-                </Popover>
-              </DialogTrigger>
-            </View>
-          ) : (
-            <View style={{ flex: '0 0 auto' }}>
-              <DialogTrigger>
-                <Button
-                  variant="bare"
-                  aria-label={t('Account menu')}
-                  style={toolbarIconButtonStyle}
-                >
-                  <SvgDotsHorizontalTriple
-                    style={{ ...toolbarIconStyle, transform: 'rotateZ(90deg)' }}
-                  />
-                </Button>
-
-                <Popover style={{ minWidth: 240 }}>
-                  <Dialog>
-                    <Menu
-                      slot="close"
-                      onMenuSelect={onMenuSelect}
-                      items={[
-                        ...(isSorted
-                          ? [
-                              {
-                                name: 'remove-sorting',
-                                text: t('Remove all sorting'),
-                              } as const,
-                            ]
-                          : []),
-                        { name: 'export', text: t('Export') },
-                        {
-                          name: 'toggle-net-worth-chart',
-                          text: showNetWorthChart
-                            ? t('Hide balance chart')
-                            : t('Show balance chart'),
-                        },
-                        {
-                          name: 'manage-columns',
-                          text: t('Manage table columns'),
-                        },
-                      ]}
-                    />
-                  </Dialog>
-                </Popover>
-              </DialogTrigger>
-            </View>
-          )}
-        </SpaceBetween>
-        {filterConditions?.length > 0 && (
+        )}
+        <RegisterToolbar
+          searchInputRef={searchInputRef}
+          search={search}
+          isWorking={workingHard}
+          areSplitsCollapsed={splitsExpanded.state.mode === 'collapse'}
+          onSearch={onSearch}
+          onApplyFilter={onApplyFilter}
+          onToggleSplits={onToggleSplits}
+          onManageColumns={() => onMenuSelect('manage-columns')}
+        />
+        {filterConditions.length > 0 && (
           <FiltersStack
             conditions={filterConditions}
             conditionsOp={filterConditionsOp}
@@ -603,254 +317,24 @@ export function AccountHeader({
           />
         )}
       </View>
-      {reconcileAmount != null && (
-        <ReconcilingMessage
-          targetBalance={reconcileAmount}
-          balanceQuery={balanceQuery}
-          onDone={onDoneReconciling}
-          onCreateTransaction={onCreateReconciliationTransaction}
-        />
-      )}
-    </>
-  );
-}
-
-type AccountSyncSidebarProps = {
-  account: AccountEntity;
-  accountsSyncing: string[];
-};
-
-function AccountSyncSidebar({
-  account,
-  accountsSyncing,
-}: AccountSyncSidebarProps) {
-  return (
-    <View
-      style={{
-        backgroundColor: accountsSyncing.includes(account.id)
-          ? theme.sidebarItemBackgroundPending
-          : isAccountFailedSync(account)
-            ? theme.sidebarItemBackgroundFailed
-            : theme.sidebarItemBackgroundPositive,
-        width: 7,
-        height: 7,
-        borderRadius: radius.pill,
-        flexShrink: 0,
-      }}
-    />
-  );
-}
-
-type AccountNameFieldProps = {
-  account?: AccountEntity;
-  accountName: string;
-  isNameEditable: boolean;
-  saveNameError?: ReactNode;
-  onSaveName: (newName: string) => void;
-};
-
-function AccountNameField({
-  account,
-  accountName,
-  isNameEditable,
-  saveNameError,
-  onSaveName,
-}: AccountNameFieldProps) {
-  const { t } = useTranslation();
-  const [editingName, setEditingName] = useState(false);
-
-  const handleSave = (newName: string) => {
-    onSaveName(newName);
-    setEditingName(false);
-  };
-
-  return (
-    <View style={{ flexShrink: 0, alignItems: 'center' }}>
-      {editingName ? (
-        <>
-          <InitialFocus>
-            <Input
-              defaultValue={accountName}
-              onEnter={handleSave}
-              onUpdate={handleSave}
-              onEscape={() => setEditingName(false)}
-              style={{
-                ...styles.display,
-                fontSize: 28,
-                lineHeight: '34px',
-                color: theme.pageText,
-                marginTop: -3,
-                marginBottom: -3,
-                marginLeft: -9,
-                paddingTop: 1,
-                paddingBottom: 1,
-                paddingLeft: 8,
-                paddingRight: 8,
-                borderRadius: radius.md,
-                width: Math.max(20, accountName.length) + 'ch',
-              }}
-            />
-          </InitialFocus>
-          {saveNameError && (
-            <View style={{ color: theme.warningText }}>{saveNameError}</View>
-          )}
-        </>
-      ) : (
-        <View
-          style={{
-            flexDirection: 'row',
-            alignItems: 'center',
-            whiteSpace: 'nowrap',
-            gap: 3,
-            '& .hover-visible': {
-              opacity: 0,
-              transition: `opacity ${motion.base} ${motion.ease}`,
-            },
-            '&:hover .hover-visible': {
-              opacity: 1,
-            },
-          }}
-        >
-          <View
-            style={{
-              ...styles.display,
-              fontSize: 28,
-              lineHeight: '34px',
-              color: theme.pageText,
-              marginRight: 6,
-            }}
-            data-testid="account-name"
-          >
-            {account && account.closed
-              ? t('Closed: {{ accountName }}', { accountName })
-              : accountName}
-          </View>
-
-          <View style={{ flexDirection: 'row', width: 50 }}>
-            {isNameEditable && account && (
-              <NotesButton
-                id={`account-${account.id}`}
-                defaultColor={theme.pageTextSubdued}
-              />
-            )}
-            {isNameEditable && (
-              <Button
-                variant="bare"
-                aria-label={t('Edit account name')}
-                className="hover-visible"
-                onPress={() => setEditingName(true)}
-              >
-                <SvgPencil1
-                  style={{
-                    width: 11,
-                    height: 11,
-                    color: theme.pageTextSubdued,
-                  }}
-                />
-              </Button>
-            )}
-          </View>
-        </View>
-      )}
     </View>
   );
 }
 
-type AccountMenuProps = {
-  account: AccountEntity;
-  canSync: boolean;
-  showNetWorthChart: boolean;
-  showReconciled: boolean;
-  isSorted: boolean;
-  onMenuSelect: (
-    item:
-      | 'link'
-      | 'unlink'
-      | 'close'
-      | 'reopen'
-      | 'export'
-      | 'remove-sorting'
-      | 'toggle-reconciled'
-      | 'toggle-net-worth-chart'
-      | 'manage-columns'
-      | 'account-group',
-  ) => void;
-};
-
-function AccountMenu({
-  account,
-  canSync,
-  showNetWorthChart,
-  showReconciled,
-  isSorted,
-  onMenuSelect,
-}: AccountMenuProps) {
-  const { t } = useTranslation();
-  const syncServerStatus = useSyncServerStatus();
-  const newSidebarUIEnabled = useFeatureFlag('newSidebarUI');
-
-  return (
-    <Menu
-      slot="close"
-      onMenuSelect={item => {
-        onMenuSelect(item);
-      }}
-      items={[
-        ...(isSorted
-          ? [
-              {
-                name: 'remove-sorting',
-                text: t('Remove all sorting'),
-              } as const,
-            ]
-          : []),
-        {
-          name: 'toggle-net-worth-chart',
-          text: showNetWorthChart
-            ? t('Hide balance chart')
-            : t('Show balance chart'),
-        },
-        {
-          name: 'manage-columns',
-          text: t('Manage table columns'),
-        },
-        ...(newSidebarUIEnabled
-          ? [
-              {
-                name: 'account-group',
-                text: t('Set account group'),
-              } as const,
-            ]
-          : []),
-        {
-          name: 'toggle-reconciled',
-          text: showReconciled
-            ? t('Hide reconciled transactions')
-            : t('Show reconciled transactions'),
-        },
-        { name: 'export', text: t('Export') },
-        ...(account && !account.closed
-          ? canSync
-            ? [
-                {
-                  name: 'unlink',
-                  text: t('Unlink account'),
-                } as const,
-              ]
-            : syncServerStatus === 'online'
-              ? [
-                  {
-                    name: 'link',
-                    text: t('Link account'),
-                  } as const,
-                ]
-              : []
-          : []),
-
-        ...(account.closed
-          ? [{ name: 'reopen', text: t('Reopen account') } as const]
-          : [{ name: 'close', text: t('Close account') } as const]),
-      ]}
-    />
-  );
+/** The open accounts a multi-account register can import into. */
+function getImportableAccounts(
+  accounts: readonly AccountEntity[],
+  accountId: string | undefined,
+): AccountEntity[] {
+  const openAccounts = accounts.filter(account => !account.closed);
+  switch (accountId) {
+    case undefined:
+      return openAccounts;
+    case 'onbudget':
+      return openAccounts.filter(account => !account.offbudget);
+    case 'offbudget':
+      return openAccounts.filter(account => account.offbudget);
+    default:
+      return [];
+  }
 }

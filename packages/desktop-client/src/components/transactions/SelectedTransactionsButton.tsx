@@ -1,7 +1,8 @@
 import { useMemo } from 'react';
 import { useHotkeys } from 'react-hotkeys-hook';
-import { useTranslation } from 'react-i18next';
+import { Trans, useTranslation } from 'react-i18next';
 
+import { Button } from '@actual-app/components/button';
 import { Menu } from '@actual-app/components/menu';
 import { validForMerge } from '@actual-app/core/shared/merge';
 import { q } from '@actual-app/core/shared/query';
@@ -11,30 +12,37 @@ import {
 } from '@actual-app/core/shared/schedules';
 import { isPreviewId } from '@actual-app/core/shared/transactions';
 import { validForTransfer } from '@actual-app/core/shared/transfer';
-import type { TransactionEntity } from '@actual-app/core/types/models';
+import type {
+  AccountEntity,
+  TransactionEntity,
+} from '@actual-app/core/types/models';
 
+import { SelectedTransactionsSummary } from '#components/accounts/SelectedTransactionsSummary';
+import { SelectionBar } from '#components/common/SelectionBar';
 import { SelectedItemsButton } from '#components/table';
+import { useReportRegisterSelection } from '#hooks/useHotkeyGuards';
 import { useSchedules } from '#hooks/useSchedules';
 import { useSelectedItems } from '#hooks/useSelected';
 import { pushModal } from '#modals/modalsSlice';
 import { useDispatch } from '#redux';
 
+type EditableField =
+  | 'date'
+  | 'amount'
+  | 'account'
+  | 'payee'
+  | 'notes'
+  | 'category'
+  | 'cleared';
+
 type SelectedTransactionsButtonProps = {
+  /** The register's account; its point of view signs selected schedules. */
+  account?: AccountEntity;
   getTransaction: (id: string) => TransactionEntity | undefined;
   onShow: (selectedIds: string[]) => void;
   onDuplicate: (selectedIds: string[]) => void;
   onDelete: (selectedIds: string[]) => void;
-  onEdit: (
-    type:
-      | 'date'
-      | 'amount'
-      | 'account'
-      | 'payee'
-      | 'notes'
-      | 'category'
-      | 'cleared',
-    selectedIds: string[],
-  ) => void;
+  onEdit: (type: EditableField, selectedIds: string[]) => void;
   onLinkSchedule: (selectedIds: string[]) => void;
   onUnlinkSchedule: (selectedIds: string[]) => void;
   onCreateRule: (selectedIds: string[]) => void;
@@ -50,7 +58,13 @@ type SelectedTransactionsButtonProps = {
   onMergeTransactions: (selectedIds: string[]) => void;
 };
 
+/**
+ * The register's selection bar: `{{n}} selected · {{sum}}`, `Edit ⌄`,
+ * `Duplicate`, `Delete` and `More ⌄`, which holds every selection action.
+ * The selection hotkeys stay registered here.
+ */
 export function SelectedTransactionsButton({
+  account,
   getTransaction,
   onShow,
   onDuplicate,
@@ -71,6 +85,7 @@ export function SelectedTransactionsButton({
   const dispatch = useDispatch();
   const selectedItems = useSelectedItems();
   const selectedIds = useMemo(() => [...selectedItems], [selectedItems]);
+  useReportRegisterSelection(selectedIds.length > 0);
 
   const scheduleIds = useMemo(() => {
     return selectedIds
@@ -294,170 +309,215 @@ export function SelectedTransactionsButton({
     [onSetTransfer, selectedIds, showMakeTransfer, canBeTransfer],
   );
 
-  return (
-    <SelectedItemsButton
-      id="transactions"
-      name={count => t('{{count}} transactions', { count })}
-      // @ts-expect-error fix me
-      items={[
-        ...(!types.trans
-          ? [
-              {
-                name: 'view-schedule',
-                text: t('View schedule'),
-                key: 'S',
-              } as const,
-              {
-                name: 'post-transaction',
-                text: t('Post transaction'),
-              } as const,
-              {
-                name: 'post-transaction-today',
-                text: t('Post transaction today'),
-              } as const,
-              canBeSkipped &&
-                ({
-                  name: 'skip',
-                  text: t('Skip next scheduled date'),
-                } as const),
-              canBeCompleted &&
-                ({ name: 'complete', text: t('Mark as completed') } as const),
-            ]
-          : [
-              { name: 'show', text: t('Show'), key: 'F' } as const,
-              {
-                name: 'duplicate',
-                text: t('Duplicate'),
-                key: 'U',
-                disabled: ambiguousDuplication,
-              } as const,
-              { name: 'delete', text: t('Delete'), key: 'D' } as const,
-              ...(linked
-                ? [
-                    {
-                      name: 'view-schedule',
-                      text: t('View schedule'),
-                      key: 'S',
-                      disabled: selectedIds.length > 1,
-                    } as const,
-                    {
-                      name: 'unlink-schedule',
-                      text: t('Unlink schedule'),
-                    } as const,
-                  ]
-                : [
-                    {
-                      name: 'link-schedule',
-                      text: t('Link schedule'),
-                      key: 'S',
-                    } as const,
-                    {
-                      name: 'create-rule',
-                      text: t('Create rule'),
-                    } as const,
-                    {
-                      name: 'run-rules',
-                      text: t('Run Rules'),
-                    } as const,
-                  ]),
+  const editFieldItems = [
+    { name: 'date', text: t('Date'), key: 'E' },
+    { name: 'account', text: t('Account'), key: 'A' },
+    { name: 'payee', text: t('Payee'), key: 'P' },
+    { name: 'notes', text: t('Notes'), key: 'N' },
+    { name: 'category', text: t('Category'), key: 'C' },
+    { name: 'amount', text: t('Amount'), key: 'M' },
+    { name: 'cleared', text: t('Cleared'), key: 'L' },
+  ] as const satisfies ReadonlyArray<{
+    name: EditableField;
+    text: string;
+    key: string;
+  }>;
 
-              ...(showMakeTransfer
-                ? [
-                    {
-                      name: 'set-transfer',
-                      text: t('Make transfer'),
-                      key: 'R',
-                      disabled: !canBeTransfer,
-                    } as const,
-                  ]
-                : []),
-              ...(canMakeAsSplitTransaction
-                ? [
-                    {
-                      name: 'make-as-split-transaction',
-                      text: t('Make as split transaction'),
-                    } as const,
-                  ]
-                : []),
-              ...(canUnsplitTransactions
-                ? [
-                    {
-                      name: 'unsplit-transactions',
-                      text: t('Unsplit {{count}} transactions', {
-                        count: selectedIds.length,
-                      }),
-                    } as const,
-                  ]
-                : []),
-              ...(canMerge
-                ? [
-                    {
-                      name: 'merge-transactions',
-                      text: t('Merge'),
-                      key: 'G',
-                    } as const,
-                  ]
-                : []),
-              Menu.line,
-              { type: Menu.label, name: t('Edit field'), text: '' } as const,
-              { name: 'date', text: t('Date'), key: 'E' } as const,
-              { name: 'account', text: t('Account'), key: 'A' } as const,
-              { name: 'payee', text: t('Payee'), key: 'P' } as const,
-              { name: 'notes', text: t('Notes'), key: 'N' } as const,
-              { name: 'category', text: t('Category'), key: 'C' } as const,
-              { name: 'amount', text: t('Amount'), key: 'M' } as const,
-              { name: 'cleared', text: t('Cleared'), key: 'L' } as const,
-            ]),
-      ]}
-      onSelect={name => {
-        switch (name) {
-          case 'show':
-            onShow(selectedIds);
-            break;
-          case 'duplicate':
-            onDuplicate(selectedIds);
-            break;
-          case 'delete':
-            onDelete(selectedIds);
-            break;
-          case 'make-as-split-transaction':
-            onMakeAsSplitTransaction(selectedIds);
-            break;
-          case 'unsplit-transactions':
-            onMakeAsNonSplitTransactions(selectedIds);
-            break;
-          case 'merge-transactions':
-            onMergeTransactions(selectedIds);
-            break;
-          case 'post-transaction':
-          case 'post-transaction-today':
-          case 'skip':
-          case 'complete':
-            onScheduleAction(name, selectedIds);
-            break;
-          case 'view-schedule':
-            onViewSchedule();
-            break;
-          case 'link-schedule':
-            onLinkSchedule(selectedIds);
-            break;
-          case 'unlink-schedule':
-            onUnlinkSchedule(selectedIds);
-            break;
-          case 'create-rule':
-            onCreateRule(selectedIds);
-            break;
-          case 'run-rules':
-            onRunRules(selectedIds);
-            break;
-          case 'set-transfer':
-            onSetTransfer(selectedIds);
-            break;
-          default:
-            // @ts-expect-error fix me
-            onEdit(name, selectedIds);
-        }
-      }}
-    />
+  if (selectedIds.length === 0) {
+    return null;
+  }
+
+  return (
+    <SelectionBar
+      ariaLabel={t('Selected transactions')}
+      testId="transactions-selection-bar"
+      summary={
+        <SelectedTransactionsSummary
+          selectedItems={selectedItems}
+          account={account}
+        />
+      }
+    >
+      {types.trans && (
+        <>
+          <SelectedItemsButton<EditableField>
+            id="transactions-edit"
+            variant="menu"
+            name={t('Edit')}
+            items={[...editFieldItems]}
+            onSelect={name => onEdit(name, selectedIds)}
+          />
+          <Button
+            variant="bare"
+            isDisabled={ambiguousDuplication}
+            onPress={() => onDuplicate(selectedIds)}
+          >
+            <Trans>Duplicate</Trans>
+          </Button>
+          <Button variant="bare" onPress={() => onDelete(selectedIds)}>
+            <Trans>Delete</Trans>
+          </Button>
+        </>
+      )}
+      <SelectedItemsButton
+        id="transactions"
+        variant="menu"
+        name={t('More')}
+        // @ts-expect-error fix me
+        items={[
+          ...(!types.trans
+            ? [
+                {
+                  name: 'view-schedule',
+                  text: t('View schedule'),
+                  key: 'S',
+                } as const,
+                {
+                  name: 'post-transaction',
+                  text: t('Post transaction'),
+                } as const,
+                {
+                  name: 'post-transaction-today',
+                  text: t('Post transaction today'),
+                } as const,
+                canBeSkipped &&
+                  ({
+                    name: 'skip',
+                    text: t('Skip next scheduled date'),
+                  } as const),
+                canBeCompleted &&
+                  ({ name: 'complete', text: t('Mark as completed') } as const),
+              ]
+            : [
+                { name: 'show', text: t('Show'), key: 'F' } as const,
+                {
+                  name: 'duplicate',
+                  text: t('Duplicate'),
+                  key: 'U',
+                  disabled: ambiguousDuplication,
+                } as const,
+                { name: 'delete', text: t('Delete'), key: 'D' } as const,
+                ...(linked
+                  ? [
+                      {
+                        name: 'view-schedule',
+                        text: t('View schedule'),
+                        key: 'S',
+                        disabled: selectedIds.length > 1,
+                      } as const,
+                      {
+                        name: 'unlink-schedule',
+                        text: t('Unlink schedule'),
+                      } as const,
+                    ]
+                  : [
+                      {
+                        name: 'link-schedule',
+                        text: t('Link schedule'),
+                        key: 'S',
+                      } as const,
+                      {
+                        name: 'create-rule',
+                        text: t('Create rule'),
+                      } as const,
+                      {
+                        name: 'run-rules',
+                        text: t('Run Rules'),
+                      } as const,
+                    ]),
+
+                ...(showMakeTransfer
+                  ? [
+                      {
+                        name: 'set-transfer',
+                        text: t('Make transfer'),
+                        key: 'R',
+                        disabled: !canBeTransfer,
+                      } as const,
+                    ]
+                  : []),
+                ...(canMakeAsSplitTransaction
+                  ? [
+                      {
+                        name: 'make-as-split-transaction',
+                        text: t('Make as split transaction'),
+                      } as const,
+                    ]
+                  : []),
+                ...(canUnsplitTransactions
+                  ? [
+                      {
+                        name: 'unsplit-transactions',
+                        text: t('Unsplit {{count}} transactions', {
+                          count: selectedIds.length,
+                        }),
+                      } as const,
+                    ]
+                  : []),
+                ...(canMerge
+                  ? [
+                      {
+                        name: 'merge-transactions',
+                        text: t('Merge'),
+                        key: 'G',
+                      } as const,
+                    ]
+                  : []),
+                Menu.line,
+                { type: Menu.label, name: t('Edit field'), text: '' } as const,
+                ...editFieldItems,
+              ]),
+        ]}
+        onSelect={name => {
+          switch (name) {
+            case 'show':
+              onShow(selectedIds);
+              break;
+            case 'duplicate':
+              onDuplicate(selectedIds);
+              break;
+            case 'delete':
+              onDelete(selectedIds);
+              break;
+            case 'make-as-split-transaction':
+              onMakeAsSplitTransaction(selectedIds);
+              break;
+            case 'unsplit-transactions':
+              onMakeAsNonSplitTransactions(selectedIds);
+              break;
+            case 'merge-transactions':
+              onMergeTransactions(selectedIds);
+              break;
+            case 'post-transaction':
+            case 'post-transaction-today':
+            case 'skip':
+            case 'complete':
+              onScheduleAction(name, selectedIds);
+              break;
+            case 'view-schedule':
+              onViewSchedule();
+              break;
+            case 'link-schedule':
+              onLinkSchedule(selectedIds);
+              break;
+            case 'unlink-schedule':
+              onUnlinkSchedule(selectedIds);
+              break;
+            case 'create-rule':
+              onCreateRule(selectedIds);
+              break;
+            case 'run-rules':
+              onRunRules(selectedIds);
+              break;
+            case 'set-transfer':
+              onSetTransfer(selectedIds);
+              break;
+            default:
+              // @ts-expect-error fix me
+              onEdit(name, selectedIds);
+          }
+        }}
+      />
+    </SelectionBar>
   );
 }

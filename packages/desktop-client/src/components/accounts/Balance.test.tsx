@@ -8,7 +8,7 @@ import { useSelectedItems } from '#hooks/useSelected';
 import { useSheetValue } from '#hooks/useSheetValue';
 import { TestProviders } from '#mocks';
 
-import { SelectedBalance } from './Balance';
+import { SelectedReading } from './SelectedReading';
 
 vi.mock('#hooks/useSelected', () => ({
   useSelectedItems: vi.fn(),
@@ -53,7 +53,7 @@ function mockedSchedules(schedules: ScheduleEntity[]) {
   };
 }
 
-describe('SelectedBalance – normal transactions', () => {
+describe('SelectedReading – normal transactions', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     vi.mocked(useCachedSchedules).mockReturnValue(mockedSchedules([]));
@@ -66,11 +66,11 @@ describe('SelectedBalance – normal transactions', () => {
 
     render(
       <TestProviders>
-        <SelectedBalance selectedItems={new Set(['tx-123'])} />
+        <SelectedReading selectedItems={new Set(['tx-123'])} />
       </TestProviders>,
     );
 
-    expect(screen.getByText('Selected balance:')).toBeInTheDocument();
+    expect(screen.getByText('Selected')).toBeInTheDocument();
     expect(screen.getByText('-50.00')).toBeInTheDocument();
   });
 
@@ -79,15 +79,15 @@ describe('SelectedBalance – normal transactions', () => {
 
     render(
       <TestProviders>
-        <SelectedBalance selectedItems={new Set(['tx-123'])} />
+        <SelectedReading selectedItems={new Set(['tx-123'])} />
       </TestProviders>,
     );
 
-    expect(screen.getByText('Selected balance:')).toBeInTheDocument();
+    expect(screen.getByText('Selected')).toBeInTheDocument();
   });
 });
 
-describe('SelectedBalance – preview (scheduled) transactions', () => {
+describe('SelectedReading – preview (scheduled) transactions', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     vi.mocked(useSheetValue).mockReturnValue(null);
@@ -105,13 +105,13 @@ describe('SelectedBalance – preview (scheduled) transactions', () => {
 
     render(
       <TestProviders>
-        <SelectedBalance
+        <SelectedReading
           selectedItems={new Set([`preview/${scheduleId}/2026-03-24`])}
         />
       </TestProviders>,
     );
 
-    expect(screen.getByText('Selected balance:')).toBeInTheDocument();
+    expect(screen.getByText('Selected')).toBeInTheDocument();
   });
 
   test('counts each selected occurrence of the same schedule independently', () => {
@@ -127,7 +127,7 @@ describe('SelectedBalance – preview (scheduled) transactions', () => {
 
     render(
       <TestProviders>
-        <SelectedBalance selectedItems={selectedItems} />
+        <SelectedReading selectedItems={selectedItems} />
       </TestProviders>,
     );
 

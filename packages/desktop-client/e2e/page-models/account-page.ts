@@ -13,9 +13,15 @@ type TransactionEntry = {
 
 export class AccountPage {
   readonly page: Page;
+  readonly header: Locator;
   readonly accountName: Locator;
   readonly accountBalance: Locator;
+  readonly closedPill: Locator;
+  readonly offBudgetPill: Locator;
   readonly addNewTransactionButton: Locator;
+  readonly importButton: Locator;
+  readonly reconcileButton: Locator;
+  readonly reconcileStrip: Locator;
   readonly newTransactionRow: Locator;
   readonly addTransactionButton: Locator;
   readonly cancelTransactionButton: Locator;
@@ -26,6 +32,7 @@ export class AccountPage {
   readonly filterSelectTooltip: Locator;
   readonly selectButton: Locator;
   readonly selectTooltip: Locator;
+  readonly selectionBar: Locator;
   readonly sidebarAllAccountsBalance: Locator;
   readonly sidebarOnBudgetBalance: Locator;
   readonly sidebarOffBudgetBalance: Locator;
@@ -33,11 +40,23 @@ export class AccountPage {
   constructor(page: Page) {
     this.page = page;
 
+    this.header = this.page.getByTestId('account-header');
     this.accountName = this.page.getByTestId('account-name');
     this.accountBalance = this.page.getByTestId('account-balance');
-    this.addNewTransactionButton = this.page.getByRole('button', {
-      name: 'Add New',
+    this.closedPill = this.page.getByTestId('account-closed-pill');
+    this.offBudgetPill = this.page.getByTestId('account-off-budget-pill');
+    // Scoped to the header: an empty register repeats these buttons.
+    this.addNewTransactionButton = this.header.getByRole('button', {
+      name: 'Add transaction',
     });
+    this.importButton = this.header.getByRole('button', {
+      name: 'Import',
+      exact: true,
+    });
+    this.reconcileButton = this.header.getByRole('button', {
+      name: /^(Reconcile|Update value)$/,
+    });
+    this.reconcileStrip = this.page.getByTestId('reconcile-strip');
     this.newTransactionRow = this.page
       .getByTestId('new-transaction')
       .getByTestId('row');
@@ -52,11 +71,15 @@ export class AccountPage {
     this.transactionTable = this.page.getByTestId('transaction-table');
     this.transactionTableRow = this.transactionTable.getByTestId('row');
 
-    this.filterButton = this.page.getByRole('button', { name: 'Filter' });
+    this.filterButton = this.page.getByRole('button', {
+      name: 'Filter',
+      exact: true,
+    });
     this.filterSelectTooltip = this.page.getByTestId('filters-select-tooltip');
 
     this.selectButton = this.page.getByTestId('transactions-select-button');
     this.selectTooltip = this.page.getByTestId('transactions-select-tooltip');
+    this.selectionBar = this.page.getByTestId('transactions-selection-bar');
 
     this.sidebarAllAccountsBalance = this.page.getByTestId(
       'sidebar-all-accounts-balance',
@@ -166,6 +189,45 @@ export class AccountPage {
   async clickSelectAction(action: string | RegExp) {
     await this.selectButton.click();
     await this.selectTooltip.getByRole('button', { name: action }).click();
+  }
+
+  /**
+   * Reconcile against a statement balance through the inline strip. Without
+   * a balance, the prefilled cleared balance is used.
+   */
+  async reconcile(statementBalance?: string) {
+    await this.reconcileButton.click();
+    const input = this.reconcileStrip.getByRole('textbox', {
+      name: 'Statement balance',
+    });
+    await input.waitFor();
+    if (statementBalance != null) {
+      await input.fill(statementBalance);
+    }
+    await this.reconcileStrip
+      .getByRole('button', { name: 'Reconcile', exact: true })
+      .click();
+  }
+
+  /**
+   * Lock the cleared transactions once the reconcile strip is settled.
+   */
+  async lockReconciledTransactions() {
+    await this.reconcileStrip
+      .getByRole('button', { name: 'Lock transactions' })
+      .click();
+  }
+
+  /**
+   * Record a new value for an off-budget account through the inline strip.
+   */
+  async updateValue(currentValue: string) {
+    await this.reconcileButton.click();
+    const input = this.reconcileStrip.getByRole('textbox', {
+      name: 'Current value',
+    });
+    await input.fill(currentValue);
+    await this.reconcileStrip.getByRole('button', { name: 'Record' }).click();
   }
 
   /**
