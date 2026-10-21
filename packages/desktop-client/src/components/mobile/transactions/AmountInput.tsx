@@ -1,12 +1,14 @@
 import { memo, useEffect, useState } from 'react';
 import type { FocusEvent } from 'react';
 
-import { styles } from '@actual-app/components/styles';
 import * as Platform from '@actual-app/core/shared/platform';
 
 import { useFeatureFlag } from '#hooks/useFeatureFlag';
 
-import { CalculatorAmountInput } from './CalculatorAmountInput';
+import {
+  amountHeadlineStyle,
+  CalculatorAmountInput,
+} from './CalculatorAmountInput';
 import type { CalculatorAmountInputProps } from './CalculatorAmountInput';
 import { FocusableAmountInput } from './FocusableAmountInput';
 
@@ -90,7 +92,7 @@ export const AmountInput = memo(function AmountInput({
       style={props.style}
       textStyle={
         variant === 'large'
-          ? { ...styles.veryLargeText, textAlign: 'center' }
+          ? { ...amountHeadlineStyle, textAlign: 'center' }
           : undefined
       }
       value={value}

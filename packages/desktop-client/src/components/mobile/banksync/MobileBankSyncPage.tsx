@@ -17,6 +17,10 @@ import type { GroupedBankSyncAccounts } from '#components/banksync/bankSyncUtils
 import { BuiltInProviders } from '#components/banksync/BuiltInProviders';
 import { useBuiltInBankSyncProviders } from '#components/banksync/useBuiltInBankSyncProviders';
 import { Search } from '#components/common/Search';
+import {
+  mobileSearchBarStyle,
+  mobileSearchInputStyle,
+} from '#components/mobile/utils';
 import { MobilePageHeader, Page } from '#components/Page';
 import { SettingsBackButton } from '#components/settings/SettingsBackButton';
 import { useAccounts } from '#hooks/useAccounts';
@@ -126,29 +130,14 @@ export function MobileBankSyncPage() {
         </View>
       )}
       {openAccounts.length > 0 && (
-        <View
-          style={{
-            flexShrink: 0,
-            flexDirection: 'row',
-            alignItems: 'center',
-            backgroundColor: theme.mobilePageBackground,
-            padding: 10,
-            width: '100%',
-            borderBottomWidth: 2,
-            borderBottomStyle: 'solid',
-            borderBottomColor: theme.tableBorder,
-          }}
-        >
+        <View style={{ ...mobileSearchBarStyle, flexShrink: 0 }}>
           <Search
             placeholder={t('Filter accounts…')}
             value={filter}
             onChange={onSearchChange}
             width="100%"
             height={styles.mobileMinHeight}
-            style={{
-              backgroundColor: theme.tableBackground,
-              borderColor: theme.formInputBorder,
-            }}
+            style={mobileSearchInputStyle}
           />
         </View>
       )}

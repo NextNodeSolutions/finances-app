@@ -3,7 +3,6 @@ import { useTranslation } from 'react-i18next';
 import { useLocation } from 'react-router';
 
 import { styles } from '@actual-app/components/styles';
-import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 import { listen, send } from '@actual-app/core/platform/client/connection';
 import * as undo from '@actual-app/core/platform/client/undo';
@@ -13,7 +12,11 @@ import type { RuleEntity } from '@actual-app/core/types/models';
 
 import { Search } from '#components/common/Search';
 import { ruleToString } from '#components/ManageRules';
-import { withFilterParam } from '#components/mobile/utils';
+import {
+  mobileSearchBarStyle,
+  mobileSearchInputStyle,
+  withFilterParam,
+} from '#components/mobile/utils';
 import { MobilePageHeader, Page } from '#components/Page';
 import { SettingsBackButton } from '#components/settings/SettingsBackButton';
 import { useAccounts } from '#hooks/useAccounts';
@@ -193,28 +196,14 @@ export function MobileRulesPage() {
       }
       padding={0}
     >
-      <View
-        style={{
-          flexDirection: 'row',
-          alignItems: 'center',
-          backgroundColor: theme.mobilePageBackground,
-          padding: 10,
-          width: '100%',
-          borderBottomWidth: 2,
-          borderBottomStyle: 'solid',
-          borderBottomColor: theme.tableBorder,
-        }}
-      >
+      <View style={mobileSearchBarStyle}>
         <Search
           placeholder={t('Filter rules…')}
           value={filter}
           onChange={onSearchChange}
           width="100%"
           height={styles.mobileMinHeight}
-          style={{
-            backgroundColor: theme.tableBackground,
-            borderColor: theme.formInputBorder,
-          }}
+          style={mobileSearchInputStyle}
         />
       </View>
       <RulesList

@@ -12,13 +12,18 @@ import { css, cx } from '@emotion/css';
 import { AutoTextSize } from 'auto-text-size';
 
 import { BalanceWithCarryover } from '#components/budget/BalanceWithCarryover';
+import { isNegativeBalance } from '#components/budget/util';
+import {
+  AMOUNT_CHIP_GUTTER,
+  mobileNegativeAmountChipStyle,
+} from '#components/mobile/utils';
 import { PrivacyFilter } from '#components/PrivacyFilter';
 import { useFormat } from '#hooks/useFormat';
 import { useSyncedPref } from '#hooks/useSyncedPref';
 import type { Binding } from '#spreadsheet';
 import { envelopeBudget, trackingBudget } from '#spreadsheet/bindings';
 
-import { getColumnWidth, PILL_STYLE } from './BudgetTable';
+import { getColumnWidth, PILL_CLASS_NAME, PILL_STYLE } from './BudgetTable';
 
 type BalanceCellProps = {
   binding: Binding<
@@ -82,9 +87,14 @@ export function BalanceCell({
       {({ type, value, className: defaultClassName }) => (
         <Button
           variant="bare"
+          className={PILL_CLASS_NAME}
           style={{
             ...PILL_STYLE,
+            // The goal tooltip wraps this chip in a content-sized box, so the
+            // column width is spelled out instead of taken as a percentage.
+            minWidth: `calc(${columnWidth} - ${AMOUNT_CHIP_GUTTER}px)`,
             maxWidth: columnWidth,
+            ...(isNegativeBalance(value) && mobileNegativeAmountChipStyle),
           }}
           onPress={onPress}
           aria-label={ariaLabel}

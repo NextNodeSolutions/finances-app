@@ -19,7 +19,7 @@ import { useCategoryScheduleGoalTemplateIndicator } from '#hooks/useCategorySche
 import { useFormat } from '#hooks/useFormat';
 import type { Binding } from '#spreadsheet';
 
-import { getColumnWidth, PILL_STYLE } from './BudgetTable';
+import { getColumnWidth, PILL_CLASS_NAME, PILL_STYLE } from './BudgetTable';
 
 type SpentCellProps = {
   binding: Binding<'envelope-budget' | 'tracking-budget', 'sum-amount'>;
@@ -60,6 +60,7 @@ export function SpentCell({
         <>
           <Button
             variant="bare"
+            className={PILL_CLASS_NAME}
             style={{
               ...PILL_STYLE,
             }}

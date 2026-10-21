@@ -56,7 +56,9 @@ export const SplitAmountInput = memo(function SplitAmountInput({
         onFocus={onFocus}
         style={{
           ...styles.smallText,
-          marginRight: 8,
+          ...styles.tnum,
+          height: 44,
+          marginRight: 12,
           textAlign: 'right',
           minWidth: 0,
         }}
@@ -90,7 +92,7 @@ export const SplitAmountInput = memo(function SplitAmountInput({
           onChange?.(nextAmount);
         }
       }}
-      style={{ marginRight: 8 }}
+      style={{ marginRight: 12, height: 44, borderRadius: 8 }}
       value={amountToInteger(value)}
       zeroSign={negate ? '-' : '+'}
     />

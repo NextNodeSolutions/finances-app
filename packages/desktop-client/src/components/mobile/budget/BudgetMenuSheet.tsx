@@ -71,14 +71,14 @@ export function BudgetMenuSheet({
             style={{
               justifyContent: 'center',
               alignItems: 'center',
-              padding: `${spacing.xs}px ${spacing.md}px ${spacing.md}px`,
+              padding: `${spacing.xs}px ${spacing.md}px ${spacing.lg}px`,
             }}
           >
             <Text
               style={{
-                ...styles.smallText,
-                color: theme.pageTextLight,
-                marginBottom: spacing.xxs,
+                ...styles.monoLabel,
+                color: theme.tableHeaderText,
+                marginBottom: spacing.xs,
               }}
             >
               <Trans>Budgeted</Trans>

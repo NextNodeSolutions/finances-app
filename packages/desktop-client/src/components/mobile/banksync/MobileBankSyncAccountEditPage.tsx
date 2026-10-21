@@ -165,8 +165,8 @@ export function MobileBankSyncAccountEditPage() {
           style={{
             padding: 16,
             paddingTop: 12,
-            borderTop: `1px solid ${theme.tableBorder}`,
-            backgroundColor: theme.mobilePageBackground,
+            borderTop: `1px solid ${theme.hairline}`,
+            backgroundColor: theme.titlebarBackground,
             display: 'flex',
             flexDirection: 'row',
             justifyContent: 'space-between',

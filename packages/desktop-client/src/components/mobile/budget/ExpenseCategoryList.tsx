@@ -16,6 +16,7 @@ import { css } from '@emotion/css';
 
 import { useReorderCategoryMutation } from '#budget';
 import { findSortDown } from '#components/budget/util';
+import { cardRowsClassName } from '#components/mobile/utils';
 
 import { ExpenseCategoryListItem } from './ExpenseCategoryListItem';
 
@@ -74,10 +75,11 @@ export function ExpenseCategoryList({
           target={target}
           className={css({
             '&[data-drop-target]': {
-              height: 4,
-              backgroundColor: theme.tableBorderSeparator,
+              height: 2,
+              margin: '0 12px',
+              backgroundColor: theme.accent,
               opacity: 1,
-              borderRadius: 4,
+              borderRadius: 2,
             },
           })}
         />
@@ -102,6 +104,7 @@ export function ExpenseCategoryList({
       aria-label={t('{{categoryGroupName}} expense group categories', {
         categoryGroupName: categoryGroup.name,
       })}
+      className={cardRowsClassName}
       items={categories}
       dragAndDropHooks={dragAndDropHooks}
       dependencies={[

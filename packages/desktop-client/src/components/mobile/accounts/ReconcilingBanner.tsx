@@ -3,13 +3,13 @@ import { Trans } from 'react-i18next';
 
 import { Button } from '@actual-app/components/button';
 import { SvgCheckCircle1 } from '@actual-app/components/icons/v2';
-import { styles } from '@actual-app/components/styles';
 import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 import type { AccountEntity } from '@actual-app/core/types/models';
 import type { TransObjectLiteral } from '@actual-app/core/types/util';
 
+import { mobileCardStyle } from '#components/mobile/utils';
 import { useFormat } from '#hooks/useFormat';
 import { useSheetValue } from '#hooks/useSheetValue';
 import * as bindings from '#spreadsheet/bindings';
@@ -62,11 +62,10 @@ export function ReconcilingBanner({
       style={{
         flexShrink: 0,
         display: 'grid',
-        backgroundColor: theme.tableBackground,
-        ...styles.shadow,
-        borderRadius: 4,
-        margin: '10px 10px 0 10px',
-        padding: 10,
+        ...mobileCardStyle,
+        overflow: 'visible',
+        margin: '10px 12px 0',
+        padding: 12,
       }}
     >
       <View
@@ -98,7 +97,7 @@ export function ReconcilingBanner({
         <Button
           variant="primary"
           isDisabled={isUpdating}
-          style={{ height: styles.mobileMinHeight }}
+          style={{ height: 44, borderRadius: 8 }}
           onPress={() => runAction(onDone)}
         >
           <Trans>Lock transactions</Trans>
@@ -115,7 +114,6 @@ export function ReconcilingBanner({
         <Text
           style={{
             color: theme.tableText,
-            fontStyle: 'italic',
             textAlign: 'center',
           }}
         >
@@ -124,7 +122,7 @@ export function ReconcilingBanner({
             <strong>{{ clearedBalance } as TransObjectLiteral}</strong> needs{' '}
             <strong>{{ difference } as TransObjectLiteral}</strong> to match
             your bank&apos;s balance of{' '}
-            <Text style={{ fontWeight: 700 }}>
+            <Text style={{ fontWeight: 600 }}>
               {{ bankBalance } as TransObjectLiteral}
             </Text>
           </Trans>
@@ -138,7 +136,7 @@ export function ReconcilingBanner({
         >
           <Button
             isDisabled={isUpdating}
-            style={{ flex: 1, minHeight: styles.mobileMinHeight }}
+            style={{ flex: 1, minHeight: 44, borderRadius: 8 }}
             onPress={() => runAction(() => onCreateTransaction(targetDiff))}
           >
             <Trans>Create reconciliation transaction</Trans>
@@ -146,7 +144,7 @@ export function ReconcilingBanner({
           <Button
             variant="primary"
             isDisabled={isUpdating}
-            style={{ flex: 1, minHeight: styles.mobileMinHeight }}
+            style={{ flex: 1, minHeight: 44, borderRadius: 8 }}
             onPress={() => runAction(onDone)}
           >
             <Trans>Exit reconciliation</Trans>

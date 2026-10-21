@@ -3,7 +3,6 @@ import { Trans } from 'react-i18next';
 
 import { Button } from '@actual-app/components/button';
 import { useResponsive } from '@actual-app/components/hooks/useResponsive';
-import { styles } from '@actual-app/components/styles';
 import { theme } from '@actual-app/components/theme';
 import { radius, spacing } from '@actual-app/components/tokens';
 import { View } from '@actual-app/components/view';
@@ -23,7 +22,7 @@ export function MobileSheetActions({
 }: MobileSheetActionsProps) {
   const { isNarrowWidth } = useResponsive();
   const touchButtonStyle = isNarrowWidth
-    ? { flex: 1, height: styles.mobileMinHeight, borderRadius: radius.sm }
+    ? { flex: 1, height: 44, borderRadius: radius.md, fontWeight: 500 }
     : {};
 
   return (
@@ -48,6 +47,7 @@ export function MobileSheetActions({
           ...(isDestructive && {
             backgroundColor: theme.errorText,
             borderColor: theme.errorText,
+            color: theme.buttonPrimaryText,
           }),
         }}
       >

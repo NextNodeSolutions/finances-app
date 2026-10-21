@@ -5,14 +5,21 @@ import { Trans, useTranslation } from 'react-i18next';
 import { SvgFilter } from '@actual-app/components/icons/v1';
 import { Label } from '@actual-app/components/label';
 import { styles } from '@actual-app/components/styles';
+import type { CSSProperties } from '@actual-app/components/styles';
 import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
+import { radius } from '@actual-app/components/tokens';
 import { View } from '@actual-app/components/view';
 import type { IntegerAmount } from '@actual-app/core/shared/util';
 import type { TransactionEntity } from '@actual-app/core/types/models';
 
 import { Search } from '#components/common/Search';
 import { PullToRefresh } from '#components/mobile/PullToRefresh';
+import {
+  mobileFigureLabelStyle,
+  mobileSearchBarStyle,
+  mobileSearchInputStyle,
+} from '#components/mobile/utils';
 import { CellValue, CellValueText } from '#components/spreadsheet/CellValue';
 import { DisplayPayeeProvider } from '#hooks/useDisplayPayee';
 import { SelectedProvider, useSelected } from '#hooks/useSelected';
@@ -20,6 +27,20 @@ import { useSheetValue } from '#hooks/useSheetValue';
 import type { Binding, SheetFields, SheetNames } from '#spreadsheet';
 
 import { TransactionList } from './TransactionList';
+
+const secondaryLabelStyle: CSSProperties = {
+  ...mobileFigureLabelStyle,
+  textAlign: 'center',
+  marginBottom: 2,
+};
+
+const secondaryFigureStyle: CSSProperties = {
+  ...styles.tnum,
+  fontSize: 12.5,
+  textAlign: 'center',
+  fontWeight: 500,
+  color: theme.pageTextLight,
+};
 
 type TransactionSearchInputProps = {
   placeholder: string;
@@ -33,15 +54,7 @@ function TransactionSearchInput({
   const [text, setText] = useState('');
 
   return (
-    <View
-      style={{
-        flexDirection: 'row',
-        alignItems: 'center',
-        backgroundColor: theme.mobilePageBackground,
-        padding: 10,
-        width: '100%',
-      }}
-    >
+    <View style={{ ...mobileSearchBarStyle, borderBottom: 'none' }}>
       <Search
         value={text}
         onChange={text => {
@@ -51,10 +64,7 @@ function TransactionSearchInput({
         placeholder={placeholder}
         width="100%"
         height={styles.mobileMinHeight}
-        style={{
-          backgroundColor: theme.tableBackground,
-          borderColor: theme.formInputBorder,
-        }}
+        style={mobileSearchInputStyle}
       />
     </View>
   );
@@ -118,13 +128,16 @@ export function TransactionListWithBalances({
         <View
           style={{
             flexShrink: 0,
-            marginTop: 10,
+            paddingTop: 18,
           }}
         >
           <View
             style={{
               flexDirection: 'row',
-              justifyContent: 'space-evenly',
+              flexWrap: 'wrap',
+              justifyContent: 'center',
+              rowGap: 6,
+              padding: '0 16px',
             }}
           >
             {balanceCleared && balanceUncleared ? (
@@ -136,17 +149,12 @@ export function TransactionListWithBalances({
               />
             ) : (
               <>
-                <View style={{ flexBasis: '33%' }} />
                 <Balance balance={balance} />
-                <View
-                  style={{
-                    flexBasis: '33%',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                  }}
-                >
-                  {filtered && <AppliedFiltersChip />}
-                </View>
+                {filtered && (
+                  <View style={{ flexBasis: '100%', alignItems: 'center' }}>
+                    <AppliedFiltersChip />
+                  </View>
+                )}
               </>
             )}
           </View>
@@ -191,8 +199,8 @@ function AppliedFiltersChip() {
         gap: 6,
         backgroundColor: theme.pillBackgroundSelected,
         color: theme.pillTextSelected,
-        borderRadius: 15,
-        padding: '4px 10px',
+        borderRadius: radius.sm,
+        padding: '3px 8px',
       }}
     >
       <SvgFilter width={12} height={12} style={{ flexShrink: 0 }} />
@@ -245,13 +253,11 @@ function BalanceWithCleared({
       <View
         style={{
           display: !showCleared ? 'none' : undefined,
-          flexBasis: '33%',
+          order: 1,
+          padding: '0 14px',
         }}
       >
-        <Label
-          title={t('Cleared')}
-          style={{ textAlign: 'center', fontSize: 12 }}
-        />
+        <Label title={t('Cleared')} style={secondaryLabelStyle} />
         <TransactionListBalanceCellValue
           binding={balanceCleared}
           type="financial"
@@ -259,11 +265,7 @@ function BalanceWithCleared({
           {props => (
             <CellValueText
               {...props}
-              style={{
-                fontSize: 12,
-                textAlign: 'center',
-                fontWeight: '500',
-              }}
+              style={secondaryFigureStyle}
               data-testid="transactions-balance-cleared"
             />
           )}
@@ -273,13 +275,11 @@ function BalanceWithCleared({
       <View
         style={{
           display: !showCleared ? 'none' : undefined,
-          flexBasis: '33%',
+          order: 1,
+          padding: '0 14px',
         }}
       >
-        <Label
-          title={t('Uncleared')}
-          style={{ textAlign: 'center', fontSize: 12 }}
-        />
+        <Label title={t('Uncleared')} style={secondaryLabelStyle} />
         <TransactionListBalanceCellValue
           binding={balanceUncleared}
           type="financial"
@@ -287,11 +287,7 @@ function BalanceWithCleared({
           {props => (
             <CellValueText
               {...props}
-              style={{
-                fontSize: 12,
-                textAlign: 'center',
-                fontWeight: '500',
-              }}
+              style={secondaryFigureStyle}
               data-testid="transactions-balance-uncleared"
             />
           )}
@@ -308,21 +304,28 @@ type BalanceProps = {
 function Balance({ balance }: BalanceProps) {
   const { t } = useTranslation();
   return (
-    <View style={{ flexBasis: '33%' }}>
-      <Label title={t('Balance')} style={{ textAlign: 'center' }} />
+    // The headline balance always leads; the cleared figures sit beneath it.
+    <View style={{ flexBasis: '100%', order: 0, alignItems: 'center' }}>
+      <Label
+        title={t('Balance')}
+        style={{ ...secondaryLabelStyle, marginBottom: 4 }}
+      />
       <TransactionListBalanceCellValue binding={balance} type="financial">
         {props => (
           <CellValueText
             {...props}
             style={{
-              fontSize: 18,
+              ...styles.display,
+              fontSize: 32,
+              lineHeight: '38px',
+              fontWeight: 300,
+              whiteSpace: 'nowrap',
               textAlign: 'center',
-              fontWeight: '500',
               color:
                 props.value < 0
                   ? theme.numberNegative
                   : props.value > 0
-                    ? theme.numberPositive
+                    ? theme.pageText
                     : theme.numberNeutral,
             }}
             data-testid="transactions-balance"

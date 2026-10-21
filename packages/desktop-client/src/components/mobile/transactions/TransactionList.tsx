@@ -27,6 +27,7 @@ import { Popover } from '@actual-app/components/popover';
 import { styles } from '@actual-app/components/styles';
 import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
+import { radius } from '@actual-app/components/tokens';
 import { View } from '@actual-app/components/view';
 import { validForMerge } from '@actual-app/core/shared/merge';
 import * as monthUtils from '@actual-app/core/shared/months';
@@ -213,13 +214,15 @@ export function TransactionList({
               <ListBoxSection>
                 <Header
                   style={{
-                    ...styles.smallText,
-                    backgroundColor: theme.pageBackground,
+                    ...styles.monoLabel,
+                    backgroundColor: theme.mobilePageBackground,
                     color: theme.tableHeaderText,
                     display: 'flex',
-                    justifyContent: 'center',
-                    paddingBottom: 4,
-                    paddingTop: 4,
+                    alignItems: 'center',
+                    justifyContent: 'flex-start',
+                    height: 30,
+                    padding: '0 16px',
+                    borderBottom: `1px solid ${theme.hairline}`,
                     position: 'sticky',
                     top: '0',
                     width: '100%',
@@ -295,9 +298,9 @@ function SelectedTransactionsFloatingActionBar({
   const getMenuItemStyle = useCallback(
     <T extends string>(item: MenuItemObject<T>) => ({
       ...styles.mobileMenuItem,
-      color: theme.mobileHeaderText,
+      color: theme.menuItemText,
       ...(item.disabled === true && { color: theme.buttonBareDisabledText }),
-      ...(item.name === 'delete' && { color: theme.errorTextMenu }),
+      ...(item.name === 'delete' && { color: theme.errorText }),
     }),
     [],
   );
@@ -309,6 +312,10 @@ function SelectedTransactionsFloatingActionBar({
     () => ({
       style: {
         ...styles.mobileMenuItem,
+        fontSize: 15,
+        fontWeight: 500,
+        padding: '0 12px',
+        borderRadius: radius.md,
         color: 'currentColor',
         height: styles.mobileMinHeight,
       },
@@ -430,7 +437,7 @@ function SelectedTransactionsFloatingActionBar({
       <View
         style={{
           flex: 1,
-          padding: 8,
+          padding: '8px 8px 8px 6px',
           flexDirection: 'row',
           alignItems: 'center',
           justifyContent: 'space-between',
@@ -455,7 +462,7 @@ function SelectedTransactionsFloatingActionBar({
           >
             <SvgDelete width={10} height={10} />
           </Button>
-          <Text style={styles.mediumText}>
+          <Text style={{ fontSize: 14, fontWeight: 500 }}>
             {selectedTransactions.size}{' '}
             {isMoreThanOne ? 'transactions' : 'transaction'} selected
           </Text>
@@ -488,7 +495,6 @@ function SelectedTransactionsFloatingActionBar({
           >
             <Menu
               getItemStyle={getMenuItemStyle}
-              style={{ backgroundColor: theme.floatingActionBarBackground }}
               onMenuSelect={name => {
                 void onBatchEdit?.({
                   name,
@@ -603,7 +609,6 @@ function SelectedTransactionsFloatingActionBar({
           >
             <Menu
               getItemStyle={getMenuItemStyle}
-              style={{ backgroundColor: theme.floatingActionBarBackground }}
               onMenuSelect={type => {
                 if (type === 'duplicate') {
                   void onBatchDuplicate?.({

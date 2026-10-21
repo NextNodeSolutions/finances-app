@@ -12,6 +12,7 @@ import { styles } from '@actual-app/components/styles';
 import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import { Toggle } from '@actual-app/components/toggle';
+import { motion, radius } from '@actual-app/components/tokens';
 import { View } from '@actual-app/components/view';
 import { css, cx } from '@emotion/css';
 
@@ -25,11 +26,13 @@ export function FieldLabel({ title, flush, style }: FieldLabelProps) {
   return (
     <Text
       style={{
-        marginBottom: 5,
-        marginTop: flush ? 0 : 25,
-        fontSize: 14,
-        color: theme.tableRowHeaderText,
-        padding: `0 ${styles.mobileEditingPadding}px`,
+        marginBottom: 6,
+        marginTop: flush ? 0 : 20,
+        fontSize: 12.5,
+        fontWeight: 500,
+        lineHeight: '16px',
+        color: theme.pageTextLight,
+        padding: `0 ${styles.mobileEditingPadding + 2}px`,
         userSelect: 'none',
         ...style,
       }}
@@ -39,12 +42,22 @@ export function FieldLabel({ title, flush, style }: FieldLabelProps) {
   );
 }
 
+const FIELD_HEIGHT = 44;
+
 const valueStyle = {
   borderWidth: 1,
+  borderStyle: 'solid',
   borderColor: theme.formInputBorder,
-  marginLeft: 8,
-  marginRight: 8,
-  height: styles.mobileMinHeight,
+  borderRadius: radius.md,
+  marginLeft: styles.mobileEditingPadding,
+  marginRight: styles.mobileEditingPadding,
+  height: FIELD_HEIGHT,
+  transition: `border-color ${motion.base} ${motion.ease}, box-shadow ${motion.base} ${motion.ease}, background-color ${motion.base} ${motion.ease}`,
+};
+
+const focusedFieldStyle = {
+  borderColor: theme.formInputBorderSelected,
+  boxShadow: `0 0 0 3px ${theme.formInputShadowSelected}`,
 };
 
 export const hideNativeDateIconClassName = css({
@@ -78,12 +91,10 @@ const iconFieldWrapperClassName = css({
   ...valueStyle,
   flexDirection: 'row',
   alignItems: 'center',
-  paddingLeft: 8,
-  paddingRight: 8,
-  gap: 8,
-  '&:focus-within': {
-    borderColor: theme.formInputBorderSelected,
-  },
+  paddingLeft: 12,
+  paddingRight: 10,
+  gap: 10,
+  '&:focus-within': focusedFieldStyle,
 });
 
 type InputFieldProps = ComponentPropsWithRef<typeof Input> & {
@@ -126,7 +137,7 @@ export function InputField({
         nativeStyle={{
           backgroundColor: disabled
             ? theme.formInputTextReadOnlySelection
-            : theme.tableBackground,
+            : theme.formInputBackground,
         }}
       >
         {iconStart && <View style={iconStyle}>{iconStart}</View>}
@@ -144,8 +155,9 @@ export function InputField({
             backgroundColor: 'transparent',
             height: '100%',
             padding: 0,
+            fontSize: 15,
             textAlign: 'left',
-            color: disabled ? theme.tableTextInactive : theme.tableText,
+            color: disabled ? theme.tableTextInactive : theme.formInputText,
             ...style,
             borderRadius: 0,
             boxShadow: 'none',
@@ -177,11 +189,13 @@ export function InputField({
       className={className}
       style={{
         ...valueStyle,
+        padding: '0 12px',
+        fontSize: 15,
         ...style,
-        color: disabled ? theme.tableTextInactive : theme.tableText,
+        color: disabled ? theme.tableTextInactive : theme.formInputText,
         backgroundColor: disabled
           ? theme.formInputTextReadOnlySelection
-          : theme.tableBackground,
+          : theme.formInputBackground,
       }}
       {...props}
     />
@@ -203,17 +217,24 @@ const defaultTapFieldClassName = () =>
     ...valueStyle,
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: theme.tableBackground,
+    padding: '0 10px 0 12px',
+    fontSize: 15,
+    fontWeight: 400,
+    color: theme.formInputText,
+    backgroundColor: theme.formInputBackground,
+    boxShadow: 'none',
     '&[data-disabled]': {
       backgroundColor: theme.formInputTextReadOnlySelection,
     },
     '&[data-pressed]': {
-      opacity: 0.5,
+      backgroundColor: theme.tableRowBackgroundHover,
       boxShadow: 'none',
     },
     '&[data-hovered]': {
+      borderColor: theme.hairlineStrong,
       boxShadow: 'none',
     },
+    '&[data-focus-visible]': focusedFieldStyle,
   });
 
 export function TapField({
@@ -249,7 +270,7 @@ export function TapField({
             <View
               style={{
                 color: theme.pageTextSubdued,
-                marginRight: 8,
+                marginRight: 10,
                 flexShrink: 0,
               }}
             >

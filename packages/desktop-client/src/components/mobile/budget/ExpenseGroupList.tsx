@@ -58,10 +58,11 @@ export function ExpenseGroupList({
           target={target}
           className={css({
             '&[data-drop-target]': {
-              height: 4,
-              backgroundColor: theme.tableBorderSeparator,
+              height: 2,
+              margin: '0 12px',
+              backgroundColor: theme.accent,
               opacity: 1,
-              borderRadius: 4,
+              borderRadius: 2,
             },
           })}
         />

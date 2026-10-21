@@ -2,7 +2,7 @@ import { useLayoutEffect, useRef, useState } from 'react';
 import type { UIEvent } from 'react';
 
 import { theme } from '@actual-app/components/theme';
-import { spacing } from '@actual-app/components/tokens';
+import { radius, spacing } from '@actual-app/components/tokens';
 import { View } from '@actual-app/components/view';
 
 import { Notes } from '#components/Notes';
@@ -45,7 +45,7 @@ export function MobileSheetNotes({ notes }: MobileSheetNotesProps) {
           notes={notes}
           editable={false}
           focused={false}
-          getStyle={() => ({ borderRadius: 6, color: theme.pageText })}
+          getStyle={() => ({ borderRadius: radius.md, color: theme.pageText })}
         />
       </View>
       <View

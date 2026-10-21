@@ -11,6 +11,7 @@ import type {
 } from '#components/banksync/bankSyncUtils';
 import { getGroupedBankSyncEntries } from '#components/banksync/bankSyncUtils';
 import { MOBILE_NAV_HEIGHT } from '#components/mobile/MobileNavTabs';
+import { mobileFigureLabelStyle } from '#components/mobile/utils';
 
 import { BankSyncAccountsListItem } from './BankSyncAccountsListItem';
 
@@ -63,23 +64,15 @@ export function BankSyncAccountsList({
             <div
               style={{
                 backgroundColor: theme.mobilePageBackground,
-                padding: '12px 16px',
-                borderBottom: `1px solid ${theme.tableBorder}`,
+                padding: '16px 16px 8px',
+                borderBottom: `1px solid ${theme.hairline}`,
                 display: 'flex',
                 alignItems: 'center',
-                justifyContent: 'center',
+                justifyContent: 'flex-start',
                 minHeight: 40,
               }}
             >
-              <Text
-                style={{
-                  fontSize: 14,
-                  fontWeight: 600,
-                  color: theme.pageTextLight,
-                  textTransform: 'uppercase',
-                  letterSpacing: 0.5,
-                }}
-              >
+              <Text style={mobileFigureLabelStyle}>
                 {syncSourceReadable[provider]}
               </Text>
             </div>

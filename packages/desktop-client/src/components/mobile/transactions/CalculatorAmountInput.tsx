@@ -19,12 +19,20 @@ import { makeAmountFullStyle } from '#components/budget/util';
 
 import { CalculatorKeyboard } from './CalculatorKeyboard';
 
+// The transaction amount is the headline figure of the edit page.
+export const amountHeadlineStyle = {
+  ...styles.display,
+  fontSize: 40,
+  lineHeight: '48px',
+  fontWeight: 300,
+};
+
 export const calculatorAmountLargeStyle = {
-  ...styles.veryLargeText,
+  ...amountHeadlineStyle,
   backgroundColor: 'transparent',
   border: 0,
   borderBottom: '1px solid',
-  borderBottomColor: theme.formInputBorder,
+  borderBottomColor: theme.hairline,
   display: 'block',
   fieldSizing: 'content',
   minWidth: '80px',

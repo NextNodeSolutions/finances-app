@@ -15,6 +15,7 @@ import {
 import { SvgCalendar3 } from '@actual-app/components/icons/v2';
 import { styles } from '@actual-app/components/styles';
 import { theme } from '@actual-app/components/theme';
+import { motion, radius } from '@actual-app/components/tokens';
 import { View } from '@actual-app/components/view';
 import { useDrag } from '@use-gesture/react';
 
@@ -43,7 +44,7 @@ export function MobileNavTabs() {
   const navTabStyle = {
     flex: `1 1 ${100 / COLUMN_COUNT}%`,
     height: ROW_HEIGHT,
-    padding: 10,
+    padding: '10px 10px 12px',
     maxWidth: `${100 / COLUMN_COUNT}%`,
   };
 
@@ -187,8 +188,7 @@ export function MobileNavTabs() {
         y,
         touchAction: 'pan-x',
         backgroundColor: theme.mobileNavBackground,
-        borderTop: `1px solid ${theme.menuBorder}`,
-        ...styles.shadow,
+        borderTop: `1px solid ${theme.hairline}`,
         height: TOTAL_HEIGHT + PILL_HEIGHT,
         width: '100%',
         position: 'fixed',
@@ -201,12 +201,12 @@ export function MobileNavTabs() {
       <View>
         <div
           style={{
-            backgroundColor: theme.pillBorder,
-            borderRadius: 10,
-            width: 30,
+            backgroundColor: theme.hairlineStrong,
+            borderRadius: radius.pill,
+            width: 32,
+            height: 4,
             marginTop: 5,
-            marginBottom: 5,
-            padding: 2,
+            marginBottom: 6,
             alignSelf: 'center',
           }}
         />
@@ -249,15 +249,20 @@ function NavTab({ Icon: TabIcon, name, path, style, onClick }: NavTabProps) {
         color: isActive ? theme.mobileNavItemSelected : theme.mobileNavItem,
         display: 'flex',
         flexDirection: 'column',
+        gap: 5,
+        fontSize: 11,
+        fontWeight: isActive ? 600 : 500,
+        letterSpacing: '0.01em',
         textDecoration: 'none',
         textAlign: 'center',
         textWrap: 'balance',
         userSelect: 'none',
+        transition: `color ${motion.base} ${motion.ease}`,
         ...style,
       })}
       onClick={onClick}
     >
-      <TabIcon width={22} height={22} style={{ minHeight: '22px' }} />
+      <TabIcon width={20} height={20} style={{ minHeight: '20px' }} />
       {name}
     </NavLink>
   );

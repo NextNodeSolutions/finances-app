@@ -27,14 +27,14 @@ export function MobileSheetBalanceHeader({
       style={{
         justifyContent: 'center',
         alignItems: 'center',
-        padding: `${spacing.xs}px ${spacing.md}px ${spacing.md}px`,
+        padding: `${spacing.xs}px ${spacing.md}px ${spacing.lg}px`,
       }}
     >
       <Text
         style={{
-          ...styles.smallText,
-          color: theme.pageTextLight,
-          marginBottom: spacing.xxs,
+          ...styles.monoLabel,
+          color: theme.tableHeaderText,
+          marginBottom: spacing.xs,
         }}
       >
         {label}
@@ -48,7 +48,13 @@ export function MobileSheetBalanceHeader({
         {props => (
           <CellValueText
             {...props}
-            style={{ textAlign: 'center', ...styles.veryLargeText }}
+            style={{
+              ...styles.display,
+              textAlign: 'center',
+              fontSize: 34,
+              lineHeight: '40px',
+              fontWeight: 300,
+            }}
           />
         )}
       </BalanceWithCarryover>

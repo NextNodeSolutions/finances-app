@@ -2,8 +2,6 @@ import React, { useCallback, useMemo, useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 
 import { styles } from '@actual-app/components/styles';
-import { Text } from '@actual-app/components/text';
-import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 import { send } from '@actual-app/core/platform/client/connection';
 import { format as monthUtilFormat } from '@actual-app/core/shared/months';
@@ -13,6 +11,10 @@ import { getScheduledAmount } from '@actual-app/core/shared/schedules';
 import type { ScheduleEntity } from '@actual-app/core/types/models';
 
 import { Search } from '#components/common/Search';
+import {
+  mobileSearchBarStyle,
+  mobileSearchInputStyle,
+} from '#components/mobile/utils';
 import { MobilePageHeader, Page } from '#components/Page';
 import { useAccounts } from '#hooks/useAccounts';
 import { useDateFormat } from '#hooks/useDateFormat';
@@ -120,38 +122,20 @@ export function MobileSchedulesPage() {
     <Page
       header={
         <MobilePageHeader
-          title={
-            <Text style={{ ...styles.underlinedText, fontSize: 16 }}>
-              <Trans>Schedules</Trans>
-            </Text>
-          }
+          title={<Trans>Schedules</Trans>}
           rightContent={<AddScheduleButton />}
         />
       }
       padding={0}
     >
-      <View
-        style={{
-          flexDirection: 'row',
-          alignItems: 'center',
-          backgroundColor: theme.mobilePageBackground,
-          padding: 10,
-          width: '100%',
-          borderBottomWidth: 2,
-          borderBottomStyle: 'solid',
-          borderBottomColor: theme.tableBorder,
-        }}
-      >
+      <View style={mobileSearchBarStyle}>
         <Search
           placeholder={t('Filter schedules…')}
           value={filter}
           onChange={setFilter}
           width="100%"
           height={styles.mobileMinHeight}
-          style={{
-            backgroundColor: theme.tableBackground,
-            borderColor: theme.formInputBorder,
-          }}
+          style={mobileSearchInputStyle}
         />
       </View>
       <SchedulesList

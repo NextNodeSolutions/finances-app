@@ -16,15 +16,14 @@ import { SvgLogo } from '@actual-app/components/icons/logo';
 import {
   SvgArrowThinLeft,
   SvgArrowThinRight,
+  SvgCheveronDown,
   SvgCheveronRight,
 } from '@actual-app/components/icons/v1';
-import {
-  SvgArrowButtonDown1,
-  SvgCalendar,
-} from '@actual-app/components/icons/v2';
-import { styles } from '@actual-app/components/styles';
+import { SvgCalendar } from '@actual-app/components/icons/v2';
+import type { CSSProperties } from '@actual-app/components/styles';
 import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
+import { radius } from '@actual-app/components/tokens';
 import { View } from '@actual-app/components/view';
 import { send } from '@actual-app/core/platform/client/connection';
 import * as monthUtils from '@actual-app/core/shared/months';
@@ -45,6 +44,12 @@ import {
 import { closeBudget } from '#budgetfiles/budgetfilesSlice';
 import { prewarmMonth } from '#components/budget/util';
 import { FinancialText } from '#components/FinancialText';
+import {
+  MOBILE_HEADER_TITLE_CHEVRON_SIZE,
+  mobileHeaderIconButtonStyle,
+  mobileHeaderTitleChevronStyle,
+  mobileHeaderTitleStyle,
+} from '#components/mobile/utils';
 import { MobilePageHeader, Page } from '#components/Page';
 import { SyncRefresh } from '#components/SyncRefresh';
 import { useCategories } from '#hooks/useCategories';
@@ -65,7 +70,7 @@ import { uncategorizedTransactions } from '#queries';
 import { useDispatch } from '#redux';
 import { envelopeBudget } from '#spreadsheet/bindings';
 
-import { BudgetTable, PILL_STYLE } from './BudgetTable';
+import { BudgetTable } from './BudgetTable';
 
 function isBudgetType(input?: string): input is 'envelope' | 'tracking' {
   return ['envelope', 'tracking'].includes(input);
@@ -541,19 +546,24 @@ export function BudgetPage() {
           leftContent={
             <Button
               variant="bare"
-              style={{ margin: 10 }}
+              style={{
+                ...mobileHeaderIconButtonStyle,
+                width: 'auto',
+                padding: '0 6px',
+                gap: 2,
+              }}
               onPress={onOpenBudgetPageMenu}
               aria-label={t('Budget page menu')}
             >
               <SvgLogo
                 style={{ color: theme.mobileHeaderText }}
-                width="20"
-                height="20"
+                width="18"
+                height="18"
               />
               <SvgCheveronRight
                 style={{ flexShrink: 0, color: theme.mobileHeaderTextSubdued }}
-                width="14"
-                height="14"
+                width="12"
+                height="12"
               />
             </Button>
           }
@@ -563,9 +573,9 @@ export function BudgetPage() {
                 variant="bare"
                 onPress={onCurrentMonth}
                 aria-label={t('Today')}
-                style={{ margin: 10 }}
+                style={mobileHeaderIconButtonStyle}
               >
-                <SvgCalendar width={20} height={20} />
+                <SvgCalendar width={18} height={18} />
               </Button>
             )
           }
@@ -623,24 +633,68 @@ function Banners({ month, onBudgetAction }) {
   );
 }
 
+// Attention banners use the signal family (overspending, overbudgeting,
+// uncategorized money); informational ones stay in the quiet notice tint.
+const BANNER_TONES = {
+  critical: {
+    backgroundColor: theme.signalSubtle,
+    borderColor: theme.warningBorder,
+    markColor: theme.signal,
+  },
+  warning: {
+    backgroundColor: theme.warningBackground,
+    borderColor: theme.warningBorder,
+    markColor: theme.signal,
+  },
+  info: {
+    backgroundColor: theme.noticeBackground,
+    borderColor: theme.noticeBorder,
+    markColor: theme.noticeText,
+  },
+};
+
+const BANNER_ACTION_STYLE: CSSProperties = {
+  flexShrink: 0,
+  marginLeft: 10,
+  minHeight: 30,
+  padding: '0 14px',
+  borderRadius: radius.md,
+  fontSize: 12.5,
+  fontWeight: 500,
+  color: theme.buttonNormalText,
+};
+
 function Banner({ type = 'info', children }) {
+  const tone = BANNER_TONES[type] ?? BANNER_TONES.info;
   return (
     <Card
       style={{
-        height: 50,
-        marginTop: 10,
-        marginBottom: 10,
-        padding: 10,
+        minHeight: 48,
+        margin: '10px 8px 0',
+        padding: '8px 8px 8px 12px',
         justifyContent: 'center',
-        backgroundColor:
-          type === 'critical'
-            ? theme.errorBackground
-            : type === 'warning'
-              ? theme.warningBackground
-              : theme.noticeBackground,
+        borderRadius: radius.lg,
+        border: `1px solid ${tone.borderColor}`,
+        boxShadow: 'none',
+        backgroundColor: tone.backgroundColor,
+        color: theme.pageText,
+        fontSize: 13,
+        lineHeight: '18px',
       }}
     >
-      {children}
+      <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
+        <View
+          aria-hidden
+          style={{
+            width: 6,
+            height: 6,
+            borderRadius: radius.pill,
+            flexShrink: 0,
+            backgroundColor: tone.markColor,
+          }}
+        />
+        <View style={{ flex: 1 }}>{children}</View>
+      </View>
     </Card>
   );
 }
@@ -697,7 +751,7 @@ function UncategorizedTransactionsBanner(props) {
           </Text>
           <Button
             onPress={() => navigate('/categories/uncategorized')}
-            style={PILL_STYLE}
+            style={BANNER_ACTION_STYLE}
           >
             <Text>
               <Trans>Categorize</Trans>
@@ -772,21 +826,13 @@ function OverbudgetedBanner({ month, onBudgetAction, ...props }) {
             justifyContent: 'space-between',
           }}
         >
-          <View>
-            <View
-              style={{
-                flexDirection: 'row',
-                alignItems: 'center',
-                gap: 10,
-              }}
-            >
-              <SvgArrowButtonDown1 style={{ width: 15, height: 15 }} />
-              <Text>
-                <Trans>You have budgeted more than your available funds</Trans>
-              </Text>
-            </View>
-          </View>
-          <Button onPress={openCoverOverbudgetedModal} style={PILL_STYLE}>
+          <Text>
+            <Trans>You have budgeted more than your available funds</Trans>
+          </Text>
+          <Button
+            onPress={openCoverOverbudgetedModal}
+            style={BANNER_ACTION_STYLE}
+          >
             <Trans>Cover</Trans>
           </Button>
         </View>
@@ -938,7 +984,10 @@ function OverspendingBanner({ month, onBudgetAction, budgetType, ...props }) {
               )
             </Trans>
           </Text>
-          <Button onPress={onOpenCategorySelectionModal} style={PILL_STYLE}>
+          <Button
+            onPress={onOpenCategorySelectionModal}
+            style={BANNER_ACTION_STYLE}
+          >
             {budgetType === 'envelope' && <Trans>Cover</Trans>}
             {budgetType === 'tracking' && <Trans>View</Trans>}
           </Button>
@@ -961,8 +1010,9 @@ function MonthSelector({
   const nextEnabled = month < monthUtils.subMonths(monthBounds.end, 1);
 
   const arrowButtonStyle = {
-    padding: 10,
-    margin: 2,
+    ...mobileHeaderIconButtonStyle,
+    margin: 0,
+    color: theme.mobileHeaderTextSubdued,
   };
 
   return (
@@ -979,34 +1029,39 @@ function MonthSelector({
         variant="bare"
         isDisabled={!prevEnabled}
         onPress={onPrevMonth}
-        style={{ ...arrowButtonStyle, opacity: prevEnabled ? 1 : 0.6 }}
+        style={{ ...arrowButtonStyle, opacity: prevEnabled ? 1 : 0.4 }}
       >
-        <SvgArrowThinLeft width="15" height="15" />
+        <SvgArrowThinLeft width="14" height="14" />
       </Button>
       <Button
         variant="bare"
         style={{
           textAlign: 'center',
-          fontSize: 16,
-          fontWeight: 500,
+          padding: '4px 8px',
+          borderRadius: 8,
         }}
         onPress={() => {
           onOpenMonthMenu?.(month);
         }}
         data-month={month}
       >
-        <Text style={styles.underlinedText}>
+        <Text style={{ ...mobileHeaderTitleStyle, whiteSpace: 'nowrap' }}>
           {monthUtils.format(month, "MMMM ''yy", locale)}
         </Text>
+        <SvgCheveronDown
+          width={MOBILE_HEADER_TITLE_CHEVRON_SIZE}
+          height={MOBILE_HEADER_TITLE_CHEVRON_SIZE}
+          style={mobileHeaderTitleChevronStyle}
+        />
       </Button>
       <Button
         aria-label={t('Next month')}
         variant="bare"
         isDisabled={!nextEnabled}
         onPress={onNextMonth}
-        style={{ ...arrowButtonStyle, opacity: nextEnabled ? 1 : 0.6 }}
+        style={{ ...arrowButtonStyle, opacity: nextEnabled ? 1 : 0.4 }}
       >
-        <SvgArrowThinRight width="15" height="15" />
+        <SvgArrowThinRight width="14" height="14" />
       </Button>
     </View>
   );
