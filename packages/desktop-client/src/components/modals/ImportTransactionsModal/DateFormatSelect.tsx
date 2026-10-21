@@ -1,13 +1,13 @@
 import React from 'react';
-import { useTranslation } from 'react-i18next';
+import { Trans } from 'react-i18next';
 
 import { Select } from '@actual-app/components/select';
-import { View } from '@actual-app/components/view';
 
-import { SectionLabel } from '#components/forms';
-
+import { OptionField } from './OptionField';
 import { dateFormats } from './utils';
 import type { DateFormat, FieldMapping, ImportTransaction } from './utils';
+
+const SELECT_WIDTH = 140;
 
 type DateFormatSelectProps = {
   transactions: ImportTransaction[];
@@ -22,7 +22,6 @@ export function DateFormatSelect({
   parseDateFormat,
   onChange,
 }: DateFormatSelectProps) {
-  const { t } = useTranslation();
   // We don't actually care about the delimiter, but we try to render
   // it based on the data we have so far. Look in a transaction and
   // try to figure out what delimiter the date is using, and default
@@ -35,16 +34,20 @@ export function DateFormatSelect({
   }
 
   return (
-    <View style={{ width: 120 }}>
-      <SectionLabel title={t('Date format')} />
+    <OptionField
+      htmlFor="date-format-select"
+      label={<Trans>Date format</Trans>}
+    >
       <Select
+        id="date-format-select"
         options={dateFormats.map(f => [
           f.format,
           f.label.replace(/ /g, delimiter),
         ])}
         value={parseDateFormat || ''}
         onChange={onChange}
+        style={{ width: SELECT_WIDTH }}
       />
-    </View>
+    </OptionField>
   );
 }
