@@ -127,7 +127,8 @@ export function CustomReport() {
   const { data: report, isPending } = useCustomReport(params.id);
   const [budgetType = 'envelope'] = useSyncedPref('budgetType');
 
-  if (isPending) {
+  // An unsaved report has no id, so its query never runs and stays pending.
+  if (params.id && isPending) {
     return <LoadingIndicator />;
   }
 
