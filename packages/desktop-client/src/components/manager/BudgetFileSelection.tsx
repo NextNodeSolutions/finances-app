@@ -25,7 +25,7 @@ import { Popover } from '@actual-app/components/popover';
 import { styles } from '@actual-app/components/styles';
 import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
-import { tokens } from '@actual-app/components/tokens';
+import { motion, radius, tokens } from '@actual-app/components/tokens';
 import { Tooltip } from '@actual-app/components/tooltip';
 import { View } from '@actual-app/components/view';
 import {
@@ -56,6 +56,25 @@ import { useSyncServerStatus } from '#hooks/useSyncServerStatus';
 import { pushModal } from '#modals/modalsSlice';
 import { useDispatch, useSelector } from '#redux';
 import { getUserData } from '#users/usersSlice';
+
+import { ManagerCard } from './ManagerCard';
+
+const ICON_BUTTON_SIZE = 30;
+// The files sheet: one inset for the title, the file names and the actions,
+// a slightly smaller one on the right where icon buttons carry their own
+// padding, and rows tall enough for a name over its status.
+const SHEET_WIDTH = 520;
+const SHEET_INSET = 32;
+const SHEET_ICON_INSET = 24;
+const FILE_ROW_MIN_HEIGHT = 52;
+
+const iconButtonStyle = {
+  width: ICON_BUTTON_SIZE,
+  height: ICON_BUTTON_SIZE,
+  padding: 0,
+  borderRadius: radius.md,
+  color: theme.pageTextLight,
+};
 
 function getFileDescription(file: File, t: (key: string) => string) {
   if (file.state === 'unknown') {
@@ -134,11 +153,12 @@ function BudgetFileMenuButton({
         ref={triggerRef}
         variant="bare"
         aria-label={t('Menu')}
+        style={iconButtonStyle}
         onPress={() => {
           setMenuOpen(true);
         }}
       >
-        <SvgDotsHorizontalTriple style={{ width: 16, height: 16 }} />
+        <SvgDotsHorizontalTriple style={{ width: 14, height: 14 }} />
       </Button>
 
       <Popover
@@ -216,50 +236,48 @@ function BudgetFileState({ file, currentUserId }: BudgetFileStateProps) {
   const showOwnerContent = multiuserEnabled && file.owner !== currentUserId;
 
   return (
-    <View style={{ width: '100%' }}>
+    <View style={{ width: '100%', gap: 4, marginTop: 2 }}>
       <View
         style={{
-          color,
+          color: color ?? theme.pageTextLight,
           alignItems: 'center',
           flexDirection: 'row',
-          marginTop: 8,
+          gap: 6,
+          fontSize: 12.5,
         }}
       >
         <Icon
           style={{
-            width: 18,
-            height: 18,
+            width: 13,
+            height: 13,
             color: 'currentColor',
           }}
         />
 
-        <Text style={{ marginLeft: 5 }}>{status}</Text>
+        <Text>{status}</Text>
       </View>
 
-      <View style={{ paddingTop: 10, flexDirection: 'row', width: '100%' }}>
-        {showOwnerContent && (
-          <View style={{ flexDirection: 'row' }}>
-            <Text
-              style={{
-                ...styles.altMenuHeaderText,
-                ...styles.verySmallText,
-                color: theme.pageTextLight,
-              }}
-            >
-              <Trans>Owner:</Trans>
-            </Text>
-            <Text
-              size="small"
-              style={{
-                color: theme.pageTextLight,
-                paddingLeft: 10,
-              }}
-            >
-              {ownerName}
-            </Text>
-          </View>
-        )}
-      </View>
+      {showOwnerContent && (
+        <View style={{ flexDirection: 'row', gap: 6 }}>
+          <Text
+            style={{
+              ...styles.verySmallText,
+              fontWeight: 500,
+              color: theme.pageTextLight,
+            }}
+          >
+            <Trans>Owner:</Trans>
+          </Text>
+          <Text
+            size="small"
+            style={{
+              color: theme.pageTextLight,
+            }}
+          >
+            {ownerName}
+          </Text>
+        </View>
+      )}
     </View>
   );
 }
@@ -307,21 +325,27 @@ function BudgetFileListItem({
     <GridListItem
       textValue={file.name}
       onAction={() => _onSelect(file)}
+      className={css({
+        outline: 'none',
+        borderTop: `1px solid ${theme.hairlineSubtle}`,
+        '&[data-focus-visible]': {
+          boxShadow: `inset 0 0 0 2px ${theme.focusRing}`,
+        },
+      })}
       {...props}
     >
       <View
         className={css({
-          ...styles.shadow,
           flexDirection: 'row',
           justifyContent: 'space-between',
           alignItems: 'center',
-          margin: '5px 10px',
-          padding: 15,
+          gap: 12,
+          minHeight: FILE_ROW_MIN_HEIGHT,
+          padding: `0 ${SHEET_ICON_INSET}px 0 ${SHEET_INSET}px`,
           cursor: 'pointer',
-          borderRadius: 6,
-          backgroundColor: theme.buttonNormalBackground,
+          transition: `background-color ${motion.base} ${motion.ease}`,
           '&:hover': {
-            backgroundColor: theme.buttonNormalBackgroundHover,
+            backgroundColor: theme.tableRowBackgroundHover,
           },
         })}
       >
@@ -330,7 +354,16 @@ function BudgetFileListItem({
           style={{ alignItems: 'flex-start', width: '100%' }}
         >
           <View style={{ flexDirection: 'row', width: '100%' }}>
-            <Text style={{ fontSize: 16, fontWeight: 700 }}>{file.name}</Text>
+            <Text
+              style={{
+                fontSize: 14,
+                fontWeight: 600,
+                letterSpacing: '-0.005em',
+                color: theme.pageText,
+              }}
+            >
+              {file.name}
+            </Text>
             {multiuserEnabled && 'cloudFileId' in file && (
               <UserAccessForFile
                 fileId={file.cloudFileId}
@@ -400,12 +433,12 @@ function BudgetFileList({
         overflow: 'auto',
         display: 'flex',
         flexDirection: 'column',
-        gap: 8,
       }}
       renderEmptyState={() => (
         <Text
           style={{
-            ...styles.mediumText,
+            fontSize: 13.5,
+            padding: '24px 0 16px',
             textAlign: 'center',
             color: theme.pageTextSubdued,
           }}
@@ -455,10 +488,10 @@ function RefreshButton({ style, onRefresh }: RefreshButtonProps) {
     <Button
       variant="bare"
       aria-label={t('Refresh')}
-      style={{ padding: 10, ...style }}
+      style={{ ...iconButtonStyle, ...style }}
       onPress={_onRefresh}
     >
-      <Icon style={{ width: 18, height: 18 }} />
+      <Icon style={{ width: 15, height: 15 }} />
     </Button>
   );
 }
@@ -478,9 +511,9 @@ function SettingsButton({ onOpenSettings }: SettingsButtonProps) {
         onPress={() => {
           onOpenSettings();
         }}
-        style={{ padding: 10 }}
+        style={iconButtonStyle}
       >
-        <SvgCog style={{ width: 18, height: 18 }} />
+        <SvgCog style={{ width: 15, height: 15 }} />
       </Button>
     </View>
   );
@@ -502,12 +535,15 @@ function BudgetFileSelectionHeader({
       style={{
         flexDirection: 'row',
         justifyContent: 'space-between',
-        margin: 20,
+        alignItems: 'center',
+        padding: `${SHEET_INSET}px ${SHEET_ICON_INSET}px 16px ${SHEET_INSET}px`,
       }}
     >
       <Text
         style={{
-          ...styles.veryLargeText,
+          ...styles.display,
+          fontSize: 28,
+          lineHeight: '34px',
         }}
       >
         <Trans>Files</Trans>
@@ -516,7 +552,7 @@ function BudgetFileSelectionHeader({
         <View
           style={{
             flexDirection: 'row',
-            gap: '0.2rem',
+            gap: 2,
           }}
         >
           {onRefresh && <RefreshButton onRefresh={onRefresh} />}
@@ -612,24 +648,8 @@ export function BudgetFileSelection({
     }
   };
 
-  return (
-    <View
-      style={{
-        maxHeight: '100%',
-        flex: 1,
-        justifyContent: 'center',
-        ...(quickSwitchMode
-          ? {
-              marginTop: 20,
-              width: '100vw',
-            }
-          : { marginBottom: 20 }),
-        [`@media (min-width: ${tokens.breakpoint_small})`]: {
-          maxWidth: tokens.breakpoint_small,
-          width: '100%',
-        },
-      }}
-    >
+  const fileList = (
+    <>
       {showHeader && (
         <BudgetFileSelectionHeader
           quickSwitchMode={quickSwitchMode}
@@ -673,15 +693,15 @@ export function BudgetFileSelection({
             flexDirection: 'row',
             justifyContent: 'flex-end',
             alignItems: 'stretch',
-            margin: 10,
-            minHeight: 39,
+            gap: 8,
+            padding: `16px ${SHEET_INSET}px`,
+            borderTop: `1px solid ${theme.hairlineSubtle}`,
           }}
         >
           <Button
             variant="bare"
             style={{
               ...narrowButtonStyle,
-              marginLeft: 10,
               color: theme.pageTextLight,
             }}
             onPress={() => {
@@ -694,27 +714,50 @@ export function BudgetFileSelection({
           <Button
             variant="primary"
             onPress={() => onCreate()}
-            style={{
-              ...narrowButtonStyle,
-              marginLeft: 10,
-            }}
+            style={narrowButtonStyle}
           >
             <Trans>Create new file</Trans>
           </Button>
 
           {isNonProductionEnvironment() && (
             <Button
-              variant="primary"
+              variant="normal"
               onPress={() => onCreate({ testMode: true })}
-              style={{
-                ...narrowButtonStyle,
-                marginLeft: 10,
-              }}
+              style={narrowButtonStyle}
             >
               <Trans>Create test file</Trans>
             </Button>
           )}
         </View>
+      )}
+    </>
+  );
+
+  return (
+    <View
+      style={{
+        maxHeight: '100%',
+        flex: 1,
+        justifyContent: 'center',
+        ...(quickSwitchMode
+          ? {
+              marginTop: 20,
+              width: '100vw',
+            }
+          : { marginBottom: 20 }),
+        [`@media (min-width: ${tokens.breakpoint_small})`]: {
+          maxWidth: SHEET_WIDTH,
+          width: '100%',
+        },
+      }}
+    >
+      {quickSwitchMode ? (
+        fileList
+      ) : (
+        // The list scrolls inside the sheet; header and actions stay put.
+        <ManagerCard padding={0} style={{ overflowY: 'hidden' }}>
+          {fileList}
+        </ManagerCard>
       )}
     </View>
   );

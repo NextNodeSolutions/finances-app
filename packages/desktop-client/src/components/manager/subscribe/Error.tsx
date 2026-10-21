@@ -6,9 +6,11 @@ import { useLocation } from 'react-router';
 import { Button } from '@actual-app/components/button';
 import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
-import { View } from '@actual-app/components/view';
 
+import { ManagerCard } from '#components/manager/ManagerCard';
 import { useNavigate } from '#hooks/useNavigate';
+
+import { bodyTextStyle } from './common';
 
 function getErrorMessage(reason) {
   switch (reason) {
@@ -29,19 +31,13 @@ export function Error() {
   }
 
   return (
-    <View style={{ alignItems: 'center', color: theme.pageText }}>
-      <Text
-        style={{
-          fontSize: 16,
-          color: theme.pageTextDark,
-          lineHeight: 1.4,
-        }}
-      >
+    <ManagerCard style={{ maxWidth: 450, alignItems: 'center' }}>
+      <Text style={{ ...bodyTextStyle, color: theme.pageText }}>
         {getErrorMessage(error)}
       </Text>
       <Button onPress={onTryAgain} style={{ marginTop: 20 }}>
         <Trans>Try again</Trans>
       </Button>
-    </View>
+    </ManagerCard>
   );
 }
