@@ -5,6 +5,7 @@ import type { AccountEntity } from '@actual-app/core/types/models';
 import { useSyncAndDownloadMutation } from '#accounts';
 import { useAccounts } from '#hooks/useAccounts';
 import { useLocalPref } from '#hooks/useLocalPref';
+import { useOptionalFeature } from '#hooks/useOptionalFeature';
 import { useSyncedPref } from '#hooks/useSyncedPref';
 import { useSyncServerStatus } from '#hooks/useSyncServerStatus';
 
@@ -33,6 +34,8 @@ export function parseBankSyncInterval(interval: string | undefined) {
 }
 
 type IsAutomaticSyncDueArgs = {
+  /** The bank sync feature is turned on for this budget. */
+  isBankSyncOn: boolean;
   now: number;
   intervalMs: number;
   /** Epoch ms of the last automatic sync attempted by this device. */
@@ -58,13 +61,14 @@ type IsAutomaticSyncDueArgs = {
  * of requests made to the bank.
  */
 export function isAutomaticSyncDue({
+  isBankSyncOn,
   now,
   intervalMs,
   lastAutomaticRun,
   accounts,
   isServerOnline,
 }: IsAutomaticSyncDueArgs) {
-  if (intervalMs <= 0) {
+  if (!isBankSyncOn || intervalMs <= 0) {
     return false;
   }
 
@@ -110,6 +114,7 @@ export function useAutomaticBankSync() {
   const { data: accounts = [] } = useAccounts();
   const syncAndDownload = useSyncAndDownloadMutation();
   const serverStatus = useSyncServerStatus();
+  const [isBankSyncOn] = useOptionalFeature('bankSync');
 
   const intervalMs = parseBankSyncInterval(interval);
 
@@ -118,6 +123,7 @@ export function useAutomaticBankSync() {
 
     if (
       !isAutomaticSyncDue({
+        isBankSyncOn,
         now,
         intervalMs,
         lastAutomaticRun,
@@ -133,7 +139,8 @@ export function useAutomaticBankSync() {
   });
 
   useEffect(() => {
-    if (intervalMs <= 0) {
+    // No timer at all while the feature is off.
+    if (!isBankSyncOn || intervalMs <= 0) {
       return;
     }
 
@@ -141,5 +148,5 @@ export function useAutomaticBankSync() {
 
     const timer = setInterval(maybeSync, CHECK_INTERVAL_MS);
     return () => clearInterval(timer);
-  }, [intervalMs]);
+  }, [isBankSyncOn, intervalMs]);
 }

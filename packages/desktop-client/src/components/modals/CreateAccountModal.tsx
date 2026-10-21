@@ -13,6 +13,7 @@ import { useBuiltInBankSyncProviders } from '#components/banksync/useBuiltInBank
 import { Link } from '#components/common/Link';
 import { Modal, ModalCloseButton, ModalHeader } from '#components/common/Modal';
 import { useNavigate } from '#hooks/useNavigate';
+import { useOptionalFeature } from '#hooks/useOptionalFeature';
 import { pushModal, replaceModal } from '#modals/modalsSlice';
 import type { Modal as ModalType } from '#modals/modalsSlice';
 import { useDispatch } from '#redux';
@@ -30,13 +31,15 @@ export function CreateAccountModal({
   const navigate = useNavigate();
   const { providers, syncServerStatus, permissionWarning } =
     useBuiltInBankSyncProviders({ upgradingAccountId });
+  const [isBankSyncOn] = useOptionalFeature('bankSync');
 
   const onCreateLocalAccount = () => {
     dispatch(pushModal({ modal: { name: 'add-local-account' } }));
   };
 
   const isUsingServer = syncServerStatus !== 'no-server';
-  const shouldSkipToLocalAccount = !isUsingServer && upgradingAccountId == null;
+  const shouldSkipToLocalAccount =
+    (!isUsingServer || !isBankSyncOn) && upgradingAccountId == null;
 
   useLayoutEffect(() => {
     if (shouldSkipToLocalAccount) {

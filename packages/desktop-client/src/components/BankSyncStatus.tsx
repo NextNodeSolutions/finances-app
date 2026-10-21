@@ -7,11 +7,13 @@ import { theme } from '@actual-app/components/theme';
 import { elevation, radius } from '@actual-app/components/tokens';
 import { View } from '@actual-app/components/view';
 
+import { useOptionalFeature } from '#hooks/useOptionalFeature';
 import { useSelector } from '#redux';
 
 import { AnimatedRefresh } from './AnimatedRefresh';
 
 export function BankSyncStatus() {
+  const [isBankSyncOn] = useOptionalFeature('bankSync');
   const accountsSyncing = useSelector(state => state.account.accountsSyncing);
   const accountsSyncingCount = accountsSyncing.length;
   const count = accountsSyncingCount;
@@ -24,6 +26,10 @@ export function BankSyncStatus() {
       leave: { opacity: 0 },
     },
   );
+
+  if (!isBankSyncOn) {
+    return null;
+  }
 
   return (
     <View
