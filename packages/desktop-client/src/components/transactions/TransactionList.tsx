@@ -31,12 +31,14 @@ import type { TableHandleRef } from '#components/table';
 import { isValidBoundaryDrop } from '#hooks/useDragDrop';
 import type { DropPosition } from '#hooks/useDragDrop';
 import { useNavigate } from '#hooks/useNavigate';
+import { useOptionalFeature } from '#hooks/useOptionalFeature';
 import { useSyncedPref } from '#hooks/useSyncedPref';
 import { pushModal } from '#modals/modalsSlice';
 import { addNotification } from '#notifications/notificationsSlice';
 import { useDispatch } from '#redux';
 
 import { applyRulesToTransaction } from './applyRulesToTransaction';
+import { useTransactionPanels } from './panels/useTransactionPanels';
 import type { ClearedFieldsByTransaction } from './table/utils';
 import { TransactionTable } from './TransactionsTable';
 import type { TransactionTableProps } from './TransactionsTable';
@@ -321,8 +323,14 @@ export function TransactionList({
     [dispatch],
   );
 
+  const [isTagsOn] = useOptionalFeature('tags');
+  const { openDetail } = useTransactionPanels();
   const onNotesTagClick = useCallback(
     (tag: string) => {
+      // With tags off, notes render as plain text and a tag filters nothing.
+      if (!isTagsOn) {
+        return;
+      }
       onApplyFilter({
         field: 'notes',
         op: 'hasTags',
@@ -330,7 +338,7 @@ export function TransactionList({
         type: 'string',
       });
     },
-    [onApplyFilter],
+    [isTagsOn, onApplyFilter],
   );
 
   const onReorder = useCallback(
@@ -527,6 +535,7 @@ export function TransactionList({
         onNavigateToTransferAccount={onNavigateToTransferAccount}
         onNavigateToSchedule={onNavigateToSchedule}
         onNotesTagClick={onNotesTagClick}
+        onOpenDetails={openDetail}
         onSort={onSort}
         sortField={sortField}
         ascDesc={ascDesc}

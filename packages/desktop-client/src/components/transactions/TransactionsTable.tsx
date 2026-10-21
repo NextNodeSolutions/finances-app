@@ -145,6 +145,9 @@ import {
   isFutureTransaction,
 } from '#util/schedule-actions';
 
+import { getRegisterRows, isSectionRow } from './registerRows';
+import type { RegisterRow } from './registerRows';
+import { RegisterSectionRow } from './RegisterSectionRow';
 import {
   isTransactionTableColumnAvailableInChildRows,
   isTransactionTableColumnDisplayOnly,
@@ -166,7 +169,12 @@ import type {
   TransactionEditFunction,
   TransactionUpdateFunction,
 } from './table/utils';
+import { TransactionDetailsButton } from './TransactionDetailsButton';
 import { useTransactionRowContextActions } from './useTransactionRowContextActions';
+
+// The trailing cell that holds a row's `Transaction details` icon; the
+// header pads by the same width so the columns stay aligned.
+const DETAILS_CELL_WIDTH = 28;
 
 type AmountColumnWidths = {
   amount: number; // Applies to both debit and credit columns
@@ -369,7 +377,7 @@ const TransactionHeader = memo(
           zIndex: 200,
           color: theme.tableHeaderText,
           backgroundColor: theme.tableHeaderBackground,
-          paddingRight: `${5 + (scrollWidth ?? 0)}px`,
+          paddingRight: `${DETAILS_CELL_WIDTH + (scrollWidth ?? 0)}px`,
           borderBottom: '1px solid ' + theme.hairline,
         }}
         data-testid="transaction-table-header"
@@ -1077,6 +1085,8 @@ type TransactionProps = {
   onNavigateToTransferAccount: (id: AccountEntity['id']) => void;
   onNavigateToSchedule: (id: ScheduleEntity['id']) => void;
   onNotesTagClick: (tag: string) => void;
+  /** Opens a row's detail panel; rows show no details icon without it. */
+  onOpenDetails?: (id: TransactionEntity['id']) => void;
   splitError?: ReactNode;
   listContainerRef?: RefObject<HTMLDivElement>;
   showSelection?: boolean;
@@ -1137,6 +1147,7 @@ const Transaction = memo(function Transaction({
   onNavigateToTransferAccount,
   onNavigateToSchedule,
   onNotesTagClick,
+  onOpenDetails,
   splitError,
   listContainerRef,
   showSelection,
@@ -1612,6 +1623,7 @@ const Transaction = memo(function Transaction({
     onCreateRule: ids => onCreateRule?.(ids),
     onScheduleAction: (name, ids) => onScheduleAction?.(name, ids),
     onMakeAsNonSplitTransactions: ids => onMakeAsNonSplitTransactions?.(ids),
+    onOpenDetails,
   });
 
   // For child transactions the date/account cells render as blank
@@ -2201,7 +2213,7 @@ const Transaction = memo(function Transaction({
           '& .hover-visible': {
             opacity: 0,
           },
-          ':hover .hover-visible': {
+          ':hover .hover-visible, & .hover-visible[data-focus-visible]': {
             opacity: 1,
           },
           ...(highlighted || selected
@@ -2237,7 +2249,18 @@ const Transaction = memo(function Transaction({
         {selectionCell}
         {columns.slice(selectionCellIndex).map(renderColumnCell)}
 
-        <Cell width={5} />
+        <Field
+          width={DETAILS_CELL_WIDTH}
+          truncate={false}
+          contentStyle={{ padding: 0, alignItems: 'center' }}
+        >
+          {onOpenDetails && (
+            <TransactionDetailsButton
+              transaction={originalTransaction}
+              onOpenDetails={onOpenDetails}
+            />
+          )}
+        </Field>
       </Row>
       <DragPreview ref={previewRef}>
         {() => (
@@ -2744,6 +2767,8 @@ type TransactionTableInnerProps = {
   onNavigateToTransferAccount: (id: AccountEntity['id']) => void;
   onNavigateToSchedule: (id: ScheduleEntity['id']) => void;
   onNotesTagClick: (tag: string) => void;
+  /** Opens a row's detail panel; rows show no details icon without it. */
+  onOpenDetails?: (id: TransactionEntity['id']) => void;
   sortField: string;
   ascDesc: 'asc' | 'desc';
   onCreateRule: (ids: RuleEntity['id'][]) => void;
@@ -2851,11 +2876,22 @@ function TransactionTableInner({
     props.balances,
   );
 
-  const renderRow: TableProps<TransactionEntity>['renderItem'] = ({
+  // UPCOMING / POSTED separators; selection and the navigator only ever
+  // see transactions.
+  const { rows, getTransactionIndex } = useMemo(
+    () => getRegisterRows(transactionsToRender),
+    [transactionsToRender],
+  );
+
+  const renderRow: TableProps<RegisterRow>['renderItem'] = ({
     item,
-    index,
+    index: rowIndex,
     editing,
   }) => {
+    if (isSectionRow(item)) {
+      return <RegisterSectionRow section={item.section} />;
+    }
+    const index = getTransactionIndex(rowIndex);
     const {
       transactions,
       selectedItems,
@@ -2972,6 +3008,7 @@ function TransactionTableInner({
         onNavigateToTransferAccount={onNavigateToTransferAccount}
         onNavigateToSchedule={onNavigateToSchedule}
         onNotesTagClick={onNotesTagClick}
+        onOpenDetails={props.onOpenDetails}
         splitError={
           hasSplitError && (
             <TransactionError
@@ -3078,7 +3115,7 @@ function TransactionTableInner({
           navigator={tableNavigator}
           ref={tableRef}
           listContainerRef={listContainerRef}
-          items={transactionsToRender}
+          items={rows}
           renderItem={renderRow}
           renderEmpty={renderEmpty}
           loadMore={props.loadMoreTransactions}
@@ -3155,6 +3192,8 @@ export type TransactionTableProps = {
   onNavigateToTransferAccount: (id: AccountEntity['id']) => void;
   onNavigateToSchedule: (id: ScheduleEntity['id']) => void;
   onNotesTagClick: (tag: string) => void;
+  /** Opens a row's detail panel; rows show no details icon without it. */
+  onOpenDetails?: (id: TransactionEntity['id']) => void;
   onSort: (field: string, ascDesc: 'asc' | 'desc') => void;
   sortField: string;
   ascDesc: 'asc' | 'desc';

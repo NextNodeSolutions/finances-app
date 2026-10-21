@@ -26,7 +26,7 @@ import { AutoSizer } from 'react-virtualized-auto-sizer';
 import { Button } from '@actual-app/components/button';
 import { AnimatedLoading } from '@actual-app/components/icons/AnimatedLoading';
 import { SvgDelete, SvgExpandArrow } from '@actual-app/components/icons/v0';
-import { SvgCheckmark } from '@actual-app/components/icons/v1';
+import { SvgCheckmark, SvgCheveronDown } from '@actual-app/components/icons/v1';
 import { Input } from '@actual-app/components/input';
 import { Menu } from '@actual-app/components/menu';
 import type { MenuItem } from '@actual-app/components/menu';
@@ -860,6 +860,11 @@ type SelectedItemsButtonProps<Name extends string> = {
   name: ((count: number) => string) | string;
   items: MenuItem<Name>[];
   onSelect: (name: Name, items: string[]) => void;
+  /**
+   * `chip` (default) is the accent selection count; `menu` is a plain
+   * `Label ⌄` trigger for use inside a selection bar.
+   */
+  variant?: 'chip' | 'menu';
 };
 
 export function SelectedItemsButton<Name extends string>({
@@ -867,6 +872,7 @@ export function SelectedItemsButton<Name extends string>({
   name,
   items,
   onSelect,
+  variant = 'chip',
 }: SelectedItemsButtonProps<Name>) {
   const selectedItems = useSelectedItems();
   const [menuOpen, setMenuOpen] = useState(false);
@@ -884,16 +890,27 @@ export function SelectedItemsButton<Name extends string>({
       <Button
         ref={triggerRef}
         variant="bare"
-        className={selectionChipClassName}
+        className={
+          variant === 'menu' ? selectionMenuClassName : selectionChipClassName
+        }
         onPress={() => setMenuOpen(true)}
         data-testid={id + '-select-button'}
       >
-        <SvgExpandArrow
-          width={7}
-          height={7}
-          style={{ marginRight: 7, color: 'inherit', flexShrink: 0 }}
-        />
+        {variant === 'chip' && (
+          <SvgExpandArrow
+            width={7}
+            height={7}
+            style={{ marginRight: 7, color: 'inherit', flexShrink: 0 }}
+          />
+        )}
         {buttonLabel}
+        {variant === 'menu' && (
+          <SvgCheveronDown
+            width={10}
+            height={10}
+            style={{ marginLeft: 6, color: 'inherit', flexShrink: 0 }}
+          />
+        )}
       </Button>
 
       <Popover
@@ -935,16 +952,35 @@ const selectionChipClassName = css({
   },
 });
 
+// A quiet `Label ⌄` trigger among a selection bar's other actions.
+const selectionMenuClassName = css({
+  color: theme.menuItemText,
+  fontWeight: 500,
+  padding: '5px 10px',
+  borderRadius: radius.md,
+  transition: `background-color ${motion.base} ${motion.ease}`,
+  '&[data-hovered], &[data-pressed]': {
+    backgroundColor: theme.menuItemBackgroundHover,
+  },
+});
+
 const rowStyle: CSSProperties = {
   position: 'absolute',
   willChange: 'transform',
   width: '100%',
 };
 
-export type TableHandleRef<T extends TableItem = TableItem> = {
-  scrollTo: (id: T['id'], alignment?: string) => void;
+// The handle and the navigator only ever see item ids, so they are typed by
+// the id: tables whose rows share an id type (e.g. transactions and the
+// register's section rows) share one handle and one navigator.
+export type TableHandleRef<T extends TableItem = TableItem> = TableHandle<
+  T['id']
+>;
+
+type TableHandle<Id extends TableItem['id']> = {
+  scrollTo: (id: Id, alignment?: string) => void;
   scrollToTop: () => void;
-  getScrolledItem: () => T['id'];
+  getScrolledItem: () => Id;
   setRowAnimation: (flag) => void;
   edit(id: number, field: string, shouldScroll: boolean): void;
   anchor(): void;
@@ -987,7 +1023,7 @@ export type TableProps<T extends TableItem = TableItem> = {
   getItemKey?: (index: number) => T['id'];
   loadMore?: () => void;
   style?: CSSProperties;
-  navigator?: ReturnType<typeof useTableNavigator<T>>;
+  navigator?: TableNavigatorFor<T['id']>;
   listContainerRef?: RefObject<HTMLDivElement>;
   onScroll?: () => void;
   onKeyDown?: (e: KeyboardEvent) => void;
@@ -1274,15 +1310,17 @@ export const Table = forwardRef(
     );
   },
 ) as <T extends TableItem>(
-  props: TableProps<T> & { ref?: Ref<TableHandleRef<T>> },
+  props: TableProps<T> & { ref?: Ref<TableHandle<T['id']>> },
 ) => ReactElement;
 
 // @ts-expect-error fix me
 Table.displayName = 'Table';
 
-export type TableNavigator<T extends TableItem> = {
-  onEdit: (id: T['id'] | null, field?: string) => void;
-  editingId: T['id'];
+export type TableNavigator<T extends TableItem> = TableNavigatorFor<T['id']>;
+
+type TableNavigatorFor<Id extends TableItem['id']> = {
+  onEdit: (id: Id | null, field?: string) => void;
+  editingId: Id;
   focusedField: string;
   getNavigatorProps: (userProps: object) => object;
 };
