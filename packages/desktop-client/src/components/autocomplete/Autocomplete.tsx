@@ -10,10 +10,11 @@ import type {
 import { Button } from '@actual-app/components/button';
 import { useResponsive } from '@actual-app/components/hooks/useResponsive';
 import { SvgRemove } from '@actual-app/components/icons/v2';
-import { Input } from '@actual-app/components/input';
+import { focusedInputStyle, Input } from '@actual-app/components/input';
 import { Popover } from '@actual-app/components/popover';
 import { styles } from '@actual-app/components/styles';
 import { theme } from '@actual-app/components/theme';
+import { radius } from '@actual-app/components/tokens';
 import { View, viewStyles } from '@actual-app/components/view';
 import { getNormalisedString } from '@actual-app/core/shared/normalisation';
 import { css, cx } from '@emotion/css';
@@ -21,6 +22,8 @@ import Downshift from 'downshift';
 import type { StateChangeTypes } from 'downshift';
 
 import { useProperFocus } from '#hooks/useProperFocus';
+
+const POPOVER_MIN_WIDTH = 160;
 
 type CommonAutocompleteProps<T extends AutocompleteItem> = {
   focused?: boolean;
@@ -149,7 +152,7 @@ function defaultRenderItems<T extends AutocompleteItem>(
   highlightedIndex: number,
 ) {
   return (
-    <div>
+    <div style={{ padding: 4 }}>
       {items.map((item, index) => {
         const name = getItemName(item);
         return (
@@ -180,7 +183,8 @@ function defaultRenderItems<T extends AutocompleteItem>(
             // oxlint-disable-next-line jsx-a11y/prefer-tag-over-role
             role="button"
             className={css({
-              padding: 5,
+              padding: '5px 10px',
+              borderRadius: radius.sm,
               cursor: 'default',
               backgroundColor:
                 highlightedIndex === index
@@ -633,7 +637,7 @@ function SingleAutocomplete<T extends AutocompleteItem>({
               (embedded ? (
                 <View
                   ref={itemsViewRef}
-                  style={{ ...styles.darkScrollbar, marginTop: 5 }}
+                  style={{ ...styles.lightScrollbar, marginTop: 5 }}
                   data-testid="autocomplete"
                 >
                   {renderItems(
@@ -652,11 +656,13 @@ function SingleAutocomplete<T extends AutocompleteItem>({
                   onOpenChange={close}
                   isNonModal
                   style={{
-                    ...styles.darkScrollbar,
+                    ...styles.lightScrollbar,
                     ...styles.popover,
                     backgroundColor: theme.menuAutoCompleteBackground,
                     color: theme.menuAutoCompleteText,
-                    minWidth: 200,
+                    // Edges line up with the field; the floor only keeps
+                    // names legible when a column is squeezed.
+                    minWidth: POPOVER_MIN_WIDTH,
                     width: triggerRef.current?.clientWidth,
                   }}
                   data-testid="autocomplete"
@@ -691,9 +697,10 @@ function MultiItem({ name, onRemove }: MultiItemProps) {
         flexDirection: 'row',
         flexWrap: 'nowrap',
         backgroundColor: theme.pillBackgroundSelected,
-        padding: '2px 4px',
+        color: theme.pillTextSelected,
+        padding: '1px 2px 1px 8px',
         margin: '2px',
-        borderRadius: 4,
+        borderRadius: radius.sm,
       }}
     >
       <span
@@ -707,7 +714,11 @@ function MultiItem({ name, onRemove }: MultiItemProps) {
       >
         {name}
       </span>
-      <Button variant="bare" style={{ marginLeft: 1 }} onPress={onRemove}>
+      <Button
+        variant="bare"
+        style={{ marginLeft: 2, padding: 4, color: 'inherit' }}
+        onPress={onRemove}
+      >
         <SvgRemove style={{ width: 8, height: 8 }} />
       </Button>
     </View>
@@ -788,13 +799,10 @@ function MultiAutocomplete<T extends AutocompleteItem>({
             flexWrap: 'wrap',
             flexDirection: 'row',
             alignItems: 'center',
-            backgroundColor: theme.tableBackground,
-            borderRadius: 4,
+            backgroundColor: theme.formInputBackground,
+            borderRadius: radius.md,
             border: '1px solid ' + theme.formInputBorder,
-            ...(focused && {
-              border: '1px solid ' + theme.formInputBorderSelected,
-              boxShadow: '0 1px 1px ' + theme.formInputShadowSelected,
-            }),
+            ...(focused && focusedInputStyle),
           }}
         >
           {selectedItems.map((item, idx) => {
@@ -856,7 +864,9 @@ export function AutocompleteFooter({
     <View
       style={{
         flexShrink: 0,
-        ...(embedded ? { paddingTop: 5 } : { padding: 5 }),
+        ...(embedded
+          ? { paddingTop: 5 }
+          : { padding: 4, borderTop: '1px solid ' + theme.hairline }),
       }}
     >
       {children}

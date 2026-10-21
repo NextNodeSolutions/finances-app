@@ -36,6 +36,7 @@ import { Popover } from '@actual-app/components/popover';
 import { styles } from '@actual-app/components/styles';
 import type { CSSProperties } from '@actual-app/components/styles';
 import { theme } from '@actual-app/components/theme';
+import { radius } from '@actual-app/components/tokens';
 import { View } from '@actual-app/components/view';
 import {
   currentDate,
@@ -69,73 +70,124 @@ function fromCalendarDate(date: CalendarDate): Date {
   return new Date(date.year, date.month - 1, date.day);
 }
 
-const calendarShadow = '0 0px 4px rgba(0, 0, 0, .25)';
+type CalendarTitleProps = {
+  date: CalendarDate;
+  locale: string;
+};
 
+// The visible month and year in the locale's own order, with the year set
+// apart so it can take the mono label face.
+function CalendarTitle({ date, locale }: CalendarTitleProps) {
+  const parts = new Intl.DateTimeFormat(locale, {
+    month: 'long',
+    year: 'numeric',
+  }).formatToParts(fromCalendarDate(date));
+
+  return (
+    <>
+      {parts.map(part =>
+        part.type === 'year' ? (
+          <span key="year" className="calendar-header-year">
+            {part.value}
+          </span>
+        ) : (
+          part.value
+        ),
+      )}
+    </>
+  );
+}
+
+// The calendar is white paper: no tiles behind the days, ink for the
+// chosen day, a hairline ring for today. Its frame comes from the popover
+// (or from the embedding surface), so the calendar itself stays flat.
 const pickerStyles: CSSProperties = {
   '& .react-aria-Calendar': {
     color: theme.calendarText,
     background: theme.calendarBackground,
-    boxShadow: calendarShadow,
-    borderRadius: 4,
-    padding: 10,
+    borderRadius: styles.menuBorderRadius,
+    padding: 12,
   },
   '& .calendar-header': {
     display: 'flex',
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    marginBottom: 6,
+    marginBottom: 8,
     '& button': {
-      color: 'inherit',
+      color: theme.pageTextLight,
       background: 'none',
       border: 'none',
-      borderRadius: 4,
+      borderRadius: radius.sm,
       padding: 5,
       cursor: 'pointer',
       display: 'flex',
-      '&:hover': { backgroundColor: theme.calendarItemBackground },
+      '&:hover': {
+        backgroundColor: theme.buttonBareBackgroundHover,
+        color: theme.calendarText,
+      },
     },
   },
+  // Month engraved in the display serif with the year as a quiet mono
+  // label, like the budget's month headings.
   '& .calendar-header-title': {
-    fontWeight: 'bold',
-    fontSize: 14,
+    ...styles.display,
+    fontSize: 16,
+    lineHeight: '22px',
     margin: 0,
+    color: theme.calendarText,
     backgroundColor: theme.calendarBackground,
   },
+  '& .calendar-header-year': {
+    ...styles.monoLabel,
+    marginInline: 3,
+    color: theme.tableHeaderText,
+  },
   '& .react-aria-CalendarGrid': {
-    borderCollapse: 'collapse',
+    borderCollapse: 'separate',
+    borderSpacing: 2,
   },
   '& .react-aria-CalendarHeaderCell': {
-    color: theme.calendarItemText,
-    fontWeight: 'normal',
+    ...styles.monoLabel,
+    color: theme.tableHeaderText,
     textAlign: 'center',
-    padding: '2px 0',
+    padding: '0 0 4px',
   },
   '& .react-aria-CalendarCell': {
     width: 28,
     height: 28,
     lineHeight: '28px',
     textAlign: 'center',
+    fontSize: 12.5,
+    fontWeight: 500,
+    fontVariantNumeric: 'tabular-nums',
     cursor: 'pointer',
-    backgroundColor: theme.calendarItemBackground,
+    borderRadius: radius.sm,
     color: theme.calendarItemText,
 
+    '&[data-hovered]': {
+      backgroundColor: theme.buttonBareBackgroundHover,
+    },
     '&[data-outside-month]': {
-      opacity: 0.4,
+      color: theme.tableTextSubdued,
     },
     '&[data-today]': {
-      textDecoration: 'underline',
+      fontWeight: 600,
+      boxShadow: `inset 0 0 0 1px ${theme.hairlineStrong}`,
     },
     '&[data-selected]': {
-      backgroundColor: theme.calendarSelectedBackground,
-      borderRadius: 4,
+      backgroundColor: theme.buttonPrimaryBackground,
+      color: theme.buttonPrimaryText,
+      fontWeight: 500,
+      boxShadow: 'none',
     },
     '&[data-disabled]': {
       opacity: 0.4,
       cursor: 'default',
     },
     '&[data-focus-visible]': {
-      outline: `2px solid ${theme.calendarSelectedBackground}`,
+      outline: `2px solid ${theme.focusRing}`,
+      outlineOffset: 1,
     },
   },
 };
@@ -228,14 +280,16 @@ const DatePicker = forwardRef<DatePickerForwardedRef, DatePickerProps>(
             '& .react-aria-Calendar': {
               borderBottomLeftRadius: 0,
               borderBottomRightRadius: 0,
-              boxShadow: 'none',
             },
           },
           // Embedded: stretch the grid to the container with equal columns
           // (same technique as DayRangeCalendar). The container must have a
           // definite width — a 100%-wide table blows up shrink-to-fit boxes.
           embedded && {
-            '& .react-aria-Calendar': { width: '100%' },
+            '& .react-aria-Calendar': {
+              width: '100%',
+              border: '1px solid ' + theme.hairline,
+            },
             '& .react-aria-CalendarGrid': {
               width: '100%',
               tableLayout: 'fixed',
@@ -264,7 +318,9 @@ const DatePicker = forwardRef<DatePickerForwardedRef, DatePickerProps>(
               >
                 <SvgCheveronLeft width={16} height={16} />
               </button>
-              <Heading className="calendar-header-title" />
+              <Heading className="calendar-header-title">
+                <CalendarTitle date={focusedDate} locale={locale} />
+              </Heading>
               <button
                 type="button"
                 tabIndex={-1}
@@ -524,7 +580,7 @@ function DateSelectDesktop({
         <View
           style={
             onTransferDateSyncChange
-              ? { borderRadius: 4, boxShadow: calendarShadow }
+              ? { borderRadius: styles.menuBorderRadius, overflow: 'hidden' }
               : undefined
           }
         >
@@ -553,9 +609,8 @@ function DateSelectDesktop({
               onChange={e => onTransferDateSyncChange(e.target.checked)}
               onMouseDown={e => e.preventDefault()}
               style={{
-                padding: '6px 8px',
-                borderBottomLeftRadius: 4,
-                borderBottomRightRadius: 4,
+                padding: '6px 12px',
+                borderTop: '1px solid ' + theme.hairline,
                 backgroundColor: theme.calendarBackground,
                 color: theme.calendarText,
               }}

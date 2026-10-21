@@ -16,6 +16,7 @@ import { styles } from '@actual-app/components/styles';
 import { Text } from '@actual-app/components/text';
 import { TextOneLine } from '@actual-app/components/text-one-line';
 import { theme } from '@actual-app/components/theme';
+import { radius } from '@actual-app/components/tokens';
 import { View } from '@actual-app/components/view';
 import { integerToCurrency } from '@actual-app/core/shared/util';
 import type {
@@ -91,7 +92,7 @@ function CategoryList({
         style={{
           overflowY: 'auto',
           willChange: 'transform',
-          padding: '5px 0',
+          padding: 4,
           ...(!embedded && { maxHeight: 175 }),
         }}
       >
@@ -267,7 +268,8 @@ type SplitTransactionButtonProps = ComponentPropsWithoutRef<typeof View> & {
 function SplitTransactionButton({
   Icon,
   highlighted,
-  embedded,
+  // Kept out of the DOM props; items look the same embedded or not.
+  embedded: _embedded,
   style,
   ...props
 }: SplitTransactionButtonProps) {
@@ -300,16 +302,16 @@ function SplitTransactionButton({
         backgroundColor: highlighted
           ? theme.menuAutoCompleteBackgroundHover
           : 'transparent',
-        borderRadius: embedded ? 4 : 0,
+        borderRadius: radius.sm,
         flexShrink: 0,
         flexDirection: 'row',
         alignItems: 'center',
-        fontSize: 11,
+        fontSize: 12.5,
         fontWeight: 500,
-        color: theme.noticeTextMenu,
-        padding: '6px 8px',
+        color: theme.accentText,
+        padding: '6px 10px',
         ':active': {
-          backgroundColor: 'rgba(100, 100, 100, .25)',
+          backgroundColor: theme.buttonBareBackgroundActive,
         },
         ...style,
       }}
@@ -348,7 +350,8 @@ function CategoryItem({
   className,
   style,
   highlighted,
-  embedded,
+  // Kept out of the DOM props; items look the same embedded or not.
+  embedded: _embedded,
   showBalances,
   ...props
 }: CategoryItemProps) {
@@ -389,9 +392,9 @@ function CategoryItem({
           color: highlighted
             ? theme.menuAutoCompleteItemTextHover
             : theme.menuAutoCompleteItemText,
-          padding: 4,
+          padding: '5px 10px',
           paddingLeft: 20,
-          borderRadius: embedded ? 4 : 0,
+          borderRadius: radius.sm,
           border: 'none',
           font: 'inherit',
           ...narrowStyle,
@@ -412,8 +415,8 @@ function CategoryItem({
             marginLeft: 5,
             flexShrink: 0,
             ...makeAmountFullStyle((isToBudgetItem ? toBudget : balance) || 0, {
-              positiveColor: theme.noticeTextMenu,
-              negativeColor: theme.errorTextMenu,
+              positiveColor: theme.numberPositive,
+              negativeColor: theme.numberNegative,
             }),
           }}
         >

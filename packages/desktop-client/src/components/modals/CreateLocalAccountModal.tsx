@@ -145,14 +145,15 @@ export function CreateLocalAccountModal() {
                 style={{
                   width: '100%',
                   flexDirection: 'row',
-                  justifyContent: 'flex-end',
+                  paddingLeft: 75,
+                  margin: '2px 0 6px',
                 }}
               >
-                <View style={{ flexDirection: 'column' }}>
+                <View style={{ flexDirection: 'column', flex: 1 }}>
                   <View
                     style={{
                       flexDirection: 'row',
-                      justifyContent: 'flex-end',
+                      alignItems: 'center',
                     }}
                   >
                     <Checkbox
@@ -173,10 +174,12 @@ export function CreateLocalAccountModal() {
                   </View>
                   <div
                     style={{
-                      textAlign: 'right',
-                      fontSize: '0.7em',
+                      fontSize: 12,
+                      lineHeight: '17px',
                       color: theme.pageTextLight,
-                      marginTop: 3,
+                      marginTop: 6,
+                      maxWidth: 380,
+                      textWrap: 'pretty',
                     }}
                   >
                     <Text style={{ display: 'block' }}>

@@ -4,7 +4,11 @@ import { useTranslation } from 'react-i18next';
 
 import { Button } from '@actual-app/components/button';
 import { SvgRemove, SvgSearchAlternate } from '@actual-app/components/icons/v2';
-import { baseInputStyle, Input } from '@actual-app/components/input';
+import {
+  baseInputStyle,
+  focusedInputStyle,
+  Input,
+} from '@actual-app/components/input';
 import type { CSSProperties } from '@actual-app/components/styles';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
@@ -48,11 +52,12 @@ export function Search({
         width,
         height,
         flex: '',
-        borderColor: isInModal ? undefined : 'transparent',
-        backgroundColor: isInModal ? undefined : theme.formInputBackground,
+        borderColor: theme.hairline,
+        ':hover': { borderColor: theme.hairlineStrong },
         ...style,
         ...(focused && {
-          boxShadow: '0 0 0 1px ' + theme.formInputShadowSelected,
+          ...focusedInputStyle,
+          ':hover': focusedInputStyle,
           ...(isInModal
             ? {}
             : { backgroundColor: theme.formInputBackgroundSelected }),
@@ -64,9 +69,8 @@ export function Search({
           width: 13,
           height: 13,
           flexShrink: 0,
-          color: value ? theme.menuItemTextSelected : 'inherit',
-          margin: 5,
-          marginRight: 0,
+          color: value ? theme.accentText : theme.pageTextSubdued,
+          marginLeft: 10,
         }}
       />
 
@@ -78,6 +82,7 @@ export function Search({
         onChangeValue={onChange}
         className={css({
           width: '100%',
+          paddingLeft: 8,
           '::placeholder': {
             color: theme.formInputTextPlaceholder,
             transition: 'color .25s',

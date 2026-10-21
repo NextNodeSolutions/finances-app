@@ -6,6 +6,7 @@ import { Button } from '@actual-app/components/button';
 import { styles } from '@actual-app/components/styles';
 import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
+import { radius } from '@actual-app/components/tokens';
 import { View } from '@actual-app/components/view';
 
 import { Modal, ModalCloseButton, ModalHeader } from '#components/common/Modal';
@@ -46,7 +47,7 @@ export function ImportModal() {
   const itemStyle = {
     padding: 10,
     border: '1px solid ' + theme.tableBorder,
-    borderRadius: 6,
+    borderRadius: radius.md,
     marginBottom: 10,
     display: 'block',
   };
@@ -74,13 +75,13 @@ export function ImportModal() {
             </Text>
 
             <Button style={itemStyle} onPress={() => onSelectType('ynab4')}>
-              <span style={{ fontWeight: 700 }}>YNAB4</span>
+              <span style={{ fontWeight: 600 }}>YNAB4</span>
               <View style={{ color: theme.pageTextLight }}>
                 <Trans>The old unsupported desktop app</Trans>
               </View>
             </Button>
             <Button style={itemStyle} onPress={() => onSelectType('ynab5')}>
-              <span style={{ fontWeight: 700 }}>nYNAB</span>
+              <span style={{ fontWeight: 600 }}>nYNAB</span>
               <View style={{ color: theme.pageTextLight }}>
                 <div>
                   <Trans>The newer web app</Trans>
@@ -88,7 +89,7 @@ export function ImportModal() {
               </View>
             </Button>
             <Button style={itemStyle} onPress={() => onSelectType('actual')}>
-              <span style={{ fontWeight: 700 }}>Actual</span>
+              <span style={{ fontWeight: 600 }}>Actual</span>
               <View style={{ color: theme.pageTextLight }}>
                 <div>
                   <Trans>Import a file exported from Actual</Trans>

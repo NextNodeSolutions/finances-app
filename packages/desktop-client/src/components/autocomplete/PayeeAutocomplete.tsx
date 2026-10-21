@@ -21,6 +21,7 @@ import {
 import { styles } from '@actual-app/components/styles';
 import { TextOneLine } from '@actual-app/components/text-one-line';
 import { theme } from '@actual-app/components/theme';
+import { radius } from '@actual-app/components/tokens';
 import { View } from '@actual-app/components/view';
 import { formatDistance } from '@actual-app/core/shared/location-utils';
 import { getNormalisedString } from '@actual-app/core/shared/normalisation';
@@ -53,6 +54,28 @@ type PayeeAutocompleteItem = PayeeEntity &
   };
 
 const MAX_AUTO_SUGGESTIONS = 5;
+
+// Footer actions read as quiet menu rows under the list, not as framed
+// buttons: same inset and radius as the items above them.
+const footerRowClassName = css({
+  justifyContent: 'flex-start',
+  padding: '6px 10px',
+  borderRadius: radius.sm,
+  fontSize: 13,
+  fontWeight: 400,
+  color: theme.pageTextLight,
+  '&[data-hovered]': {
+    backgroundColor: theme.menuItemBackgroundHover,
+    color: theme.menuItemTextHover,
+  },
+});
+
+const footerRowSelectedClassName = css({
+  fontWeight: 500,
+  backgroundColor: theme.menuItemBackgroundHover,
+  color: theme.menuItemTextSelected,
+  '&[data-hovered]': { color: theme.menuItemTextSelected },
+});
 
 function getPayeeSuggestions(
   commonPayees: PayeeEntity[],
@@ -256,7 +279,7 @@ function PayeeList({
       <View
         style={{
           overflow: 'auto',
-          padding: '5px 0',
+          padding: 4,
           ...(!embedded && { maxHeight: 175 }),
         }}
       >
@@ -324,9 +347,9 @@ function PayeeList({
         {showSearchForMore && (
           <div
             style={{
-              fontSize: 11,
-              padding: 5,
-              color: theme.pageTextLight,
+              fontSize: 11.5,
+              padding: '6px 10px',
+              color: theme.pageTextSubdued,
               textAlign: 'center',
             }}
           >
@@ -606,8 +629,11 @@ export function PayeeAutocomplete({
             <AutocompleteFooter embedded={embedded}>
               {showMakeTransfer && (
                 <Button
-                  variant={focusTransferPayees ? 'menuSelected' : 'menu'}
-                  style={showManagePayees && { marginBottom: 5 }}
+                  variant="bare"
+                  className={cx(
+                    footerRowClassName,
+                    focusTransferPayees && footerRowSelectedClassName,
+                  )}
                   onPress={() => {
                     onUpdate?.(null, null);
                     setFocusTransferPayees(!focusTransferPayees);
@@ -617,7 +643,11 @@ export function PayeeAutocomplete({
                 </Button>
               )}
               {showManagePayees && (
-                <Button variant="menu" onPress={() => onManagePayees()}>
+                <Button
+                  variant="bare"
+                  className={footerRowClassName}
+                  onPress={() => onManagePayees()}
+                >
                   <Trans>Manage payees</Trans>
                 </Button>
               )}
@@ -643,7 +673,8 @@ export function CreatePayeeButton({
   Icon,
   payeeName,
   highlighted,
-  embedded,
+  // Kept out of the DOM props; items look the same embedded or not.
+  embedded: _embedded,
   style,
   ...props
 }: CreatePayeeButtonProps) {
@@ -661,18 +692,16 @@ export function CreatePayeeButton({
       style={{
         display: 'block',
         flex: '1 0',
-        color: highlighted
-          ? theme.menuAutoCompleteTextHover
-          : theme.noticeTextMenu,
-        borderRadius: embedded ? 4 : 0,
-        fontSize: 11,
+        color: theme.accentText,
+        borderRadius: radius.sm,
+        fontSize: 12.5,
         fontWeight: 500,
-        padding: '6px 9px',
+        padding: '6px 10px',
         backgroundColor: highlighted
           ? theme.menuAutoCompleteBackgroundHover
           : 'transparent',
         ':active': {
-          backgroundColor: 'rgba(100, 100, 100, .25)',
+          backgroundColor: theme.buttonBareBackgroundActive,
         },
         ...narrowStyle,
         ...style,
@@ -717,7 +746,8 @@ function PayeeItem({
   item,
   className,
   highlighted,
-  embedded,
+  // Kept out of the DOM props; items look the same embedded or not.
+  embedded: _embedded,
   ...props
 }: PayeeItemProps) {
   const { isNarrowWidth } = useResponsive();
@@ -775,8 +805,8 @@ function PayeeItem({
           color: highlighted
             ? theme.menuAutoCompleteItemTextHover
             : theme.menuAutoCompleteItemText,
-          borderRadius: embedded ? 4 : 0,
-          padding: 4,
+          borderRadius: radius.sm,
+          padding: '5px 10px',
           paddingLeft: paddingLeftOverFromIcon,
           border: 'none',
           font: 'inherit',
@@ -810,7 +840,8 @@ function NearbyPayeeItem({
   item,
   className,
   highlighted,
-  embedded,
+  // Kept out of the DOM props; items look the same embedded or not.
+  embedded: _embedded,
   onForgetLocation,
   ...props
 }: NearbyPayeeItemProps) {
@@ -858,8 +889,8 @@ function NearbyPayeeItem({
           color: highlighted
             ? theme.menuAutoCompleteItemTextHover
             : theme.menuAutoCompleteItemText,
-          borderRadius: embedded ? 4 : 0,
-          padding: 4,
+          borderRadius: radius.sm,
+          padding: '5px 10px',
           paddingLeft: paddingLeftOverFromIcon,
           display: 'flex',
           alignItems: 'center',
@@ -911,10 +942,10 @@ function NearbyPayeeItem({
           style={{
             backgroundColor: theme.errorBackground,
             border: `1px solid ${theme.errorBorder}`,
-            color: theme.pageText,
+            color: theme.errorText,
             fontSize: '11px',
             padding: '2px 6px',
-            borderRadius: 3,
+            borderRadius: radius.xs,
           }}
         >
           <Trans i18nKey="forget">Forget</Trans>

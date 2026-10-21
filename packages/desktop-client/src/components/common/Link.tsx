@@ -7,7 +7,7 @@ import { styles } from '@actual-app/components/styles';
 import type { CSSProperties } from '@actual-app/components/styles';
 import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
-import { css } from '@emotion/css';
+import { css, cx } from '@emotion/css';
 
 import { useNavigate } from '#hooks/useNavigate';
 
@@ -35,6 +35,14 @@ type InternalLinkProps = {
   isDisabled?: boolean;
   isExactPathMatch?: boolean;
 };
+
+// Underlines sit clear of descenders and stay hairline-thin.
+const underlineStyle = {
+  textDecorationThickness: '1px',
+  textUnderlineOffset: '0.2em',
+};
+
+const externalLinkClassName = css(underlineStyle);
 
 const externalLinkColors = {
   purple: theme.pageTextPositive,
@@ -64,7 +72,7 @@ const ExternalLink = ({
       target="_blank"
       rel="noopener noreferrer"
       style={{ color: externalLinkColors[linkColor] }}
-      className={className}
+      className={cx(externalLinkClassName, className)}
       onClick={onClick}
     >
       {children}
@@ -81,6 +89,7 @@ const TextLink = ({ style, onClick, children, ...props }: TextLinkProps) => {
         border: 0,
         cursor: 'pointer',
         textDecoration: 'underline',
+        ...underlineStyle,
         ':hover': {
           boxShadow: 'none',
         },

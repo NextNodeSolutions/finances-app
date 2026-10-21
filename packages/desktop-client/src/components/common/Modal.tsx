@@ -24,7 +24,13 @@ import { styles } from '@actual-app/components/styles';
 import { Text } from '@actual-app/components/text';
 import { TextOneLine } from '@actual-app/components/text-one-line';
 import { theme } from '@actual-app/components/theme';
-import { radius, spacing, tokens } from '@actual-app/components/tokens';
+import {
+  elevation,
+  motion,
+  radius,
+  spacing,
+  tokens,
+} from '@actual-app/components/tokens';
 import { View } from '@actual-app/components/view';
 import { css, keyframes } from '@emotion/css';
 import { AutoTextSize } from 'auto-text-size';
@@ -72,6 +78,61 @@ const mobileSheetOverlayClassName = css({
   '&[data-entering]': { animation: `${overlayFadeIn} 180ms ease-out` },
   '&[data-exiting]': {
     animation: `${overlayFadeOut} ${SHEET_EXIT_MS}ms ease-in forwards`,
+  },
+});
+
+// Desktop dialogs use a double bezel: a recessed tray (the container)
+// holds the title row and a white card that carries the content. The
+// corners are concentric: shell radius = card radius + bezel inset.
+const TRAY_BORDER_WIDTH = 1;
+const BEZEL_PADDING = radius.sheet - radius.lg - TRAY_BORDER_WIDTH;
+const CARD_PADDING = 22;
+const MODAL_HEADER_HEIGHT = 48;
+const CLOSE_BUTTON_PADDING = 9;
+
+const bezelContainerStyle: CSSProperties = {
+  padding: BEZEL_PADDING,
+  borderRadius: radius.sheet,
+  border: `${TRAY_BORDER_WIDTH}px solid ${theme.trayBorder}`,
+  backgroundColor: theme.trayBackground,
+  boxShadow: elevation.modal,
+};
+
+const narrowContainerStyle: CSSProperties = {
+  padding: 10,
+  borderRadius: radius.lg,
+  border: '1px solid ' + theme.modalBorder,
+  backgroundColor: theme.modalBackground,
+  boxShadow: elevation.modal,
+};
+
+// The card is painted by a pseudo-element so modals keep composing
+// ModalHeader + content as siblings: when the header leads, the card
+// starts below it and the header sits on the tray; otherwise the card
+// fills the whole bezel.
+const modalCardClassName = css({
+  isolation: 'isolate',
+  padding: CARD_PADDING,
+  '&::before': {
+    content: '""',
+    position: 'absolute',
+    inset: 0,
+    zIndex: -1,
+    pointerEvents: 'none',
+    backgroundColor: theme.modalBackground,
+    border: '1px solid ' + theme.hairline,
+    borderRadius: radius.lg,
+    boxShadow: elevation.xs,
+  },
+  '&:has(> [data-modal-header]:first-child)': {
+    paddingTop: 0,
+    '&::before': { top: MODAL_HEADER_HEIGHT },
+  },
+  // The title starts on the card's content edge and the close glyph ends
+  // on it, so the tray row and the card share one column.
+  '& > [data-modal-header]:first-child': {
+    margin: `0 -${CARD_PADDING}px ${CARD_PADDING}px`,
+    padding: `0 ${CARD_PADDING - CLOSE_BUTTON_PADDING}px 0 ${CARD_PADDING}px`,
   },
 });
 
@@ -187,15 +248,10 @@ export const Modal = ({
           position: 'fixed',
           inset: 0,
           zIndex: MODAL_Z_INDEX,
-          fontSize: 14,
+          fontSize: 13,
+          backgroundColor: theme.overlayBackground,
           // on mobile, we disable the blurred background for performance reasons
-          ...(isNarrowWidth
-            ? {
-                backgroundColor: 'rgba(0, 0, 0, 0.4)',
-              }
-            : {
-                backdropFilter: 'blur(1px) brightness(0.9)',
-              }),
+          ...(!isNarrowWidth && { backdropFilter: 'blur(2px)' }),
           ...style,
         }}
         {...props}
@@ -231,28 +287,29 @@ export const Modal = ({
                   {...containerProps}
                   style={{
                     flex: 1,
-                    padding: 10,
                     willChange: isSheet ? undefined : 'opacity, transform',
                     maxWidth: '90vw',
                     minWidth: '90vw',
                     maxHeight: 'calc(var(--visual-viewport-height) * 0.9)',
                     minHeight: 0,
-                    borderRadius: 6,
-                    //border: '1px solid ' + theme.modalBorder,
                     color: theme.pageText,
-                    backgroundColor: theme.modalBackground,
                     opacity: isHidden ? 0 : 1,
                     [`@media (min-width: ${tokens.breakpoint_small})`]: {
                       minWidth: tokens.breakpoint_small,
                     },
                     overflowY: 'auto',
-                    ...styles.shadowLarge,
+                    ...(isNarrowWidth
+                      ? narrowContainerStyle
+                      : bezelContainerStyle),
                     ...(isSheet && mobileSheetContainerStyle),
                     ...containerProps?.style,
                   }}
                 >
                   {isSheet && <View style={mobileSheetHandleStyle} />}
-                  <View style={{ paddingTop: 0, flex: 1, flexShrink: 0 }}>
+                  <View
+                    className={isNarrowWidth ? undefined : modalCardClassName}
+                    style={{ flex: 1, flexShrink: 0 }}
+                  >
                     <ErrorBoundary FallbackComponent={FeatureErrorFallback}>
                       {typeof children === 'function'
                         ? children(modalProps)
@@ -267,7 +324,8 @@ export const Modal = ({
                         left: 0,
                         right: 0,
                         bottom: 0,
-                        backgroundColor: theme.pageBackground,
+                        borderRadius: 'inherit',
+                        backgroundColor: theme.modalBackground,
                         alignItems: 'center',
                         justifyContent: 'center',
                         zIndex: 1000,
@@ -296,6 +354,8 @@ type ModalContentContainerProps = {
   children: ReactNode;
 };
 
+const contentTransition = `opacity ${motion.base} ${motion.ease}, transform ${motion.base} ${motion.ease}`;
+
 const ModalContentContainer = ({
   style,
   noAnimation,
@@ -304,7 +364,6 @@ const ModalContentContainer = ({
 }: ModalContentContainerProps) => {
   const contentRef = useRef<HTMLDivElement>(null);
   const mounted = useRef(false);
-  const [rotateFactor] = useState(() => Math.random() * 10 - 5);
 
   useLayoutEffect(() => {
     if (!contentRef.current) {
@@ -321,7 +380,8 @@ const ModalContentContainer = ({
         contentRef.current.style.willChange = 'auto';
         contentRef.current.style.pointerEvents = 'auto';
       } else {
-        contentRef.current.style.transform = `translateY(-40px) scale(.95) rotate(${rotateFactor}deg)`;
+        // A modal stacked under another one recedes slightly.
+        contentRef.current.style.transform = 'translateY(-16px) scale(.97)';
         contentRef.current.style.pointerEvents = 'none';
       }
     }
@@ -333,19 +393,17 @@ const ModalContentContainer = ({
 
         setTimeout(() => {
           if (contentRef.current) {
-            contentRef.current.style.transition =
-              'opacity .1s, transform .1s cubic-bezier(.42, 0, .58, 1)';
+            contentRef.current.style.transition = contentTransition;
           }
         }, 0);
       } else {
         contentRef.current.style.opacity = '0';
-        contentRef.current.style.transform = 'translateY(10px) scale(1)';
+        contentRef.current.style.transform = 'none';
 
         setTimeout(() => {
           if (contentRef.current) {
             mounted.current = true;
-            contentRef.current.style.transition =
-              'opacity .1s, transform .1s cubic-bezier(.42, 0, .58, 1)';
+            contentRef.current.style.transition = contentTransition;
             contentRef.current.style.opacity = '1';
             setProps();
           }
@@ -354,7 +412,7 @@ const ModalContentContainer = ({
     } else {
       setProps();
     }
-  }, [noAnimation, isActive, rotateFactor]);
+  }, [noAnimation, isActive]);
 
   return (
     <View
@@ -401,7 +459,8 @@ export const ModalButtons = ({
       innerRef={containerRef}
       style={{
         flexDirection: 'row',
-        marginTop: 30,
+        alignItems: 'center',
+        marginTop: 24,
         ...style,
       }}
     >
@@ -419,6 +478,29 @@ type ModalHeaderProps = {
   rightContent?: ReactNode;
 };
 
+const headerBaseStyle: CSSProperties = {
+  position: 'relative',
+  display: 'flex',
+  alignItems: 'center',
+  flex: 'none',
+  margin: 0,
+  padding: 0,
+};
+
+// Desktop: the title row of the tray, title set flush left with the
+// close control on the right. Narrow: the centered sheet header.
+const desktopHeaderClassName = css({
+  ...headerBaseStyle,
+  height: MODAL_HEADER_HEIGHT,
+  gap: spacing.sm,
+});
+
+const narrowHeaderClassName = css({
+  ...headerBaseStyle,
+  justifyContent: 'center',
+  height: 60,
+});
+
 export function ModalHeader({
   leftContent,
   showLogo,
@@ -426,19 +508,49 @@ export function ModalHeader({
   rightContent,
 }: ModalHeaderProps) {
   const { t } = useTranslation();
+  const { isNarrowWidth } = useResponsive();
+
+  const logo = showLogo && (
+    <SvgLogo
+      aria-label={t('Modal logo')}
+      width={isNarrowWidth ? 30 : 22}
+      height={isNarrowWidth ? 30 : 22}
+      style={{ justifyContent: 'center', alignSelf: 'center', flexShrink: 0 }}
+    />
+  );
+  const titleContent =
+    title &&
+    (typeof title === 'string' || typeof title === 'number' ? (
+      <ModalTitle title={`${title}`} />
+    ) : (
+      title
+    ));
+
+  if (!isNarrowWidth) {
+    return (
+      <h1 data-modal-header className={desktopHeaderClassName}>
+        {leftContent && <View style={{ flexShrink: 0 }}>{leftContent}</View>}
+        <View
+          style={{
+            flex: 1,
+            minWidth: 0,
+            flexDirection: 'row',
+            alignItems: 'center',
+            gap: spacing.md,
+          }}
+        >
+          {logo}
+          {titleContent && (
+            <View style={{ flex: 1, minWidth: 0 }}>{titleContent}</View>
+          )}
+        </View>
+        {rightContent && <View style={{ flexShrink: 0 }}>{rightContent}</View>}
+      </h1>
+    );
+  }
+
   return (
-    <h1
-      style={{
-        justifyContent: 'center',
-        alignItems: 'center',
-        position: 'relative',
-        height: 60,
-        flex: 'none',
-        display: 'flex',
-        margin: 0,
-        padding: 0,
-      }}
-    >
+    <h1 data-modal-header className={narrowHeaderClassName}>
       <View
         style={{
           position: 'absolute',
@@ -457,20 +569,8 @@ export function ModalHeader({
             width: 'calc(100% - 60px)',
           }}
         >
-          {showLogo && (
-            <SvgLogo
-              aria-label={t('Modal logo')}
-              width={30}
-              height={30}
-              style={{ justifyContent: 'center', alignSelf: 'center' }}
-            />
-          )}
-          {title &&
-            (typeof title === 'string' || typeof title === 'number' ? (
-              <ModalTitle title={`${title}`} />
-            ) : (
-              title
-            ))}
+          {logo}
+          {titleContent}
         </View>
       )}
 
@@ -497,6 +597,10 @@ type ModalTitleProps = {
   shrinkOnOverflow?: boolean;
 };
 
+const TITLE_FONT_SIZE = 22;
+const NARROW_TITLE_FONT_SIZE = 20;
+const MIN_TITLE_FONT_SIZE = 15;
+
 export function ModalTitle({
   title,
   isEditable,
@@ -505,6 +609,7 @@ export function ModalTitle({
   shrinkOnOverflow = false,
 }: ModalTitleProps) {
   const [isEditing, setIsEditing] = useState(false);
+  const { isNarrowWidth } = useResponsive();
 
   const onTitleClick = () => {
     if (isEditable) {
@@ -529,14 +634,21 @@ export function ModalTitle({
   }, [isEditing]);
 
   const style = getStyle?.(isEditing);
+  const fontSize = isNarrowWidth ? NARROW_TITLE_FONT_SIZE : TITLE_FONT_SIZE;
+  // Modal titles are engraved in the display serif, like page titles.
+  const titleStyle: CSSProperties = {
+    ...styles.display,
+    fontSize,
+    lineHeight: `${fontSize + 6}px`,
+    color: theme.pageTextDark,
+    textAlign: isNarrowWidth ? 'center' : 'left',
+  };
 
   return isEditing ? (
     <Input
       ref={inputRef}
       style={{
-        fontSize: 25,
-        fontWeight: 700,
-        textAlign: 'center',
+        ...titleStyle,
         ...style,
       }}
       defaultValue={title}
@@ -550,20 +662,18 @@ export function ModalTitle({
     <View
       style={{
         flexDirection: 'row',
-        justifyContent: 'center',
+        justifyContent: isNarrowWidth ? 'center' : 'flex-start',
         alignItems: 'center',
       }}
     >
       {shrinkOnOverflow ? (
         <AutoTextSize
           as={Text}
-          minFontSizePx={15}
-          maxFontSizePx={25}
+          minFontSizePx={MIN_TITLE_FONT_SIZE}
+          maxFontSizePx={fontSize}
           onClick={onTitleClick}
           style={{
-            fontSize: 25,
-            fontWeight: 700,
-            textAlign: 'center',
+            ...titleStyle,
             ...(isEditable && styles.underlinedText),
             ...style,
           }}
@@ -574,9 +684,7 @@ export function ModalTitle({
         <TextOneLine
           onClick={onTitleClick}
           style={{
-            fontSize: 25,
-            fontWeight: 700,
-            textAlign: 'center',
+            ...titleStyle,
             ...(isEditable && styles.underlinedText),
             ...style,
           }}
@@ -599,7 +707,7 @@ export function ModalCloseButton({ onPress, style }: ModalCloseButtonProps) {
     <Button
       variant="bare"
       onPress={onPress}
-      style={{ padding: '10px 10px' }}
+      style={{ padding: CLOSE_BUTTON_PADDING, color: theme.pageTextLight }}
       aria-label={t('Close')}
     >
       <SvgDelete width={10} style={style} />

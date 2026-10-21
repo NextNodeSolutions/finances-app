@@ -13,20 +13,23 @@ type ItemHeaderProps = {
 
 export function ItemHeader({ title, style, type, ...props }: ItemHeaderProps) {
   const { isNarrowWidth } = useResponsive();
-  const narrowStyle = isNarrowWidth
+  const sizeStyle = isNarrowWidth
     ? {
         ...styles.largeText,
-        paddingTop: 10,
-        paddingBottom: 10,
+        padding: '10px 9px',
       }
-    : {};
+    : {
+        fontSize: 11.5,
+        fontWeight: 500,
+        lineHeight: '14px',
+        padding: '8px 10px 4px',
+      };
 
   return (
     <div
       style={{
         color: theme.menuAutoCompleteTextHeader,
-        padding: '4px 9px',
-        ...narrowStyle,
+        ...sizeStyle,
         ...style,
       }}
       data-testid={`${title}-${type}-item-group`}

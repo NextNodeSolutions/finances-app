@@ -39,6 +39,8 @@ function onScrollbarChange() {
     },
   };
 
+  // Every surface now follows the theme, so the "dark" variant shares the
+  // hairline thumb; it stays a separate entry for its existing callers.
   styles.darkScrollbar = !hiddenScrollbars && {
     '& ::-webkit-scrollbar': {
       width: 11,
@@ -48,7 +50,7 @@ function onScrollbarChange() {
       width: 7,
       borderRadius: 30,
       backgroundClip: 'padding-box',
-      backgroundColor: 'rgba(200, 200, 200, .5)',
+      backgroundColor: 'var(--color-hairlineStrong)',
       border: '2px solid rgba(0, 0, 0, 0)',
     },
   };

@@ -8,6 +8,7 @@ import { InitialFocus } from '@actual-app/components/initial-focus';
 import { styles as baseStyles } from '@actual-app/components/styles';
 import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
+import { elevation, radius } from '@actual-app/components/tokens';
 import { View } from '@actual-app/components/view';
 import * as Platform from '@actual-app/core/shared/platform';
 
@@ -35,15 +36,17 @@ function KeyIcon({ shortcut, style }: KeyIconProps) {
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
-        fontWeight: 'bold',
-        backgroundColor: '#fff',
-        color: '#000',
-        border: '1px solid #000',
-        borderRadius: 8,
-        minWidth: 30,
-        minHeight: 30,
-        filter: 'drop-shadow(1px 1px)',
-        padding: 5,
+        ...baseStyles.tnum,
+        fontSize: 12,
+        fontWeight: 500,
+        backgroundColor: theme.buttonNormalBackground,
+        color: theme.pageText,
+        border: '1px solid ' + theme.hairlineStrong,
+        borderRadius: radius.sm,
+        boxShadow: elevation.xs,
+        minWidth: 28,
+        minHeight: 28,
+        padding: '4px 7px',
         ...style,
       }}
     >
@@ -602,9 +605,7 @@ export function KeyboardShortcutModal() {
                         width: '100%',
                       }}
                     >
-                      <Text style={{ fontWeight: 'bold' }}>
-                        {category.name}
-                      </Text>
+                      <Text style={{ fontWeight: 600 }}>{category.name}</Text>
                       <Text style={{ color: theme.pageTextLight }}>
                         {category.items.length}{' '}
                         {category.items.length === 1
