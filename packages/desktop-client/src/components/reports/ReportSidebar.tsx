@@ -33,6 +33,7 @@ import type { SyncedPrefs } from '@actual-app/core/types/prefs';
 import { Information } from '#components/alerts';
 import { useDateFormat } from '#hooks/useDateFormat';
 import { useLocale } from '#hooks/useLocale';
+import { useOptionalFeature } from '#hooks/useOptionalFeature';
 
 import { CategorySelector } from './CategorySelector';
 import { defaultsList, disabledList } from './disabledList';
@@ -139,6 +140,12 @@ export function ReportSidebar({
   const { t } = useTranslation();
   const locale = useLocale();
   const dateFormat = useDateFormat() || 'MM/dd/yyyy';
+  const [isTagsOn] = useOptionalFeature('tags');
+  // With tags off, Tag grouping is offered only to a report that already uses it.
+  const usesTagGrouping = customReportItems.groupBy === 'Tag';
+  const splitOptions = ReportOptions.groupBy.filter(
+    option => isTagsOn || usesTagGrouping || option.key !== 'Tag',
+  );
 
   const [menuOpen, setMenuOpen] = useState(false);
   const triggerRef = useRef(null);
@@ -336,7 +343,7 @@ export function ReportSidebar({
           <Select
             value={customReportItems.groupBy}
             onChange={e => onChangeSplit(e)}
-            options={ReportOptions.groupBy.map(option => [
+            options={splitOptions.map(option => [
               option.key,
               option.description,
             ])}
@@ -354,7 +361,7 @@ export function ReportSidebar({
             }
             style={{ minWidth: 0 }}
           />
-          {customReportItems.groupBy === 'Tag' && (
+          {usesTagGrouping && (
             <View style={{ marginLeft: 5, minWidth: 0 }}>
               <TagScopeSelector
                 tags={tags}
@@ -364,6 +371,17 @@ export function ReportSidebar({
             </View>
           )}
         </View>
+        {usesTagGrouping && !isTagsOn && (
+          <Text
+            style={{
+              padding: '0 5px 5px',
+              fontSize: 12,
+              color: theme.pageTextSubdued,
+            }}
+          >
+            <Trans>Tags are hidden</Trans>
+          </Text>
+        )}
 
         <View
           style={{
