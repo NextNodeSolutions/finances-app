@@ -27,8 +27,9 @@ import { css } from '@emotion/css';
 
 import { useMoveAccountMutation, useSyncAndDownloadMutation } from '#accounts';
 import { isAccountFailedSync } from '#accounts/syncStatus';
+import { sync } from '#app/appSlice';
 import { makeAmountFullStyle } from '#components/budget/util';
-import { MOBILE_NAV_HEIGHT } from '#components/mobile/MobileNavTabs';
+import { MOBILE_NAV_INSET } from '#components/mobile/MobileNavTabs';
 import { PullToRefresh } from '#components/mobile/PullToRefresh';
 import {
   mobileCardStyle,
@@ -40,6 +41,7 @@ import { CellValue, CellValueText } from '#components/spreadsheet/CellValue';
 import { useAccounts } from '#hooks/useAccounts';
 import { useLocalPref } from '#hooks/useLocalPref';
 import { useNavigate } from '#hooks/useNavigate';
+import { useOptionalFeature } from '#hooks/useOptionalFeature';
 import { useSyncedPref } from '#hooks/useSyncedPref';
 import { replaceModal } from '#modals/modalsSlice';
 import { useDispatch, useSelector } from '#redux';
@@ -284,7 +286,7 @@ function EmptyMessage({ onAddAccount }: { onAddAccount: () => void }) {
   return (
     <View
       style={{
-        minHeight: `calc(100vh - ${MOBILE_NAV_HEIGHT}px - 140px)`,
+        minHeight: `calc(100vh - ${MOBILE_NAV_INSET} - 140px)`,
         alignItems: 'center',
         justifyContent: 'center',
         padding: 30,
@@ -417,7 +419,7 @@ function AllAccountList({
         <PullToRefresh onRefresh={onSync}>
           <View
             aria-label={t('Account list')}
-            style={{ paddingBottom: MOBILE_NAV_HEIGHT }}
+            style={{ paddingBottom: MOBILE_NAV_INSET }}
           >
             <AccountHeader
               id={ALL_ACCOUNTS_ID}
@@ -507,6 +509,8 @@ const AccountList = forwardRef<HTMLDivElement, AccountListProps>(
       state => state.account.accountsSyncing,
     );
     const updatedAccounts = useSelector(state => state.account.updatedAccounts);
+    // With bank sync off, no account shows a connection or sync state.
+    const [isBankSyncOn] = useOptionalFeature('bankSync');
 
     const moveAccount = useMoveAccountMutation();
 
@@ -588,9 +592,9 @@ const AccountList = forwardRef<HTMLDivElement, AccountListProps>(
             id={account.id}
             value={account}
             isUpdated={updatedAccounts && updatedAccounts.includes(account.id)}
-            isConnected={!!account.bank}
-            isPending={syncingAccountIds.includes(account.id)}
-            isFailed={isAccountFailedSync(account)}
+            isConnected={isBankSyncOn && !!account.bank}
+            isPending={isBankSyncOn && syncingAccountIds.includes(account.id)}
+            isFailed={isBankSyncOn && isAccountFailedSync(account)}
             getBalanceQuery={getBalanceBinding}
             onSelect={onOpenAccount}
           />
@@ -623,10 +627,17 @@ export function AccountsPage() {
     dispatch(replaceModal({ modal: { name: 'add-account', options: {} } }));
   }, [dispatch]);
 
+  // Pull to refresh downloads bank transactions only with bank sync on;
+  // otherwise it just syncs the budget.
+  const [isBankSyncOn] = useOptionalFeature('bankSync');
   const syncAndDownload = useSyncAndDownloadMutation();
   const onSync = useCallback(async () => {
-    syncAndDownload.mutate({});
-  }, [syncAndDownload]);
+    if (isBankSyncOn) {
+      syncAndDownload.mutate({});
+      return;
+    }
+    void dispatch(sync());
+  }, [dispatch, isBankSyncOn, syncAndDownload]);
 
   // Drill-downs (e.g. report activity) land on /accounts with filter
   // conditions in the location state; show them as filtered transactions.

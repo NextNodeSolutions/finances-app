@@ -23,6 +23,7 @@ import {
 } from '#components/mobile/utils';
 import { MobilePageHeader, Page } from '#components/Page';
 import { useAccount } from '#hooks/useAccount';
+import { useOptionalFeature } from '#hooks/useOptionalFeature';
 import { useSyncedPref } from '#hooks/useSyncedPref';
 import {
   collapseModals,
@@ -102,6 +103,8 @@ function AccountHeader({ account }: { readonly account: AccountEntity }) {
   const syncingAccountIds = useSelector(state => state.account.accountsSyncing);
   const pending = syncingAccountIds.includes(account.id);
   const failed = isAccountFailedSync(account);
+  // With bank sync off, the header shows no connection or sync state.
+  const [isBankSyncOn] = useOptionalFeature('bankSync');
 
   const dispatch = useDispatch();
   const { mutate: updateAccount } = useUpdateAccountMutation();
@@ -204,7 +207,7 @@ function AccountHeader({ account }: { readonly account: AccountEntity }) {
         alignItems: 'center',
       }}
     >
-      {account.bank && (
+      {isBankSyncOn && account.bank && (
         <View
           style={{
             marginRight: 2,
