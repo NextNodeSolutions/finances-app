@@ -88,10 +88,15 @@ function getPayeeSuggestions(
     })
     .sort((a, b) => a.name.localeCompare(b.name));
 
+  // Only suggest common payees that the caller offers, so a filtered
+  // `payees` list (e.g. a merge picker without the payee itself) holds.
+  const offeredPayeeIds = new Set(payees.map(p => p.id));
+
   let additionalCommonPayees: PayeeAutocompleteItem[] = [];
   if (commonPayees?.length > 0) {
     if (favoritePayees.length < MAX_AUTO_SUGGESTIONS) {
       additionalCommonPayees = commonPayees
+        .filter(p => offeredPayeeIds.has(p.id))
         .filter(
           p => !(p.favorite || favoritePayees.map(fp => fp.id).includes(p.id)),
         )
