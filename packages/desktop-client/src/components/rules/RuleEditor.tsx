@@ -54,6 +54,7 @@ import { GenericInput } from '#components/util/GenericInput';
 import { useDateFormat } from '#hooks/useDateFormat';
 import { useFeatureFlag } from '#hooks/useFeatureFlag';
 import { useFormat } from '#hooks/useFormat';
+import { useOptionalFeature } from '#hooks/useOptionalFeature';
 import { useSchedules } from '#hooks/useSchedules';
 import { SelectedProvider, useSelected } from '#hooks/useSelected';
 import { addNotification } from '#notifications/notificationsSlice';
@@ -302,6 +303,8 @@ function Editor({ error, style, children }) {
   );
 }
 
+const TAG_OPS = ['hasTags', 'hasAnyTag'];
+
 function ConditionEditor({
   ops,
   condition,
@@ -320,6 +323,12 @@ function ConditionEditor({
     error,
     inputKey,
   } = condition;
+  const [isTagsOn] = useOptionalFeature('tags');
+  // With tags off, new conditions cannot pick a tag operator; a condition
+  // that already uses one keeps it, so it still reads and stays editable.
+  const visibleOps = isTagsOn
+    ? ops
+    : ops.filter(candidate => !TAG_OPS.includes(candidate) || candidate === op);
 
   const translatedConditions = useMemo(() => {
     const retValue = [...conditionFields];
@@ -382,7 +391,7 @@ function ConditionEditor({
         value={field}
         onChange={value => onChange('field', value)}
       />
-      <OpSelect ops={ops} value={op} type={type} onChange={onChange} />
+      <OpSelect ops={visibleOps} value={op} type={type} onChange={onChange} />
 
       <View style={{ flex: 1, minWidth: 80 }}>{valueEditor}</View>
 
