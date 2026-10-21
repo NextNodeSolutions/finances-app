@@ -25,7 +25,12 @@ import { Popover } from '@actual-app/components/popover';
 import { styles } from '@actual-app/components/styles';
 import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
-import { motion, radius, tokens } from '@actual-app/components/tokens';
+import {
+  fontFamily,
+  motion,
+  radius,
+  tokens,
+} from '@actual-app/components/tokens';
 import { Tooltip } from '@actual-app/components/tooltip';
 import { View } from '@actual-app/components/view';
 import {
@@ -63,10 +68,10 @@ const ICON_BUTTON_SIZE = 30;
 // The files sheet: one inset for the title, the file names and the actions,
 // a slightly smaller one on the right where icon buttons carry their own
 // padding, and rows tall enough for a name over its status.
-const SHEET_WIDTH = 520;
+const SHEET_WIDTH = 560;
 const SHEET_INSET = 32;
 const SHEET_ICON_INSET = 24;
-const FILE_ROW_MIN_HEIGHT = 52;
+const FILE_ROW_MIN_HEIGHT = 56;
 
 const iconButtonStyle = {
   width: ICON_BUTTON_SIZE,
@@ -213,7 +218,7 @@ function BudgetFileState({ file, currentUserId }: BudgetFileStateProps) {
       break;
     case 'remote':
       Icon = SvgCloudDownload;
-      status = t('Available for download');
+      status = t('Remote');
       ownerName = getOwnerDisplayName();
       break;
     case 'local':
@@ -228,12 +233,13 @@ function BudgetFileState({ file, currentUserId }: BudgetFileStateProps) {
       break;
     default:
       Icon = SvgCloudCheck;
-      status = t('Syncing');
+      status = t('Synced');
       ownerName = getOwnerDisplayName();
       break;
   }
 
   const showOwnerContent = multiuserEnabled && file.owner !== currentUserId;
+  const isEncrypted = Boolean(file.encryptKeyId);
 
   return (
     <View style={{ width: '100%', gap: 4, marginTop: 2 }}>
@@ -243,7 +249,8 @@ function BudgetFileState({ file, currentUserId }: BudgetFileStateProps) {
           alignItems: 'center',
           flexDirection: 'row',
           gap: 6,
-          fontSize: 12.5,
+          fontFamily: fontFamily.mono,
+          fontSize: 11,
         }}
       >
         <Icon
@@ -254,7 +261,9 @@ function BudgetFileState({ file, currentUserId }: BudgetFileStateProps) {
           }}
         />
 
-        <Text>{status}</Text>
+        <Text>
+          {isEncrypted ? t('{{status}} · encrypted', { status }) : status}
+        </Text>
       </View>
 
       {showOwnerContent && (
@@ -357,7 +366,7 @@ function BudgetFileListItem({
             <Text
               style={{
                 fontSize: 14,
-                fontWeight: 600,
+                fontWeight: 500,
                 letterSpacing: '-0.005em',
                 color: theme.pageText,
               }}
@@ -542,11 +551,11 @@ function BudgetFileSelectionHeader({
       <Text
         style={{
           ...styles.display,
-          fontSize: 28,
-          lineHeight: '34px',
+          fontSize: 32,
+          lineHeight: '38px',
         }}
       >
-        <Trans>Files</Trans>
+        <Trans>Your budgets</Trans>
       </Text>
       {!quickSwitchMode && (
         <View

@@ -127,10 +127,7 @@ export function ElectronServerConfig({
         }}
       >
         <Text style={bodyTextStyle}>
-          <Trans>
-            Set up your server below to enable seamless data synchronization
-            across your devices, bank sync and more...
-          </Trans>
+          <Trans>A server keeps your budget in sync across devices.</Trans>
         </Text>
         <Text style={bodyTextStyle}>
           <Trans>
@@ -408,9 +405,8 @@ export function ConfigServer() {
               </Trans>
             ) : (
               <Trans>
-                A sync server keeps your budget up to date across all your
-                devices and unlocks features like bank syncing. It is completely
-                optional: Actual works great on just this device too.
+                A server keeps your budget in sync across devices. It is
+                optional: Actual works fully on this device alone.
               </Trans>
             )}
           </Text>

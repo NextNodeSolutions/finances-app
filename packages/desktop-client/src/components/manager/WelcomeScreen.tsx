@@ -43,23 +43,17 @@ export function WelcomeScreen() {
         paddingBlock: isNarrowWidth ? 28 : 40,
       }}
     >
-      <View style={{ alignItems: 'center', gap: 6, flexShrink: 0 }}>
+      <View style={{ alignItems: 'center', gap: 10, flexShrink: 0 }}>
         <Text
           style={{
             ...styles.display,
-            fontSize: 30,
-            lineHeight: '36px',
+            fontSize: 32,
+            lineHeight: '38px',
             textAlign: 'center',
           }}
         >
           <Trans>Welcome to Actual</Trans>
         </Text>
-        <Text style={{ ...bodyTextStyle, textAlign: 'center' }}>
-          <Trans>Your finances - made simple</Trans>
-        </Text>
-      </View>
-
-      <View style={{ alignItems: 'center', flexShrink: 0 }}>
         <Paragraph
           style={{
             ...bodyTextStyle,
@@ -69,9 +63,8 @@ export function WelcomeScreen() {
           }}
         >
           <Trans>
-            Actual is a super fast, privacy-focused app for managing your
-            finances. It is 100% free and open source: everything stays on your
-            device, no data is collected, and there is nothing to sign up for.
+            Your budget lives on this device, fast and private. Actual is free
+            and open source, with nothing to sign up for.
           </Trans>
         </Paragraph>
       </View>
