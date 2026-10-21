@@ -6,6 +6,7 @@ import { SvgHash } from '@actual-app/components/icons/v0';
 
 import { useCursorPosition } from '#hooks/useCursorPosition';
 import { useInputRefValue } from '#hooks/useInputRefValue';
+import { useOptionalFeature } from '#hooks/useOptionalFeature';
 
 type NoteInsertHashButtonProps = {
   inputRef: RefObject<HTMLInputElement | null>;
@@ -15,6 +16,11 @@ export function NoteInsertHashButton({ inputRef }: NoteInsertHashButtonProps) {
   const { t } = useTranslation();
   const [inputValue, setInputValue] = useInputRefValue(inputRef);
   const [_, setCursorPosition] = useCursorPosition(inputRef);
+  const [isTagsOn] = useOptionalFeature('tags');
+
+  if (!isTagsOn) {
+    return null;
+  }
 
   return (
     <Button

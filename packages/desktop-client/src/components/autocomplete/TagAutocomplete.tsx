@@ -18,6 +18,7 @@ import { css } from '@emotion/css';
 
 import { useCurrentWordRange } from '#hooks/useCurrentWordRange';
 import { useCursorPosition } from '#hooks/useCursorPosition';
+import { useOptionalFeature } from '#hooks/useOptionalFeature';
 import { useTagCSS } from '#hooks/useTagCSS';
 import { useFilteredTags } from '#hooks/useTags';
 
@@ -72,7 +73,8 @@ export function TagAutocomplete({
   }, [filteredTags, currentWord]);
 
   const [isOpen, setIsOpen] = useState(false);
-  const showPopup = isOpen && filteredItems.length > 0;
+  const [isTagsOn] = useOptionalFeature('tags');
+  const showPopup = isOpen && filteredItems.length > 0 && isTagsOn;
 
   const [highlightedIdx, setHighlightedIdx] = useState(0);
   const highlightedId =
