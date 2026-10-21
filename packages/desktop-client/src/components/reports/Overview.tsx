@@ -23,7 +23,7 @@ import type {
 } from '@actual-app/core/types/models';
 
 import { MOBILE_NAV_HEIGHT } from '#components/mobile/MobileNavTabs';
-import { MobilePageHeader, Page } from '#components/Page';
+import { Page } from '#components/Page';
 import { useAccounts } from '#hooks/useAccounts';
 import {
   useDashboardPages,
@@ -51,7 +51,7 @@ import {
 
 import { reportPageGutter } from './chart-theme';
 import { NON_DRAGGABLE_AREA_CLASS_NAME } from './constants';
-import { DashboardHeader } from './DashboardHeader';
+import { DashboardRename } from './DashboardRename';
 import './overview.scss';
 import { DashboardSelector } from './DashboardSelector';
 import { LoadingIndicator } from './LoadingIndicator';
@@ -70,6 +70,9 @@ import { NetWorthCard } from './reports/NetWorthCard';
 import { SankeyCard } from './reports/SankeyCard';
 import { SpendingCard } from './reports/SpendingCard';
 import { SummaryCard } from './reports/SummaryCard';
+import { ReportsHeader } from './ReportsHeader';
+import { ReportsMobileHeader } from './ReportsMobileHeader';
+import { ReportsTabs } from './ReportsTabs';
 
 // Generous gutters between cards. With the page's own padding, the grid
 // padding puts the cards on the page title's gutter.
@@ -479,74 +482,38 @@ export function Overview({ dashboard }: OverviewProps) {
     <Page
       header={
         isNarrowWidth ? (
-          <View>
-            <MobilePageHeader
-              title={
-                <View
-                  style={{
-                    overflow: 'hidden',
-                    textOverflow: 'ellipsis',
-                    whiteSpace: 'nowrap',
-                  }}
-                >
-                  <Trans>Reports</Trans>: {dashboard.name}
-                </View>
-              }
-            />
-            <View
-              style={{
-                padding: '5px',
-                borderBottom: '1px solid ' + theme.pillBorder,
-                backgroundColor: theme.mobilePageBackground,
-              }}
-            >
-              <DashboardSelector
-                dashboards={dashboardPages}
-                currentDashboard={dashboard}
-              />
-            </View>
-          </View>
-        ) : (
-          <View
-            style={{
-              flexDirection: 'row',
-              justifyContent: 'space-between',
-              alignItems: 'center',
-              minHeight: 34,
-              marginLeft: reportPageGutter,
-              marginRight: reportPageGutter,
-              marginBottom: 8,
-            }}
-          >
-            <DashboardHeader dashboard={dashboard} />
-
-            <View
-              style={{
-                flexDirection: 'row',
-                justifyContent: 'space-between',
-                gap: 8,
-                alignItems: 'center',
-              }}
-            >
-              {currentBreakpoint === 'desktop' && (
-                <>
-                  {/* Dashboard Selector */}
+          <ReportsMobileHeader
+            tabs={
+              <ReportsTabs
+                activeTab="dashboard"
+                dashboardTab={
                   <DashboardSelector
                     dashboards={dashboardPages}
                     currentDashboard={dashboard}
                   />
-
-                  <View
-                    style={{
-                      alignSelf: 'stretch',
-                      borderLeft: `1px solid ${theme.hairlineStrong}`,
-                      marginTop: 4,
-                      marginBottom: 4,
-                      marginLeft: 4,
-                      marginRight: 4,
-                    }}
-                  />
-
+                }
+              />
+            }
+          />
+        ) : (
+          <ReportsHeader
+            tabs={
+              <>
+                <ReportsTabs
+                  activeTab="dashboard"
+                  dashboardTab={
+                    <DashboardSelector
+                      dashboards={dashboardPages}
+                      currentDashboard={dashboard}
+                    />
+                  }
+                />
+                <DashboardRename key={dashboard.id} dashboard={dashboard} />
+              </>
+            }
+            actions={
+              currentBreakpoint === 'desktop' && (
+                <>
                   <DialogTrigger>
                     <Button variant="primary" isDisabled={isImporting}>
                       <Trans>Add new widget</Trans>
@@ -757,9 +724,9 @@ export function Overview({ dashboard }: OverviewProps) {
                     </Popover>
                   </DialogTrigger>
                 </>
-              )}
-            </View>
-          </View>
+              )
+            }
+          />
         )
       }
       padding={PAGE_PADDING}

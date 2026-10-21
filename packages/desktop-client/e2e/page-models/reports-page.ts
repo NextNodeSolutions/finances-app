@@ -151,6 +151,19 @@ export class ReportsPage {
       .waitFor({ state: 'visible' });
   }
 
+  /**
+   * Switch to the Statements tab and return its table once months are listed.
+   */
+  async goToStatementsPage() {
+    await this.pageContent
+      .getByRole('button', { name: 'Statements', exact: true })
+      .click();
+
+    const table = this.pageContent.getByTestId('statements-table');
+    await table.locator('[data-testid^="statement-row-"]').first().waitFor();
+    return table;
+  }
+
   async addWidget(widgetName: string) {
     await this.pageContent
       .getByRole('button', { name: 'Add new widget' })
