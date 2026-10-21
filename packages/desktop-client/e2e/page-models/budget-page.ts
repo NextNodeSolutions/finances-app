@@ -22,7 +22,10 @@ export class BudgetPage {
     this.budgetTable = page.getByTestId('budget-table');
     this.budgetTableTotals = this.budgetTable.getByTestId('budget-totals');
     this.selectedMonthButton = page.getByTestId('selected-budget-month');
-    this.nextMonthButton = page.getByTitle('Next month');
+    this.nextMonthButton = page.getByRole('button', {
+      name: 'Next month',
+      exact: true,
+    });
     this.budgetTableScrollContainer = page.getByTestId(
       'budget-table-scroll-container',
     );

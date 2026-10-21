@@ -72,6 +72,7 @@ describe('FilterEditor tag operators', () => {
         field="notes"
         op={op}
         value=""
+        options={undefined}
         onSave={vi.fn()}
         onClose={vi.fn()}
       />,

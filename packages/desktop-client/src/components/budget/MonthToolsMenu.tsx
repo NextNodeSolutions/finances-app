@@ -45,9 +45,11 @@ export function MonthToolsMenu({
   const envelopeMenu = useEnvelopeMonthMenu(actions);
   const trackingMenu = useTrackingMonthMenu(actions);
   const monthMenu = budgetType === 'tracking' ? trackingMenu : envelopeMenu;
+  const separator: Array<typeof Menu.line> =
+    extraItems.length > 0 ? [Menu.line] : [];
   const items: Array<MenuItemObject<string> | typeof Menu.line> = [
     ...extraItems.map(({ name, text }) => ({ name, text })),
-    ...(extraItems.length > 0 ? [Menu.line] : []),
+    ...separator,
     ...monthMenu.items,
   ];
 

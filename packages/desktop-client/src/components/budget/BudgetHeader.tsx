@@ -77,7 +77,6 @@ export function BudgetHeader({
       />
       <Button
         variant="bare"
-        title={t('Previous month')}
         aria-label={t('Previous month')}
         onPress={() => onMonthSelect(monthUtils.prevMonth(startMonth))}
         style={navButtonStyle}
@@ -86,7 +85,6 @@ export function BudgetHeader({
       </Button>
       <Button
         variant="bare"
-        title={t('Next month')}
         aria-label={t('Next month')}
         onPress={() => onMonthSelect(monthUtils.nextMonth(startMonth))}
         style={navButtonStyle}

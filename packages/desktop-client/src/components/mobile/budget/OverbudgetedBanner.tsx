@@ -31,7 +31,8 @@ export function OverbudgetedBanner({
   const dispatch = useDispatch();
   const format = useFormat();
   const { showUndoNotification } = useUndo();
-  const { data: { list: categories } = { list: [] } } = useCategories();
+  const { data: categoryData } = useCategories();
+  const categories = categoryData?.list ?? [];
   const toBudget = useSheetValue<'envelope-budget', 'to-budget'>(
     envelopeBudget.toBudget,
   );
