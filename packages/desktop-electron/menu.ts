@@ -46,6 +46,8 @@ export function getMenu() {
         },
         {
           role: 'resetZoom',
+          // CmdOrCtrl+0 opens the Overview page in the app.
+          accelerator: 'CmdOrCtrl+Shift+0',
         },
         {
           role: 'zoomIn',

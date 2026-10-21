@@ -15,6 +15,7 @@ import * as Platform from '@actual-app/core/shared/platform';
 import { Modal, ModalCloseButton, ModalHeader } from '#components/common/Modal';
 import { Search } from '#components/common/Search';
 import { useFeatureFlag } from '#hooks/useFeatureFlag';
+import { useOptionalFeature } from '#hooks/useOptionalFeature';
 
 type KeyIconProps = {
   shortcut: string;
@@ -26,6 +27,8 @@ type ShortcutListItemProps = {
   description: string;
   meta?: string;
   shift?: boolean;
+  /** A key pressed first, as in `g` then `b`. */
+  prefix?: string;
   style?: CSSProperties;
 };
 
@@ -101,6 +104,7 @@ function ShortcutListItem({
   description,
   meta,
   shift,
+  prefix,
   style,
 }: ShortcutListItemProps) {
   return (
@@ -115,6 +119,14 @@ function ShortcutListItem({
           flexShrink: 0,
         }}
       >
+        {prefix && (
+          <>
+            <KeyIcon shortcut={prefix} />
+            <Text>
+              <Trans>then</Trans>
+            </Text>
+          </>
+        )}
         {shift && (
           <>
             <KeyIcon shortcut="Shift" />
@@ -139,6 +151,7 @@ type Shortcut = {
   description: string;
   meta?: string;
   shift?: boolean;
+  prefix?: string;
   style?: CSSProperties;
 };
 
@@ -156,6 +169,8 @@ export function KeyboardShortcutModal() {
     null,
   );
   const isGoalTemplatesEnabled = useFeatureFlag('goalTemplatesEnabled');
+  const [isBankSyncOn] = useOptionalFeature('bankSync');
+  const isDesktopApp = !Platform.isBrowser;
 
   // In future, we may move this to state and pull overrides from config/db
   // This would allow us to drive our shortcuts from state instead of hardcoding them
@@ -177,9 +192,9 @@ export function KeyboardShortcutModal() {
             meta: ctrl,
           },
           {
-            id: 'close-budget',
+            id: 'switch-file',
             shortcut: 'O',
-            description: t('Close the current budget and open another'),
+            description: t('Switch to another file'),
             meta: ctrl,
           },
           {
@@ -201,6 +216,148 @@ export function KeyboardShortcutModal() {
             description: t('Redo the last undone change'),
             shift: true,
             meta: ctrl,
+          },
+        ],
+      },
+      {
+        id: 'navigation',
+        name: t('Navigation'),
+        items: [
+          {
+            id: 'go-to-overview',
+            prefix: 'G',
+            shortcut: 'O',
+            description: t('Go to Overview'),
+          },
+          {
+            id: 'go-to-budget',
+            prefix: 'G',
+            shortcut: 'B',
+            description: t('Go to Budget'),
+          },
+          {
+            id: 'go-to-accounts',
+            prefix: 'G',
+            shortcut: 'A',
+            description: t('Go to All accounts'),
+          },
+          {
+            id: 'go-to-schedules',
+            prefix: 'G',
+            shortcut: 'S',
+            description: t('Go to Schedules'),
+          },
+          {
+            id: 'go-to-reports',
+            prefix: 'G',
+            shortcut: 'R',
+            description: t('Go to Reports'),
+          },
+          {
+            id: 'go-to-payees',
+            prefix: 'G',
+            shortcut: 'P',
+            description: t('Go to Payees'),
+          },
+          {
+            id: 'go-to-rules',
+            prefix: 'G',
+            shortcut: 'U',
+            description: t('Go to Rules'),
+          },
+          {
+            id: 'go-to-settings',
+            prefix: 'G',
+            shortcut: ',',
+            description: t('Go to Settings'),
+          },
+          {
+            id: 'new-transaction-anywhere',
+            shortcut: 'T',
+            description: t('Add a transaction from any page'),
+          },
+          ...(isDesktopApp
+            ? [
+                {
+                  id: 'open-overview',
+                  shortcut: '0',
+                  meta: ctrl,
+                  style: { fontVariantNumeric: 'slashed-zero' },
+                  description: t('Open Overview'),
+                },
+                {
+                  id: 'open-budget',
+                  shortcut: '1',
+                  meta: ctrl,
+                  description: t('Open Budget'),
+                },
+                {
+                  id: 'open-reports',
+                  shortcut: '2',
+                  meta: ctrl,
+                  description: t('Open Reports'),
+                },
+                {
+                  id: 'open-accounts',
+                  shortcut: '3',
+                  meta: ctrl,
+                  description: t('Open All accounts'),
+                },
+                {
+                  id: 'open-schedules',
+                  shortcut: '4',
+                  meta: ctrl,
+                  description: t('Open Schedules'),
+                },
+              ]
+            : []),
+          ...(isDesktopApp && Platform.OS === 'mac'
+            ? [
+                {
+                  id: 'open-settings',
+                  shortcut: ',',
+                  meta: ctrl,
+                  description: t('Open Settings'),
+                },
+              ]
+            : []),
+        ],
+      },
+      {
+        id: 'side-panel',
+        name: t('Side panel'),
+        items: [
+          {
+            id: 'close-side-panel',
+            shortcut: 'Esc',
+            description: t('Close the side panel'),
+          },
+          {
+            id: 'side-panel-primary-action',
+            shortcut: 'Enter',
+            meta: ctrl,
+            description: t('Save, transfer or cover from the side panel'),
+          },
+        ],
+      },
+      {
+        id: 'overview-page',
+        name: t('Overview page'),
+        items: [
+          {
+            id: 'rewind-month',
+            shortcut: '←',
+            description: t('Rewind one month'),
+          },
+          {
+            id: 'forward-month',
+            shortcut: '→',
+            description: t('Move forward one month'),
+          },
+          {
+            id: 'back-to-today',
+            shortcut: 'Esc',
+            description: t('Back to today'),
           },
         ],
       },
@@ -253,12 +410,16 @@ export function KeyboardShortcutModal() {
         id: 'account-page-general',
         name: t('Account page general'),
         items: [
-          {
-            id: 'bank-sync',
-            shortcut: 'B',
-            meta: ctrl,
-            description: t('Bank sync'),
-          },
+          ...(isBankSyncOn
+            ? [
+                {
+                  id: 'bank-sync',
+                  shortcut: 'B',
+                  meta: ctrl,
+                  description: t('Bank sync'),
+                },
+              ]
+            : []),
           {
             id: 'import-transactions',
             shortcut: 'I',
@@ -439,7 +600,7 @@ export function KeyboardShortcutModal() {
         ],
       },
     ],
-    [t, ctrl, isGoalTemplatesEnabled],
+    [t, ctrl, isGoalTemplatesEnabled, isBankSyncOn, isDesktopApp],
   );
 
   const { isSearching, isInCategory, currentCategory, itemsToShow } =
@@ -585,6 +746,7 @@ export function KeyboardShortcutModal() {
                     description={shortcut.description}
                     meta={shortcut.meta}
                     shift={shortcut.shift}
+                    prefix={shortcut.prefix}
                     style={shortcut.style}
                   />
                 ))
