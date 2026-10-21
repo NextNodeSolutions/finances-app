@@ -1,6 +1,7 @@
-import React from 'react';
+import type { ReactElement } from 'react';
 import { useTranslation } from 'react-i18next';
 
+import { Button } from '@actual-app/components/button';
 import { theme } from '@actual-app/components/theme';
 import { elevation, motion, radius } from '@actual-app/components/tokens';
 import { View } from '@actual-app/components/view';
@@ -60,27 +61,29 @@ type MonthCountOptionProps = {
 // One segment of the tray: the chosen count sits on a white pill in ink,
 // the others recede.
 function MonthCountOption({ count, isChosen, onClick }: MonthCountOptionProps) {
+  const { t } = useTranslation();
+
   return (
-    <View
-      onClick={onClick}
+    <Button
+      variant="bare"
+      aria-pressed={isChosen}
+      aria-label={t('{{count}} months', { count })}
+      onPress={onClick}
       style={{
         width: 28,
         height: 22,
-        alignItems: 'center',
-        justifyContent: 'center',
+        padding: 0,
         borderRadius: radius.sm,
-        cursor: 'pointer',
         color: isChosen ? theme.pageText : theme.pageTextSubdued,
         backgroundColor: isChosen
           ? theme.buttonNormalBackground
           : 'transparent',
         boxShadow: isChosen ? elevation.xs : 'none',
         transition: `background-color ${motion.base} ${motion.ease}, color ${motion.base} ${motion.ease}`,
-        ':hover': { color: theme.pageText },
       }}
     >
       <MonthColumnsGlyph count={count} />
-    </View>
+    </Button>
   );
 }
 
@@ -103,7 +106,7 @@ export function MonthCountSelector({
     return null;
   }
 
-  const options = [];
+  const options: ReactElement[] = [];
   for (let count = 1; count <= displayMax; count++) {
     options.push(
       <MonthCountOption
@@ -122,12 +125,13 @@ export function MonthCountSelector({
         alignItems: 'center',
         gap: 2,
         padding: 2,
-        marginRight: 20,
         backgroundColor: theme.trayBackground,
         border: '1px solid ' + theme.trayBorder,
         borderRadius: radius.md,
         WebkitAppRegion: 'no-drag',
       }}
+      role="group"
+      aria-label={t('Choose the number of months shown at a time')}
       title={t('Choose the number of months shown at a time')}
     >
       {options}
