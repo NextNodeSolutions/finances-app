@@ -41,13 +41,13 @@
   "dependencies": {
     "@bufbuild/protobuf": "^2.16.0",
     "murmurhash": "^2.0.1",
-    "uuid": "^14.0.3"
+    "uuid": "catalog:"
   },
   "devDependencies": {
     "@bufbuild/protoc-gen-es": "^2.16.0",
-    "@typescript/native-preview": "beta",
-    "rollup-plugin-visualizer": "^7.1.1",
-    "vite": "^8.3.4",
-    "vitest": "^5.0.4"
+    "@typescript/native-preview": "catalog:",
+    "rollup-plugin-visualizer": "catalog:",
+    "vite": "catalog:",
+    "vitest": "catalog:"
   }
 }

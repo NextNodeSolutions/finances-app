@@ -62,31 +62,31 @@
     "typecheck": "tsgo -b"
   },
   "dependencies": {
-    "@emotion/css": "^11.13.5",
-    "@internationalized/date": "^3.12.4",
-    "react-aria-components": "^1.22.1",
-    "usehooks-ts": "^3.1.1"
+    "@emotion/css": "catalog:",
+    "@internationalized/date": "catalog:",
+    "react-aria-components": "catalog:",
+    "usehooks-ts": "catalog:"
   },
   "devDependencies": {
     "@chromatic-com/storybook": "^5.5.1",
-    "@rolldown/plugin-babel": "~0.2.4",
+    "@rolldown/plugin-babel": "catalog:",
     "@storybook/addon-a11y": "^10.6.2",
     "@storybook/addon-docs": "^10.6.2",
     "@storybook/react-vite": "^10.6.2",
     "@svgr/babel-plugin-add-jsx-attribute": "^8.0.0",
     "@svgr/cli": "^8.1.0",
     "@svgr/core": "^8.1.0",
-    "@testing-library/react": "16.3.3",
-    "@types/react": "^19.3.0",
-    "@typescript/native-preview": "beta",
-    "@vitejs/plugin-react": "^6.1.2",
-    "babel-plugin-react-compiler": "^1.0.0",
+    "@testing-library/react": "catalog:",
+    "@types/react": "catalog:",
+    "@typescript/native-preview": "catalog:",
+    "@vitejs/plugin-react": "catalog:",
+    "babel-plugin-react-compiler": "catalog:",
     "eslint-plugin-storybook": "^10.6.2",
-    "react": "19.3.0",
-    "react-dom": "19.3.0",
+    "react": "catalog:",
+    "react-dom": "catalog:",
     "storybook": "^10.6.2",
-    "vite": "^8.3.4",
-    "vitest": "^5.0.4"
+    "vite": "catalog:",
+    "vitest": "catalog:"
   },
   "peerDependencies": {
     "react": "19.3.0",
