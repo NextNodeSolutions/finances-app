@@ -41,7 +41,7 @@ import {
 } from './util/paths';
 import type { GroupId } from './util/paths';
 
-const app = express();
+const app: express.Express = express();
 app.use(validateSessionMiddleware);
 app.use(errorMiddleware);
 app.use(requestLoggerMiddleware);

@@ -29,7 +29,7 @@ const debugSensitive = createDebug('actual-sensitive:enable-banking');
 
 const debug = createDebug('actual:enable-banking:app');
 
-const app = express();
+const app: express.Express = express();
 export { app as handlers };
 app.use(requestLoggerMiddleware);
 app.use(express.json());

@@ -9,6 +9,7 @@ import { validateSession } from './util/validate-user';
 
 const debugSensitive = createDebug('actual-sensitive:cors-proxy');
 
+/** @type {express.Express} */
 const app = express();
 
 app.use(express.json());
