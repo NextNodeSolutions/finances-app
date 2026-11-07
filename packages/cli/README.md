@@ -196,10 +196,10 @@ If you're working on the CLI within the monorepo:
 
 ```bash
 # 1. Build the CLI
-yarn build:cli
+pnpm build:cli
 
 # 2. Start a local sync server (in a separate terminal)
-yarn start:server-dev
+pnpm start:server-dev
 
 # 3. Open http://localhost:5006 in your browser, create a budget,
 #    then find the Sync ID in Settings → Advanced → Sync ID

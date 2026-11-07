@@ -10,7 +10,7 @@ This guide helps you resolve common issues when developing for Actual.
 
 **Solution:**
 
-1. Run `yarn typecheck` to see all type errors
+1. Run `pnpm typecheck` to see all type errors
 2. Check if types are imported correctly
 3. Look for existing type definitions in `packages/loot-core/src/types/`
 4. Use `satisfies` instead of `as` for type narrowing
@@ -21,7 +21,7 @@ This guide helps you resolve common issues when developing for Actual.
 
 1. Check `tsconfig.json` for path mappings
 2. Ensure you're using the correct import path for the package
-3. Run `yarn install` to ensure all dependencies are installed
+3. Run `pnpm install` to ensure all dependencies are installed
 
 ## Linter Errors
 
@@ -29,7 +29,7 @@ This guide helps you resolve common issues when developing for Actual.
 
 **Solution:**
 
-1. Run `yarn lint:fix` to auto-fix many issues
+1. Run `pnpm lint:fix` to auto-fix many issues
 2. Check ESLint output for specific rule violations and fix them
 
 ## Test Failures
@@ -45,8 +45,8 @@ This guide helps you resolve common issues when developing for Actual.
 
 **Solution:**
 
-1. Ensure Playwright browsers are installed: `yarn workspace @actual-app/web run playwright install`
-2. Run tests with headed browser for debugging: `yarn workspace @actual-app/web run playwright test --headed --debug`
+1. Ensure Playwright browsers are installed: `pnpm --filter @actual-app/web run playwright install`
+2. Run tests with headed browser for debugging: `pnpm --filter @actual-app/web run playwright test --headed --debug`
 
 ## Import Resolution Issues
 
@@ -69,15 +69,15 @@ This guide helps you resolve common issues when developing for Actual.
    ```
 2. Reinstall dependencies:
    ```bash
-   yarn install
+   pnpm install
    ```
 3. Check Node.js version (requires >=22):
    ```bash
    node --version
    ```
-4. Check Yarn version (requires ^4.9.1):
+4. Check pnpm version (requires >=12.8.1):
    ```bash
-   yarn --version
+   pnpm --version
    ```
 
 ### Issue: Native module build failures (better-sqlite3)
@@ -85,8 +85,8 @@ This guide helps you resolve common issues when developing for Actual.
 **Solution:**
 
 1. On Windows: Ensure you selected "Automatically install the necessary tools" during Node.js installation
-2. Run `yarn rebuild-electron` for Electron builds
-3. Run `yarn workspace @actual-app/core rebuild` for Node.js builds
+2. Run `pnpm rebuild-electron` for Electron builds
+3. Run `pnpm rebuild-node` for Node.js builds
 4. Ensure you have the necessary build tools installed (Python, Visual Studio Build Tools on Windows)
 
 ## Development Server Issues
@@ -96,11 +96,11 @@ This guide helps you resolve common issues when developing for Actual.
 **Solution:**
 
 1. Check if port is already in use
-2. Ensure all dependencies are installed: `yarn install`
+2. Ensure all dependencies are installed: `pnpm install`
 3. Try clearing node_modules and reinstalling:
    ```bash
    rm -rf node_modules packages/**/node_modules
-   yarn install
+   pnpm install
    ```
 4. Check for error messages in the console
 
@@ -120,7 +120,7 @@ This guide helps you resolve common issues when developing for Actual.
 **Solution:**
 
 1. Ensure you're running commands from the root directory
-2. Verify workspace name is correct: `yarn workspaces list`
+2. Verify workspace name is correct: `pnpm ls -r --depth -1`
 3. Check package.json for available scripts
 4. Use correct workspace alias (e.g., `@actual-app/web` instead of `desktop-client`)
 
@@ -130,23 +130,23 @@ This guide helps you resolve common issues when developing for Actual.
 
 **Solution:**
 
-1. Ensure Husky is set up: `yarn prepare`
-2. Run linting manually: `yarn lint:fix`
-3. Run type checking: `yarn typecheck`
+1. Ensure Husky is set up: `pnpm prepare`
+2. Run linting manually: `pnpm lint:fix`
+3. Run type checking: `pnpm typecheck`
 4. Fix any errors before committing
 
 ## Environment Issues
 
-### Issue: Wrong Node.js or Yarn version
+### Issue: Wrong Node.js or pnpm version
 
 **Solution:**
 
 1. Check required versions in `package.json`:
    - Node.js: >=22
-   - Yarn: ^4.9.1
+   - pnpm: >=12.8.1
 2. Use a version manager:
    - [nvm](https://github.com/nvm-sh/nvm) for Node.js
-   - Yarn version is managed by the `packageManager` field
+   - pnpm version is pinned by the `packageManager` field
 3. Update your environment to match requirements
 
 ## Getting Help

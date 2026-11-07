@@ -18,14 +18,14 @@ We provide an official Node.js client in the `@actual-app/api` package. Other la
 
 The client is [open-source on GitHub](https://github.com/actualbudget/actual/tree/master/packages/api) along with the rest of Actual if you want to see the code.
 
-Install it with either `npm` or `yarn`:
+Install it with either `npm` or `pnpm`:
 
 ```
 npm install --save @actual-app/api
 ```
 
 ```
-yarn add @actual-app/api
+pnpm add @actual-app/api
 ```
 
 ### TypeScript

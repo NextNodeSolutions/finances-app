@@ -18,13 +18,13 @@ The project uses multiple testing frameworks:
 
 ```bash
 # Run all tests across all packages (recommended)
-yarn test
+pnpm test
 
 # Run tests without cache (for debugging/CI)
-yarn test:debug
+pnpm test:debug
 ```
 
-The `yarn test` command uses Lage to run tests in parallel across all workspaces. This provides:
+The `pnpm test` command uses Lage to run tests in parallel across all workspaces. This provides:
 
 - **Parallel execution**: Tests run simultaneously across packages for faster feedback
 - **Smart caching**: Test results are cached in `.lage/` directory to skip unchanged packages
@@ -34,20 +34,20 @@ The `yarn test` command uses Lage to run tests in parallel across all workspaces
 
 ```bash
 # Run tests for @actual-app/core
-yarn workspace @actual-app/core run test
+pnpm --filter @actual-app/core run test
 
 # Run tests for the API package
-yarn workspace @actual-app/api run test
+pnpm --filter @actual-app/api run test
 
 # Run tests for desktop-client
-yarn workspace @actual-app/web run test
+pnpm --filter @actual-app/web run test
 ```
 
 ### Running a Specific Test File
 
 ```bash
 # Run E2E test for a specific file
-yarn workspace @actual-app/web run playwright test accounts.test.ts
+pnpm --filter @actual-app/web run playwright test accounts.test.ts
 ```
 
 ## Unit Tests (Vitest)
@@ -91,16 +91,16 @@ E2E tests are located in `packages/desktop-client/e2e/` and use Playwright as th
 
 ```bash
 # Run E2E tests for web
-yarn e2e
+pnpm e2e
 
 # Desktop Electron E2E (includes full build)
-yarn e2e:desktop
+pnpm e2e:desktop
 
 # Run E2E tests for a specific package
-yarn workspace @actual-app/web e2e
+pnpm --filter @actual-app/web e2e
 
 # Run specific E2E test with headed browser
-yarn workspace @actual-app/web run playwright test --headed --debug accounts.test.ts
+pnpm --filter @actual-app/web run playwright test --headed --debug accounts.test.ts
 ```
 
 ### E2E Test Structure
@@ -115,10 +115,10 @@ Visual regression tests capture screenshots and compare them to baseline images 
 
 ```bash
 # Run visual regression tests
-yarn vrt
+pnpm vrt
 
 # Run visual regression tests in Docker (consistent environment)
-yarn vrt:docker
+pnpm vrt:docker
 ```
 
 Visual regression snapshots are stored per test file in `*-snapshots/` directories. Use Docker for consistent environments when running VRT. They will be automatically generated and run on pull requests to catch unexpected visual changes.
@@ -134,7 +134,7 @@ If tests behave unexpectedly, the Lage cache might be causing issues:
 rm -rf .lage
 
 # Run tests without cache
-yarn test:debug
+pnpm test:debug
 ```
 
 ### Tests Continue on Error
@@ -145,10 +145,10 @@ With the `--continue` flag, all packages run even if one fails. This helps ident
 
 ```bash
 # Run tests in debug mode (without parallelization)
-yarn test:debug
+pnpm test:debug
 
 # Run specific E2E test with headed browser and debug mode
-yarn workspace @actual-app/web run playwright test --headed --debug accounts.test.ts
+pnpm --filter @actual-app/web run playwright test --headed --debug accounts.test.ts
 ```
 
 ## Test Configuration
@@ -169,7 +169,7 @@ yarn workspace @actual-app/web run playwright test --headed --debug accounts.tes
 
 Before submitting a pull request:
 
-- [ ] All existing tests pass (`yarn test`)
+- [ ] All existing tests pass (`pnpm test`)
 - [ ] New functionality has appropriate test coverage
 - [ ] Tests follow best practices (minimize mocking, descriptive names)
 - [ ] E2E tests pass if UI changes were made
