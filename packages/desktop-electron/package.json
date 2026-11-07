@@ -28,7 +28,7 @@
     "@typescript/native-preview": "catalog:",
     "copyfiles": "^2.4.1",
     "cross-env": "catalog:",
-    "electron": "43.5.0",
+    "electron": "43.8.1",
     "electron-builder": "26.8.1",
     "typescript-strict-plugin": "catalog:",
     "vitest": "catalog:"
