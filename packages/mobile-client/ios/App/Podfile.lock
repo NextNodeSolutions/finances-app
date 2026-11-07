@@ -6,17 +6,17 @@ PODS:
     - Capacitor
 
 DEPENDENCIES:
-  - "Capacitor (from `../../../../node_modules/@capacitor/ios`)"
-  - "CapacitorCordova (from `../../../../node_modules/@capacitor/ios`)"
-  - "CapacitorSplashScreen (from `../../../../node_modules/@capacitor/splash-screen`)"
+  - "Capacitor (from `../../node_modules/@capacitor/ios`)"
+  - "CapacitorCordova (from `../../node_modules/@capacitor/ios`)"
+  - "CapacitorSplashScreen (from `../../node_modules/@capacitor/splash-screen`)"
 
 EXTERNAL SOURCES:
   Capacitor:
-    :path: "../../../../node_modules/@capacitor/ios"
+    :path: "../../node_modules/@capacitor/ios"
   CapacitorCordova:
-    :path: "../../../../node_modules/@capacitor/ios"
+    :path: "../../node_modules/@capacitor/ios"
   CapacitorSplashScreen:
-    :path: "../../../../node_modules/@capacitor/splash-screen"
+    :path: "../../node_modules/@capacitor/splash-screen"
 
 SPEC CHECKSUMS:
   Capacitor: 52f999235b8bd6a7d01694753f4f4d54d182e3a3

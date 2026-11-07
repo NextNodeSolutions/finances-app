@@ -266,7 +266,7 @@ await group('Remove used release notes', async () => {
 });
 
 await group('Format generated files', async () => {
-  await exec(`yarn exec oxfmt ${blogPath} ${releasesPath}`, {
+  await exec(`pnpm exec oxfmt ${blogPath} ${releasesPath}`, {
     stdio: 'inherit',
   });
 });

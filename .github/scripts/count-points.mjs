@@ -29,8 +29,7 @@ const CONFIG = {
     { minChanges: 0, points: 2 },
   ],
   EXCLUDED_FILES: [
-    'yarn.lock',
-    '.yarn/**/*',
+    'pnpm-lock.yaml',
     'packages/component-library/src/icons/**/*',
     'release-notes/**/*',
     'upcoming-release-notes/**/*',

@@ -51,7 +51,7 @@ jobs:
           if [[ -n "$INPUT_VERSION" ]]; then
             args+=(--version "$INPUT_VERSION")
           fi
-          yarn workspace @actual-app/ci-actions tsx bin/get-next-package-version.ts "${args[@]}"
+          pnpm --filter @actual-app/ci-actions run tsx bin/get-next-package-version.ts "${args[@]}"
 
       - name: Determine previous tag
         id: prev_tag
@@ -95,7 +95,7 @@ jobs:
           VERSION: ${{ steps.version.outputs.version }}
         run: |
           for pkg in desktop-client desktop-electron sync-server api cli loot-core mobile-client; do
-            yarn workspace @actual-app/ci-actions tsx bin/get-next-package-version.ts \
+            pnpm --filter @actual-app/ci-actions run tsx bin/get-next-package-version.ts \
               --package-json "./packages/$pkg/package.json" \
               --version "$VERSION" \
               --update

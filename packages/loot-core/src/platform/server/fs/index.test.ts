@@ -16,7 +16,7 @@ import {
 } from './index';
 
 beforeAll(() => {
-  const baseURL = `${__dirname}/../../../../../../node_modules/@jlongster/sql.js/dist/`;
+  const baseURL = `${__dirname}/../../../../node_modules/@jlongster/sql.js/dist/`;
   patchFetchForSqlJS(baseURL);
   process.env.PUBLIC_URL = baseURL;
 });

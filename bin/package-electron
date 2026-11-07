@@ -51,35 +51,35 @@ fi
 
 export NODE_OPTIONS="--max-old-space-size=4096"
 
-yarn workspace @actual-app/crdt build
-yarn workspace plugins-service build
-yarn workspace @actual-app/core build:node
-yarn workspace @actual-app/web build --mode=desktop # electron specific build
+pnpm --filter @actual-app/crdt run build
+pnpm --filter plugins-service run build
+pnpm --filter @actual-app/core run build:node
+pnpm --filter @actual-app/web run build --mode=desktop # electron specific build
 
 # required for running the sync-server server
-yarn build:browser
-yarn workspace @actual-app/sync-server build
+pnpm run build:browser
+pnpm --filter @actual-app/sync-server run build
 
 # Emit @actual-app/core declarations so desktop-electron (which includes typings/window.ts) can build
-yarn workspace @actual-app/core exec tsgo -p tsconfig.json
+pnpm --filter @actual-app/core exec tsgo -p tsconfig.json
 
-yarn workspace desktop-electron update-client
+pnpm --filter desktop-electron run update-client
 
 (
     cd packages/desktop-electron;
-    yarn clean;
+    pnpm run clean;
 
     if [ $SKIP_EXE_BUILD == true ]; then
         echo "Building the dist"
-        yarn build:dist
+        pnpm run build:dist
         echo "Skipping exe build"
     else
       if [ "$RELEASE" == "production" ]; then
-          yarn build
+          pnpm run build
 
           echo "Created release"
       else
-          yarn build
+          pnpm run build
       fi
     fi
 )

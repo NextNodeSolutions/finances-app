@@ -39,7 +39,7 @@ jobs:
         run: npm install netlify-cli@17.10.1 -g
 
       - name: Build Actual
-        run: yarn build:browser
+        run: pnpm build:browser
 
       - name: Deploy to Netlify
         id: netlify_deploy

@@ -192,7 +192,7 @@
     "test:web": "ENV=web vitest --run -c vitest.web.config.ts",
     "typecheck": "tsgo -b && tsc-strict",
     "build": "tsgo -b",
-    "prepack": "yarn build && node scripts/add-types-conditions.mts",
+    "prepack": "pnpm run build && node scripts/add-types-conditions.mts",
     "postpack": "node scripts/restore-package-json.mts"
   },
   "dependencies": {
@@ -238,7 +238,7 @@
     "typescript-strict-plugin": "^2.4.4",
     "util": "^0.12.5",
     "vite": "^8.3.4",
-    "vite-plugin-node-polyfills": "patch:vite-plugin-node-polyfills@npm%3A0.28.0#~/.yarn/patches/vite-plugin-node-polyfills-npm-0.28.0-bac39616ee.patch",
+    "vite-plugin-node-polyfills": "0.28.0",
     "vitest": "^5.0.4",
     "yargs": "^18.2.0"
   }

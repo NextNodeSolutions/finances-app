@@ -8,7 +8,7 @@
 // workflow fails a PR whose committed copy is stale. The app fetches it from
 // the `master` branch on GitHub, the same way as the custom theme catalog.
 //
-// Run from the repo root: `yarn generate:news-feed`.
+// Run from the repo root: `pnpm generate:news-feed`.
 
 import * as fs from 'node:fs/promises';
 import { join } from 'node:path';

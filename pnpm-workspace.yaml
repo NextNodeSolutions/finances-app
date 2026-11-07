@@ -1,0 +1,26 @@
+packages:
+  - packages/*
+
+# Supply-chain defense: don't install package versions published less than 3
+# days ago, giving the community time to catch compromised releases.
+minimumReleaseAge: 4320
+
+# Secure default: only these packages may run install scripts.
+allowBuilds:
+  '@parcel/watcher': false
+  argon2: true
+  bcrypt: true
+  core-js: false
+  electron: true
+  electron-winstaller: false
+  esbuild: true
+  sharp: true
+
+overrides:
+  minimatch@3.1.2: 3.1.5
+  serialize-javascript: ^7.0.5
+  socks: '>=2.8.3'
+  webpackbar: ^7.0.0
+
+patchedDependencies:
+  vite-plugin-node-polyfills@0.28.0: patches/vite-plugin-node-polyfills@0.28.0.patch

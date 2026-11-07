@@ -70,10 +70,10 @@ jobs:
           download-translations: 'false'
 
       - name: Build @actual-app/crdt
-        run: yarn workspace @actual-app/crdt build
+        run: pnpm --filter @actual-app/crdt run build
 
       - name: Pack @actual-app/crdt
-        run: yarn workspace @actual-app/crdt pack --filename @actual-app/crdt.tgz
+        run: pnpm --filter @actual-app/crdt pack --out packages/crdt/@actual-app/crdt.tgz
 
       - name: Setup node and npm registry
         uses: actions/setup-node@53b83947a5a98c8d113130e565377fae1a50d02f # v6.3.0

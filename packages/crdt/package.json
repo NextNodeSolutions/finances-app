@@ -34,7 +34,7 @@
   "scripts": {
     "build:node": "vite build",
     "proto:generate": "./bin/generate-proto",
-    "build": "yarn run build:node && tsgo -b",
+    "build": "pnpm run build:node && tsgo -b",
     "test": "vitest --run",
     "typecheck": "tsgo -b"
   },

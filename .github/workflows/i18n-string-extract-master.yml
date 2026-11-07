@@ -76,7 +76,7 @@ jobs:
         run: |
           mkdir -p packages/desktop-client/locale/
           cp ../translations/en.json packages/desktop-client/locale/
-          yarn generate:i18n
+          pnpm generate:i18n
           if [[ ! -f packages/desktop-client/locale/en.json ]]; then
             echo "File packages/desktop-client/locale/en.json not found. Ensure the file was generated correctly."
             exit 1

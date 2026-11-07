@@ -2,6 +2,7 @@ import { spawn } from 'node:child_process';
 import type { ChildProcess } from 'node:child_process';
 import { createReadStream, readFileSync } from 'node:fs';
 import { cp, mkdir, readdir, rename, rm, writeFile } from 'node:fs/promises';
+import { createRequire } from 'node:module';
 import * as path from 'path';
 import { fileURLToPath } from 'url';
 
@@ -98,21 +99,18 @@ const pluginsServiceDistDir = path.resolve(
 );
 const serviceWorkerDir = path.resolve(__dirname, 'service-worker');
 
-const repoRoot = path.resolve(__dirname, '../..');
+// Launch loot-core's own Vite through Node: spawning a bin shim by name fails
+// on Windows, where it resolves to a `.cmd` file `spawn` cannot run without a
+// shell.
+function resolveLootCoreViteCli(): string {
+  const vitePackageJson = createRequire(
+    path.resolve(lootCoreRoot, 'package.json'),
+  ).resolve('vite/package.json');
+  const { bin }: { bin: { vite: string } } = JSON.parse(
+    readFileSync(vitePackageJson, 'utf8'),
+  );
 
-// The repo pins the Yarn release it expects via `.yarnrc.yml`, so resolve that
-// path and launch it through Node directly. Spawning `yarn` by name does not
-// work on Windows, where it resolves to a `.cmd` shim that `spawn` cannot
-// execute without a shell.
-function resolveYarnCli(): string {
-  const yarnRc = readFileSync(path.resolve(repoRoot, '.yarnrc.yml'), 'utf8');
-  const yarnPath = /^yarnPath:\s*(.+?)\s*$/m.exec(yarnRc)?.[1];
-
-  if (!yarnPath) {
-    throw new Error('Could not resolve "yarnPath" from .yarnrc.yml');
-  }
-
-  return path.resolve(repoRoot, yarnPath);
+  return path.resolve(path.dirname(vitePackageJson), bin.vite);
 }
 
 const WORKER_FILENAME_RE = /^kcab\.worker\.(.+)\.js$/;
@@ -184,8 +182,7 @@ const lootCoreBackend = (): Plugin => ({
     const child: ChildProcess = spawn(
       process.execPath,
       [
-        resolveYarnCli(),
-        'vite',
+        resolveLootCoreViteCli(),
         'build',
         '--config',
         lootCoreConfig,

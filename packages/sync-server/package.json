@@ -74,18 +74,18 @@
     }
   },
   "scripts": {
-    "start": "yarn build && node build/app.js",
-    "start-monitor": "nodemon --exec 'yarn build && node build/app.js' --ignore './build/**/*' --ext 'ts,js' build/app.js",
+    "start": "pnpm run build && node build/app.js",
+    "start-monitor": "nodemon --exec 'pnpm run build && node build/app.js' --ignore './build/**/*' --ext 'ts,js' build/app.js",
     "build": "vite build",
     "typecheck": "tsgo -b && tsc-strict",
     "test": "NODE_ENV=test NODE_OPTIONS='--experimental-vm-modules --trace-warnings' vitest --run",
-    "db:migrate": "yarn build && cross-env NODE_ENV=development node build/scripts/run-migrations.js up",
-    "db:downgrade": "yarn build && cross-env NODE_ENV=development node build/scripts/run-migrations.js down",
-    "db:test-migrate": "yarn build && cross-env NODE_ENV=test node build/scripts/run-migrations.js up",
-    "db:test-downgrade": "yarn build && cross-env NODE_ENV=test node build/scripts/run-migrations.js down",
-    "reset-password": "yarn build && node build/scripts/reset-password.js",
-    "disable-openid": "yarn build && node build/scripts/disable-openid.js",
-    "health-check": "yarn build && node build/scripts/health-check.js"
+    "db:migrate": "pnpm run build && cross-env NODE_ENV=development node build/scripts/run-migrations.js up",
+    "db:downgrade": "pnpm run build && cross-env NODE_ENV=development node build/scripts/run-migrations.js down",
+    "db:test-migrate": "pnpm run build && cross-env NODE_ENV=test node build/scripts/run-migrations.js up",
+    "db:test-downgrade": "pnpm run build && cross-env NODE_ENV=test node build/scripts/run-migrations.js down",
+    "reset-password": "pnpm run build && node build/scripts/reset-password.js",
+    "disable-openid": "pnpm run build && node build/scripts/disable-openid.js",
+    "health-check": "pnpm run build && node build/scripts/health-check.js"
   },
   "dependencies": {
     "@actual-app/crdt": "workspace:*",
@@ -114,6 +114,7 @@
     "@types/better-sqlite3": "^9.6.0",
     "@types/convict": "^6",
     "@types/cors": "^2.8.19",
+    "@types/debug": "^4.1.12",
     "@types/express": "^5.0.6",
     "@types/jws": "^3.2.11",
     "@types/node": "^22.20.5",

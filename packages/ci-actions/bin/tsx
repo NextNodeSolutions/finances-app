@@ -1,8 +1,11 @@
 #!/bin/bash
 set -euo pipefail
 
+cd "$(dirname "$0")/.."
+register="$(node --input-type=module -e "console.log(import.meta.resolve('extensionless/register'))")"
+
 cd ../../
 
 script="$1"
 shift
-exec node --import=extensionless/register --experimental-strip-types packages/ci-actions/"$script" "$@"
+exec node --import="$register" --experimental-strip-types packages/ci-actions/"$script" "$@"

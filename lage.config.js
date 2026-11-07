@@ -40,6 +40,6 @@ module.exports = {
       outputGlob: BUILD_OUTPUT_GLOBS,
     },
   },
-  npmClient: 'yarn',
+  npmClient: 'pnpm',
   concurrency: 2,
 };
