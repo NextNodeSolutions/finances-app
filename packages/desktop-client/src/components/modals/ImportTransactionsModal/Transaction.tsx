@@ -14,7 +14,12 @@ import type { CategoryEntity } from '@actual-app/core/types/models';
 import { Checkbox } from '#components/forms';
 import { Field, Row } from '#components/table';
 
+import {
+  ALREADY_IMPORTED_COLUMN_WIDTH,
+  AlreadyImportedPill,
+} from './AlreadyImportedPill';
 import { ParsedDate } from './ParsedDate';
+import { getRowCheckboxStyle } from './rowCheckboxStyle';
 import { applyFieldMappings, formatDate, parseAmountFields } from './utils';
 import type { FieldMapping, ImportTransaction } from './utils';
 
@@ -32,7 +37,7 @@ type TransactionProps = {
   categories: CategoryEntity[];
   onCheckTransaction: (transactionId: string) => void;
   reconcile: boolean;
-  index: number;
+  showStatus: boolean;
 };
 
 export function Transaction({
@@ -49,7 +54,7 @@ export function Transaction({
   categories,
   onCheckTransaction,
   reconcile,
-  index,
+  showStatus,
 }: TransactionProps) {
   const { t } = useTranslation();
 
@@ -94,10 +99,7 @@ export function Transaction({
   return (
     <Row
       style={{
-        backgroundColor:
-          index % 2 === 0
-            ? theme.tableBackground
-            : theme.tableRowBackgroundAlternate,
+        backgroundColor: theme.tableBackground,
         textDecoration: transaction.tombstone ? 'line-through' : 'none',
         color:
           (transaction.isMatchedTransaction && !transaction.selected_merge) ||
@@ -131,63 +133,13 @@ export function Transaction({
               <Checkbox
                 checked={transaction.selected && !transaction.tombstone}
                 onChange={() => onCheckTransaction(transaction.trx_id)}
-                style={
-                  transaction.selected_merge
-                    ? {
-                        ':checked': {
-                          '::after': {
-                            background:
-                              theme.checkboxBackgroundSelected +
-                              // update sign from packages/desktop-client/src/icons/v1/layer.svg
-
-                              ' url(\'data:image/svg+xml; utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><path fill="white" d="M10 1l10 6-10 6L0 7l10-6zm6.67 10L20 13l-10 6-10-6 3.33-2L10 15l6.67-4z" /></svg>\') 9px 9px',
-                          },
-                        },
-                      }
-                    : transaction.tombstone
-                      ? {
-                          '&': {
-                            opacity: 0.3,
-                            backgroundColor: theme.buttonNormalDisabledBorder,
-                          },
-                        }
-                      : {
-                          '&': {
-                            border:
-                              '1px solid ' + theme.buttonNormalDisabledBorder,
-                            backgroundColor: theme.buttonNormalDisabledBorder,
-                            '::after': {
-                              display: 'block',
-                              background:
-                                theme.buttonNormalDisabledBorder +
-                                // minus sign adapted from packages/desktop-client/src/icons/v1/add.svg
-
-                                ' url(\'data:image/svg+xml; utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="white" className="path" d="M23,11.5 L23,11.5 L23,11.5 C23,12.3284271 22.3284271,13 21.5,13 L1.5,13 L1.5,13 C0.671572875,13 1.01453063e-16,12.3284271 0,11.5 L0,11.5 L0,11.5 C-1.01453063e-16,10.6715729 0.671572875,10 1.5,10 L21.5,10 L21.5,10 C22.3284271,10 23,10.6715729 23,11.5 Z" /></svg>\') 9px 9px',
-                              width: 9,
-                              height: 9,
-
-                              content: '" "',
-                            },
-                          },
-                          ':checked': {
-                            border: '1px solid ' + theme.checkboxBorderSelected,
-                            backgroundColor: theme.checkboxBackgroundSelected,
-                            '::after': {
-                              background:
-                                theme.checkboxBackgroundSelected +
-                                // plus sign from packages/desktop-client/src/icons/v1/add.svg
-
-                                ' url(\'data:image/svg+xml; utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="white" className="path" d="M23,11.5 L23,11.5 L23,11.5 C23,12.3284271 22.3284271,13 21.5,13 L1.5,13 L1.5,13 C0.671572875,13 1.01453063e-16,12.3284271 0,11.5 L0,11.5 L0,11.5 C-1.01453063e-16,10.6715729 0.671572875,10 1.5,10 L21.5,10 L21.5,10 C22.3284271,10 23,10.6715729 23,11.5 Z" /><path fill="white" className="path" d="M11.5,23 C10.6715729,23 10,22.3284271 10,21.5 L10,1.5 C10,0.671572875 10.6715729,1.52179594e-16 11.5,0 C12.3284271,-1.52179594e-16 13,0.671572875 13,1.5 L13,21.5 C13,22.3284271 12.3284271,23 11.5,23 Z" /></svg>\') 9px 9px',
-                            },
-                          },
-                        }
-                }
+                style={getRowCheckboxStyle(transaction)}
               />
             </Tooltip>
           )}
         </Field>
       )}
-      <Field width={200}>
+      <Field width={200} contentStyle={styles.tnum}>
         {transaction.isMatchedTransaction ? (
           <View>
             <SpaceBetween style={{ alignItems: 'flex-start' }}>
@@ -228,6 +180,11 @@ export function Transaction({
           categoryList.includes(transaction.category) &&
           transaction.category}
       </Field>
+      {showStatus && (
+        <Field width={ALREADY_IMPORTED_COLUMN_WIDTH}>
+          {transaction.ignored && <AlreadyImportedPill />}
+        </Field>
+      )}
       {inOutMode && (
         <Field
           width={90}

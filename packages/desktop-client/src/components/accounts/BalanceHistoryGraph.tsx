@@ -55,10 +55,8 @@ export function BalanceHistoryGraph({
     if (firstBalance === 0) return 0;
     return ((lastBalance - firstBalance) / Math.abs(firstBalance)) * 100;
   }, [balanceData]);
-  const color = useMemo(
-    () => (percentageChange >= 0 ? theme.noticeTextLight : theme.errorText),
-    [percentageChange],
-  );
+  const color =
+    percentageChange >= 0 ? theme.numberPositive : theme.numberNegative;
 
   useEffect(() => {
     // Reset state when accountId changes
@@ -232,36 +230,6 @@ export function BalanceHistoryGraph({
                   width={width - LABEL_WIDTH}
                   height={height}
                 >
-                  <defs>
-                    <linearGradient
-                      id="fillLight"
-                      x1="0.9"
-                      y1="0"
-                      x2="0.3"
-                      y2="1"
-                    >
-                      <stop stopColor={theme.noticeTextLight} stopOpacity={1} />
-                      <stop
-                        offset="90%"
-                        stopColor={theme.noticeTextLight}
-                        stopOpacity={0.2}
-                      />
-                    </linearGradient>
-                    <linearGradient
-                      id="fillError"
-                      x1="0.9"
-                      y1="0"
-                      x2="0.3"
-                      y2="1"
-                    >
-                      <stop stopColor={theme.errorText} stopOpacity={1} />
-                      <stop
-                        offset="90%"
-                        stopColor={theme.errorText}
-                        stopOpacity={0.2}
-                      />
-                    </linearGradient>
-                  </defs>
                   <YAxis domain={['dataMin', 'dataMax']} hide />
                   <RechartsTooltip
                     contentStyle={{
@@ -280,13 +248,16 @@ export function BalanceHistoryGraph({
                     type="monotone"
                     dataKey="balance"
                     stroke={color}
-                    strokeWidth={2}
+                    strokeWidth={1.5}
                     {...animationProps}
-                    fill={
-                      color === theme.noticeTextLight
-                        ? 'url(#fillLight)'
-                        : 'url(#fillError)'
-                    }
+                    fill={color}
+                    fillOpacity={0.08}
+                    activeDot={{
+                      r: 3,
+                      strokeWidth: 2,
+                      stroke: theme.tableBackground,
+                      fill: color,
+                    }}
                   />
                 </AreaChart>
 
@@ -297,13 +268,14 @@ export function BalanceHistoryGraph({
                     justifyContent: 'space-between',
                     width: LABEL_WIDTH,
                     textAlign: 'right',
-                    ...styles.verySmallText,
+                    ...styles.tnum,
+                    fontSize: 11.5,
                   }}
                 >
                   {percentageChange === 0 ? (
                     <div />
                   ) : (
-                    <Text style={{ color }}>
+                    <Text style={{ color, fontWeight: 500 }}>
                       {percentageChange >= 0 ? '+' : ''}
                       {percentageChange.toFixed(1)}%
                     </Text>
@@ -311,7 +283,7 @@ export function BalanceHistoryGraph({
 
                   {hoveredValue && (
                     <View>
-                      <Text style={{ fontWeight: 800 }}>
+                      <Text style={{ color: theme.pageTextLight }}>
                         {hoveredValue.date}
                       </Text>
                       <PrivacyFilter activationFilters={[() => !isHovered]}>

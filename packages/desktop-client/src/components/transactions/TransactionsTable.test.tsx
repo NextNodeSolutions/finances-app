@@ -57,8 +57,13 @@ vi.mock(
   '@actual-app/core/platform/client/connection',
   () => import('#mocks/connection'),
 );
+// Tags are an optional feature that is off by default; this table covers
+// them switched on.
 vi.mock('../../hooks/useSyncedPref', () => ({
-  useSyncedPref: vi.fn().mockReturnValue([undefined, vi.fn()]),
+  useSyncedPref: vi.fn((prefName: string) => [
+    prefName === 'features.tags' ? 'true' : undefined,
+    vi.fn(),
+  ]),
 }));
 vi.mock('../../hooks/useFeatureFlag', () => ({
   useFeatureFlag: vi.fn(() => false),

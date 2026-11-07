@@ -18,7 +18,7 @@ import { getLatestAppVersion } from '#app/appSlice';
 import { closeBudget } from '#budgetfiles/budgetfilesSlice';
 import { Link } from '#components/common/Link';
 import { Checkbox, FormField, FormLabel } from '#components/forms';
-import { MOBILE_NAV_HEIGHT } from '#components/mobile/MobileNavTabs';
+import { MOBILE_NAV_INSET } from '#components/mobile/MobileNavTabs';
 import { MobilePageHeader, Page } from '#components/Page';
 import { useServerURL, useServerVersion } from '#components/ServerContext';
 import { useFeatureFlag } from '#hooks/useFeatureFlag';
@@ -36,6 +36,7 @@ import { ExperimentalFeatures } from './Experimental';
 import { ExportBudget } from './Export';
 import { FormatSettings } from './Format';
 import { LanguageSettings } from './LanguageSettings';
+import { OptionalFeatures } from './OptionalFeatures';
 import { RepairTransactions } from './RepairTransactions';
 import { ResetCache, ResetSync } from './Reset';
 import { SettingsBackButton } from './SettingsBackButton';
@@ -93,7 +94,7 @@ function About() {
           (versionInfo?.isOutdated ? (
             <Trans>New version available: {versionInfo.latestVersion}</Trans>
           ) : (
-            <Text style={{ color: theme.noticeText, fontWeight: 600 }}>
+            <Text style={{ color: theme.noticeText, fontWeight: 500 }}>
               <Trans>You're up to date!</Trans>
             </Text>
           ))
@@ -103,7 +104,7 @@ function About() {
             <Link
               variant="external"
               to="https://actualbudget.org/docs/releases"
-              linkColor="purple"
+              linkColor="muted"
             >
               <Trans>Release Notes</Trans>
             </Link>
@@ -151,7 +152,13 @@ function AdvancedAbout() {
   const [budgetId] = useMetadataPref('id');
   const [groupId] = useMetadataPref('groupId');
   const { t } = useTranslation();
-  const idStyle = { userSelect: 'text', wordBreak: 'break-all' } as const;
+  const idStyle = {
+    ...styles.tnum,
+    fontSize: 12,
+    userSelect: 'text',
+    wordBreak: 'break-all',
+    color: theme.pageTextLight,
+  } as const;
 
   return (
     <SettingsGroup
@@ -192,8 +199,8 @@ function SettingsSections({ title, children }: SettingsSectionsProps) {
         flexShrink: 0,
         maxWidth: 640,
         width: '100%',
-        gap: spacing.xl,
-        paddingBottom: MOBILE_NAV_HEIGHT,
+        gap: spacing.xl + spacing.sm,
+        paddingBottom: MOBILE_NAV_INSET,
       }}
     >
       {children}
@@ -233,7 +240,7 @@ export function SettingsIndex() {
           marginTop: 10,
           flexShrink: 0,
           gap: 30,
-          paddingBottom: MOBILE_NAV_HEIGHT,
+          paddingBottom: MOBILE_NAV_INSET,
         }}
       >
         <View
@@ -270,28 +277,21 @@ export function GeneralSettings() {
   const { t } = useTranslation();
   const { isNarrowWidth } = useResponsive();
   const isCurrencyExperimentalEnabled = useFeatureFlag('currency');
-  const serverURL = useServerURL();
 
   return (
     <SettingsSections title={t('General')}>
-      <About />
-      <ThemeSettings />
+      <BudgetTypeSettings />
+      <OptionalFeatures />
       {!isNarrowWidth && <SidebarSettings />}
-      <FormatSettings />
-      {isCurrencyExperimentalEnabled && <CurrencySettings />}
-      <LanguageSettings />
-      <SettingsGroup title={t('Budget')}>
-        <BudgetTypeSettings />
-      </SettingsGroup>
-      {serverURL && (
-        <SettingsGroup title={t('Security')}>
-          <AuthSettings />
-          <EncryptionSettings />
-        </SettingsGroup>
-      )}
+      <ThemeSettings />
+      <FormatSettings>
+        {isCurrencyExperimentalEnabled && <CurrencySettings />}
+        <LanguageSettings />
+      </FormatSettings>
       <SettingsGroup title={t('Data')}>
-        {isElectron() && <Backups />}
         <ExportBudget />
+        {isElectron() && <Backups />}
+        <EncryptionSettings />
       </SettingsGroup>
     </SettingsSections>
   );
@@ -299,10 +299,17 @@ export function GeneralSettings() {
 
 export function AdvancedSettings() {
   const { t } = useTranslation();
+  const serverURL = useServerURL();
 
   return (
     <SettingsSections title={t('Advanced')}>
+      <About />
       <AdvancedAbout />
+      {serverURL && (
+        <SettingsGroup title={t('Security')}>
+          <AuthSettings />
+        </SettingsGroup>
+      )}
       <SettingsGroup title={t('Troubleshooting')}>
         <ResetCache />
         <ResetSync />
@@ -353,8 +360,8 @@ export function Settings() {
         style={{
           flexDirection: 'row',
           flex: 1,
-          gap: spacing.xl,
-          paddingTop: 10,
+          gap: spacing.xl + spacing.sm,
+          paddingTop: spacing.sm,
         }}
       >
         <SettingsNav />

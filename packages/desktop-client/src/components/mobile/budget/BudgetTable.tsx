@@ -19,8 +19,13 @@ import type {
 } from '@actual-app/core/types/models';
 import { AutoTextSize } from 'auto-text-size';
 
-import { MOBILE_NAV_HEIGHT } from '#components/mobile/MobileNavTabs';
+import { MOBILE_NAV_INSET } from '#components/mobile/MobileNavTabs';
 import { PullToRefresh } from '#components/mobile/PullToRefresh';
+import {
+  mobileAmountChipClassName,
+  mobileAmountChipStyle,
+  mobileFigureLabelStyle,
+} from '#components/mobile/utils';
 import { PrivacyFilter } from '#components/PrivacyFilter';
 import { CellValue } from '#components/spreadsheet/CellValue';
 import { SchedulesProvider } from '#hooks/useCachedSchedules';
@@ -33,14 +38,23 @@ import { envelopeBudget, trackingBudget } from '#spreadsheet/bindings';
 
 import { ExpenseGroupList } from './ExpenseGroupList';
 import { IncomeGroup } from './IncomeGroup';
+import { MonthPace } from './MonthPace';
 
 export const ROW_HEIGHT = 50;
 
-export const PILL_STYLE: CSSProperties = {
-  borderRadius: 16,
-  color: theme.pillText,
-  backgroundColor: theme.pillBackgroundLight,
-};
+// Left inset of a group name button, right after its expand arrow: the arrow
+// already separates the name from the card edge, and the narrower inset
+// leaves a name like "Usual Expenses" room for one line.
+export const GROUP_NAME_BUTTON_LEFT_INSET = 2;
+
+export const PILL_STYLE: CSSProperties = mobileAmountChipStyle;
+export const PILL_CLASS_NAME = mobileAmountChipClassName;
+
+// Headline figure of the budget page: the amount left to budget (or saved),
+// engraved in the display serif.
+const HEADLINE_FIGURE_MAX_SIZE = 20;
+const FIGURE_MAX_SIZE = 12.5;
+const LABEL_MAX_SIZE = 10.5;
 
 export function getColumnWidth({
   show3Columns = false,
@@ -80,20 +94,25 @@ function ToBudget({ toBudget, onPress, show3Columns }: ToBudgetProps) {
         width: sidebarColumnWidth,
       }}
     >
-      <Button variant="bare" onPress={onPress}>
-        <View>
+      <Button
+        variant="bare"
+        onPress={onPress}
+        style={{ padding: '4px 6px', marginLeft: -6, borderRadius: 8 }}
+      >
+        <View style={{ gap: 2 }}>
           <View>
             <AutoTextSize
               as={Label}
               minFontSizePx={6}
-              maxFontSizePx={12}
+              maxFontSizePx={LABEL_MAX_SIZE}
               mode="oneline"
               title={amount < 0 ? t('Overbudgeted') : t('To Budget')}
               style={{
-                ...(amount < 0 ? styles.smallText : {}),
-                color: theme.formInputText,
+                ...mobileFigureLabelStyle,
+                ...(amount < 0 && { color: theme.toBudgetNegative }),
                 flexShrink: 0,
                 textAlign: 'left',
+                marginBottom: 0,
               }}
             />
           </View>
@@ -105,18 +124,17 @@ function ToBudget({ toBudget, onPress, show3Columns }: ToBudgetProps) {
                     key={value}
                     as={Text}
                     minFontSizePx={6}
-                    maxFontSizePx={12}
+                    maxFontSizePx={HEADLINE_FIGURE_MAX_SIZE}
                     mode="oneline"
                     style={{
-                      ...styles.tnum,
-                      fontSize: 12,
-                      fontWeight: '700',
+                      ...styles.display,
+                      lineHeight: 1.15,
                       color:
                         amount < 0
                           ? theme.toBudgetNegative
                           : amount > 0
                             ? theme.toBudgetPositive
-                            : theme.budgetNumberNeutral,
+                            : theme.toBudgetZero,
                     }}
                   >
                     {format(value, type)}
@@ -129,11 +147,13 @@ function ToBudget({ toBudget, onPress, show3Columns }: ToBudgetProps) {
         <SvgCheveronRight
           style={{
             flexShrink: 0,
-            color: theme.mobileHeaderTextSubdued,
-            marginLeft: 5,
+            color: theme.tableTextSubdued,
+            marginLeft: 4,
+            alignSelf: 'flex-end',
+            marginBottom: 5,
           }}
-          width={14}
-          height={14}
+          width={12}
+          height={12}
         />
       </Button>
     </View>
@@ -166,20 +186,24 @@ function Saved({ projected, onPress, show3Columns }: SavedProps) {
         width: sidebarColumnWidth,
       }}
     >
-      <Button variant="bare" onPress={onPress}>
-        <View style={{ alignItems: 'flex-start' }}>
+      <Button
+        variant="bare"
+        onPress={onPress}
+        style={{ padding: '4px 6px', marginLeft: -6, borderRadius: 8 }}
+      >
+        <View style={{ alignItems: 'flex-start', gap: 2 }}>
           {projected ? (
             <View>
               <AutoTextSize
                 as={Label}
                 minFontSizePx={6}
-                maxFontSizePx={12}
+                maxFontSizePx={LABEL_MAX_SIZE}
                 mode="oneline"
                 title={t('Projected savings')}
                 style={{
-                  color: theme.formInputText,
+                  ...mobileFigureLabelStyle,
                   textAlign: 'left',
-                  fontSize: 12,
+                  marginBottom: 0,
                 }}
               />
             </View>
@@ -187,8 +211,9 @@ function Saved({ projected, onPress, show3Columns }: SavedProps) {
             <Label
               title={isNegative ? t('Overspent') : t('Saved')}
               style={{
-                color: theme.formInputText,
+                ...mobileFigureLabelStyle,
                 textAlign: 'left',
+                marginBottom: 0,
               }}
             />
           )}
@@ -204,18 +229,16 @@ function Saved({ projected, onPress, show3Columns }: SavedProps) {
                     key={value}
                     as={Text}
                     minFontSizePx={6}
-                    maxFontSizePx={12}
+                    maxFontSizePx={HEADLINE_FIGURE_MAX_SIZE}
                     mode="oneline"
                     style={{
-                      ...styles.tnum,
+                      ...styles.display,
+                      lineHeight: 1.15,
                       textAlign: 'left',
-                      fontSize: 12,
-                      fontWeight: '700',
-                      color: projected
-                        ? theme.warningText
-                        : isNegative
-                          ? theme.errorTextDark
-                          : theme.formInputText,
+                      // Never amber on a figure at or above zero.
+                      color: isNegative
+                        ? theme.numberNegative
+                        : theme.pageTextDark,
                     }}
                   >
                     {format(value, type)}
@@ -228,11 +251,13 @@ function Saved({ projected, onPress, show3Columns }: SavedProps) {
         <SvgCheveronRight
           style={{
             flexShrink: 0,
-            color: theme.mobileHeaderTextSubdued,
-            marginLeft: 5,
+            color: theme.tableTextSubdued,
+            marginLeft: 4,
+            alignSelf: 'flex-end',
+            marginBottom: 5,
           }}
-          width={14}
-          height={14}
+          width={12}
+          height={12}
         />
       </Button>
     </View>
@@ -295,7 +320,12 @@ function BudgetGroups({
   return (
     <View
       data-testid="budget-groups"
-      style={{ flex: '1 0 auto', overflowY: 'auto', paddingBottom: 15 }}
+      style={{
+        flex: '1 0 auto',
+        overflowY: 'auto',
+        paddingTop: 10,
+        paddingBottom: 16,
+      }}
     >
       <ExpenseGroupList
         categoryGroups={expenseGroups}
@@ -375,13 +405,26 @@ export function BudgetTable({
         toggleSpentColumn={toggleSpentColumn}
         onShowBudgetSummary={onShowBudgetSummary}
       />
+      <View
+        style={{
+          flexShrink: 0,
+          padding: '0 16px 10px 14px',
+          backgroundColor: getHeaderBackground(month),
+          borderBottom: `1px solid ${theme.hairline}`,
+        }}
+      >
+        <MonthPace
+          month={month}
+          budgetType={budgetType === 'tracking' ? 'tracking' : 'envelope'}
+        />
+      </View>
       <PullToRefresh onRefresh={onRefresh}>
         <View
           data-testid="budget-table"
           style={{
             backgroundColor: theme.pageBackground,
             minHeight: '100vh',
-            paddingBottom: MOBILE_NAV_HEIGHT,
+            paddingBottom: MOBILE_NAV_INSET,
           }}
         >
           <SchedulesProvider query={schedulesQuery}>
@@ -401,6 +444,14 @@ export function BudgetTable({
       </PullToRefresh>
     </>
   );
+}
+
+// The summary and its pace gauge share one band, tinted off the current
+// month.
+function getHeaderBackground(month: string): string {
+  return monthUtils.isCurrentMonth(month)
+    ? theme.titlebarBackground
+    : theme.budgetHeaderOtherMonth;
 }
 
 type BudgetTableHeaderProps = {
@@ -433,8 +484,13 @@ function BudgetTableHeader({
     ...styles.tnum,
     color: theme.budgetNumberNeutral,
     textAlign: 'right',
-    fontSize: 12,
-    fontWeight: '500',
+    fontWeight: 500,
+  };
+
+  const columnLabelStyle: CSSProperties = {
+    ...mobileFigureLabelStyle,
+    paddingRight: 4,
+    marginBottom: 0,
   };
 
   return (
@@ -445,13 +501,9 @@ function BudgetTableHeader({
         justifyContent: 'space-between',
         alignItems: 'center',
         flexShrink: 0,
-        padding: '10px 15px',
-        paddingLeft: 10,
-        backgroundColor: monthUtils.isCurrentMonth(month)
-          ? theme.budgetHeaderCurrentMonth
-          : theme.budgetHeaderOtherMonth,
-        borderBottomWidth: 1,
-        borderColor: theme.tableBorder,
+        minHeight: 56,
+        padding: '6px 16px 8px 14px',
+        backgroundColor: getHeaderBackground(month),
       }}
     >
       <View
@@ -510,8 +562,8 @@ function BudgetTableHeader({
                         height={12}
                         style={{
                           flexShrink: 0,
-                          color: theme.pageTextSubdued,
-                          marginRight: 5,
+                          color: theme.tableHeaderText,
+                          marginRight: 4,
                         }}
                       />
                     )}
@@ -519,10 +571,10 @@ function BudgetTableHeader({
                       <AutoTextSize
                         as={Label}
                         minFontSizePx={8}
-                        maxFontSizePx={12}
+                        maxFontSizePx={LABEL_MAX_SIZE}
                         mode="multiline"
                         title={t('Budgeted')}
-                        style={{ color: theme.formInputText, paddingRight: 4 }}
+                        style={columnLabelStyle}
                       />
                     </View>
                   </View>
@@ -532,7 +584,7 @@ function BudgetTableHeader({
                         key={value}
                         as={Text}
                         minFontSizePx={6}
-                        maxFontSizePx={12}
+                        maxFontSizePx={FIGURE_MAX_SIZE}
                         mode="oneline"
                         style={{
                           ...amountStyle,
@@ -578,8 +630,8 @@ function BudgetTableHeader({
                         height={12}
                         style={{
                           flexShrink: 0,
-                          color: theme.pageTextSubdued,
-                          marginRight: 5,
+                          color: theme.tableHeaderText,
+                          marginRight: 4,
                         }}
                       />
                     )}
@@ -587,10 +639,10 @@ function BudgetTableHeader({
                       <AutoTextSize
                         as={Label}
                         minFontSizePx={6}
-                        maxFontSizePx={12}
+                        maxFontSizePx={LABEL_MAX_SIZE}
                         mode="oneline"
                         title={t('Spent')}
-                        style={{ color: theme.formInputText, paddingRight: 4 }}
+                        style={columnLabelStyle}
                       />
                     </View>
                   </View>
@@ -600,7 +652,7 @@ function BudgetTableHeader({
                         key={value}
                         as={Text}
                         minFontSizePx={6}
-                        maxFontSizePx={12}
+                        maxFontSizePx={FIGURE_MAX_SIZE}
                         mode="oneline"
                         style={{
                           ...amountStyle,
@@ -631,10 +683,10 @@ function BudgetTableHeader({
                   <AutoTextSize
                     as={Label}
                     minFontSizePx={6}
-                    maxFontSizePx={12}
+                    maxFontSizePx={LABEL_MAX_SIZE}
                     mode="oneline"
                     title={t('Balance')}
-                    style={{ color: theme.formInputText }}
+                    style={{ ...columnLabelStyle, paddingRight: 0 }}
                   />
                 </View>
                 <View>
@@ -643,7 +695,7 @@ function BudgetTableHeader({
                       key={value}
                       as={Text}
                       minFontSizePx={6}
-                      maxFontSizePx={12}
+                      maxFontSizePx={FIGURE_MAX_SIZE}
                       mode="oneline"
                       style={amountStyle}
                     >

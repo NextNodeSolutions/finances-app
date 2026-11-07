@@ -2,6 +2,7 @@ import React from 'react';
 
 import { Text } from '@actual-app/components/text';
 
+import { useOptionalFeature } from '#hooks/useOptionalFeature';
 import { useTagCSS } from '#hooks/useTagCSS';
 
 type MobileTaggedNotesProps = {
@@ -16,9 +17,15 @@ export function MobileTaggedNotes({
   separator,
 }: MobileTaggedNotesProps) {
   const getTagCSS = useTagCSS();
+  const [isTagsOn] = useOptionalFeature('tags');
+
   return (
     <>
-      <Text className={getTagCSS(tag, { compact: true })}>{content}</Text>
+      {isTagsOn ? (
+        <Text className={getTagCSS(tag, { compact: true })}>{content}</Text>
+      ) : (
+        content
+      )}
       {separator}
     </>
   );

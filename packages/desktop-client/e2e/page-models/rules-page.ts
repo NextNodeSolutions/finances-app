@@ -10,9 +10,11 @@ export class RulesPage {
   constructor(page: Page) {
     this.page = page;
     this.searchBox = page.getByPlaceholder('Filter rules...');
-    this.createNewRuleButton = page.getByRole('button', {
-      name: 'Create new rule',
-    });
+    // An empty rules list repeats the action under its message; the toolbar
+    // button comes first.
+    this.createNewRuleButton = page
+      .getByRole('button', { name: 'Create new rule' })
+      .first();
   }
 
   /**

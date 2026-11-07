@@ -100,4 +100,118 @@
   --palette-chartQual7: #55dbc1;
   --palette-chartQual8: #efda97;
   --palette-chartQual9: #df948a;
+
+  /* Private-banking redesign palette. The scales above stay for the
+     midnight theme and for custom themes that reference them. */
+  --palette-stone0: #ffffff;
+  --palette-stone25: #fbfbfa;
+  --palette-stone50: #f7f7f5;
+  --palette-stone75: #f2f2ef;
+  --palette-stone100: #ebeae6;
+  --palette-stone150: #e3e2de;
+  --palette-stone200: #d3d2cd;
+  --palette-stone300: #b4b3ad;
+  --palette-stone400: #75746f;
+  --palette-stone500: #63625d;
+  --palette-stone600: #4f4e4a;
+  --palette-stone700: #383734;
+  --palette-stone800: #262523;
+  --palette-stone850: #1d1c1b;
+  --palette-stone900: #141413;
+  --palette-stone950: #0b0b0a;
+
+  --palette-onyx950: #070706;
+  --palette-onyx900: #0d0d0c;
+  --palette-onyx850: #121211;
+  --palette-onyx800: #171716;
+  --palette-onyx750: #1d1d1b;
+  --palette-onyx700: #232321;
+  --palette-onyx650: #2b2b29;
+  --palette-onyx600: #393936;
+  --palette-onyx500: #57574f;
+  --palette-onyx400: #8a8983;
+  --palette-onyx300: #a8a7a1;
+  --palette-onyx200: #cac9c3;
+  --palette-onyx100: #e8e7e2;
+  --palette-onyx50: #f5f4f0;
+
+  --palette-sky50: #f2f8fe;
+  --palette-sky100: #e4f0fc;
+  --palette-sky150: #cfe4fa;
+  --palette-sky200: #b0d3f7;
+  --palette-sky300: #7fb9f0;
+  --palette-sky400: #4e9de6;
+  --palette-sky500: #2f84d6;
+  --palette-sky600: #2369b3;
+  --palette-sky700: #1d5491;
+  --palette-sky800: #193f6b;
+  --palette-sky900: #132d4b;
+
+  --palette-signal50: #fff5f0;
+  --palette-signal100: #ffe8dc;
+  --palette-signal150: #ffd6c2;
+  --palette-signal200: #ffbc9c;
+  --palette-signal300: #ff9466;
+  --palette-signal400: #fa7340;
+  --palette-signal500: #ee5a24;
+  --palette-signal600: #c94415;
+  --palette-signal700: #a33713;
+  --palette-signal800: #7a2b12;
+  --palette-signal900: #52200f;
+
+  --palette-jade50: #f0faf5;
+  --palette-jade100: #ddf3e8;
+  --palette-jade150: #c3e9d6;
+  --palette-jade200: #9ddabc;
+  --palette-jade300: #66c197;
+  --palette-jade400: #37a575;
+  --palette-jade500: #1e8a5e;
+  --palette-jade600: #16724e;
+  --palette-jade700: #125c40;
+  --palette-jade800: #0f4632;
+  --palette-jade900: #0b3224;
+
+  --palette-garnet50: #fef3f2;
+  --palette-garnet100: #fde4e1;
+  --palette-garnet150: #facdc8;
+  --palette-garnet200: #f5aba3;
+  --palette-garnet300: #ec7e73;
+  --palette-garnet400: #df5a4e;
+  --palette-garnet500: #cc3f33;
+  --palette-garnet600: #b0322a;
+  --palette-garnet700: #8f2923;
+  --palette-garnet800: #6e211d;
+  --palette-garnet900: #4e1815;
+
+  --palette-amber50: #fef9ee;
+  --palette-amber100: #fcf0d4;
+  --palette-amber150: #f9e3ae;
+  --palette-amber200: #f3cf7e;
+  --palette-amber300: #e8b54c;
+  --palette-amber400: #d99b27;
+  --palette-amber500: #bd8118;
+  --palette-amber600: #9a6713;
+  --palette-amber700: #7a5112;
+  --palette-amber800: #5c3d10;
+  --palette-amber900: #3f2a0c;
+
+  --palette-chartLux1: #2f6fb0;
+  --palette-chartLux2: #3e9c7a;
+  --palette-chartLux3: #d08a3a;
+  --palette-chartLux4: #c2554a;
+  --palette-chartLux5: #7a6bb8;
+  --palette-chartLux6: #4fa3c4;
+  --palette-chartLux7: #b07aa1;
+  --palette-chartLux8: #8c9a5b;
+  --palette-chartLux9: #8a8983;
+
+  /* The same series, lifted for dark surfaces. */
+  --palette-chartLuxDark1: #5b93cf;
+  --palette-chartLuxDark2: #52b48f;
+  --palette-chartLuxDark3: #e0a35a;
+  --palette-chartLuxDark4: #d9776b;
+  --palette-chartLuxDark5: #9a8cd4;
+  --palette-chartLuxDark6: #6bb9d6;
+  --palette-chartLuxDark7: #c995bb;
+  --palette-chartLuxDark8: #a7b676;
 }

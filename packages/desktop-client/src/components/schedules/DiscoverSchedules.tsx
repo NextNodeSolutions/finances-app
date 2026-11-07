@@ -98,7 +98,11 @@ function DiscoverSchedulesTable({
         <Field width="flex">
           <DisplayId type="accounts" id={item.account} />
         </Field>
-        <Field width="auto" title={recurDescription} style={{ flex: 1.5 }}>
+        <Field
+          width="auto"
+          title={recurDescription}
+          style={{ flex: 1.5, color: theme.pageTextLight }}
+        >
           {recurDescription}
         </Field>
         <ScheduleAmountCell amount={item.amount} op={amountOp} />
@@ -108,7 +112,7 @@ function DiscoverSchedulesTable({
 
   return (
     <View style={styles.tableContainer}>
-      <TableHeader height={ROW_HEIGHT} inset={15}>
+      <TableHeader inset={15}>
         <SelectCell
           exposed={!loading}
           focused={false}

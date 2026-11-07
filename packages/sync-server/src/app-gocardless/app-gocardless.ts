@@ -81,7 +81,7 @@ const LINK_PAGE_HTML = `<!doctype html>
   </body>
 </html>`;
 
-const app = express();
+const app: express.Express = express();
 app.use(requestLoggerMiddleware);
 
 app.get('/link', function (req, res) {

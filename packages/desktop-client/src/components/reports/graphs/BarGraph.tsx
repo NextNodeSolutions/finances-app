@@ -4,7 +4,6 @@ import type { CSSProperties } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { AlignedText } from '@actual-app/components/aligned-text';
-import { theme } from '@actual-app/components/theme';
 import type {
   balanceTypeOpType,
   DataEntity,
@@ -27,7 +26,17 @@ import {
 import type { BarShapeProps } from 'recharts';
 
 import { FinancialText } from '#components/FinancialText';
-import { useRechartsAnimation } from '#components/reports/chart-theme';
+import {
+  chartAxisTick,
+  chartBarCursor,
+  chartBarRadius,
+  chartBaselineColor,
+  chartGrid,
+  chartTooltipSurface,
+  chartXAxis,
+  chartYAxis,
+  useRechartsAnimation,
+} from '#components/reports/chart-theme';
 import { Container } from '#components/reports/Container';
 import { getCustomTick } from '#components/reports/getCustomTick';
 import { numberFormatterTooltip } from '#components/reports/numberFormatter';
@@ -85,13 +94,7 @@ const CustomTooltip = ({
     return (
       <div
         className={css({
-          zIndex: 1000,
-          pointerEvents: 'none',
-          borderRadius: 2,
-          boxShadow: '0 1px 6px rgba(0, 0, 0, .20)',
-          backgroundColor: theme.menuBackground,
-          color: theme.menuItemText,
-          padding: 10,
+          ...chartTooltipSurface,
         })}
       >
         <div>
@@ -288,7 +291,7 @@ export function BarGraph({
             >
               {showTooltip && (
                 <Tooltip
-                  cursor={{ fill: 'transparent' }}
+                  cursor={chartBarCursor}
                   content={
                     <CustomTooltip
                       balanceTypeOp={balanceTypeOp}
@@ -300,33 +303,33 @@ export function BarGraph({
                   isAnimationActive={false}
                 />
               )}
-              {!compact && <CartesianGrid strokeDasharray="3 3" />}
+              {!compact && <CartesianGrid {...chartGrid} />}
               {!compact && (
                 <XAxis
+                  {...chartXAxis}
                   dataKey={yAxis}
                   angle={-35}
                   height={Math.sqrt(longestLabelLength) * 25}
-                  tick={{ fill: theme.pageText, textAnchor: 'end' }}
-                  tickLine={{ stroke: theme.pageText }}
+                  tick={{ ...chartAxisTick, textAnchor: 'end' }}
                 />
               )}
               {!compact && (
                 <YAxis
+                  {...chartYAxis}
                   tickFormatter={value =>
                     getCustomTick(
                       format(value, 'financial-no-decimals'),
                       privacyMode,
                     )
                   }
-                  tick={{ fill: theme.pageText }}
-                  tickLine={{ stroke: theme.pageText }}
                   tickSize={0}
                 />
               )}
-              {!compact && <ReferenceLine y={0} stroke={theme.pageTextLight} />}
+              {!compact && <ReferenceLine y={0} stroke={chartBaselineColor} />}
               <Bar
                 dataKey={val => getVal(val)}
                 stackId="a"
+                radius={chartBarRadius}
                 {...animationProps}
                 onMouseLeave={() => setPointer('')}
                 onMouseEnter={() => setPointer('pointer')}
@@ -357,6 +360,7 @@ export function BarGraph({
                           endDate: data.endDate,
                           field: groupBy.toLowerCase(),
                           id: item.id,
+                          name: item.payload.name,
                           uncategorizedId: itemPayload?.uncategorizedId,
                         };
 
@@ -377,6 +381,7 @@ export function BarGraph({
                 shape={(props: BarShapeProps) => (
                   <Rectangle
                     {...props}
+                    radius={chartBarRadius}
                     fill={
                       data.legend[props.index]?.color ?? props.fill ?? undefined
                     }

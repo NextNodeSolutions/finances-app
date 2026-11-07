@@ -2,6 +2,7 @@ import React from 'react';
 import type { CSSProperties, RefObject, UIEventHandler } from 'react';
 import { useTranslation } from 'react-i18next';
 
+import { styles } from '@actual-app/components/styles';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 import type {
@@ -47,7 +48,7 @@ export function ReportTableHeader({
         borderColor: theme.tableBorder,
         color: theme.tableHeaderText,
         backgroundColor: theme.tableHeaderBackground,
-        fontWeight: 600,
+        ...styles.monoLabel,
         ...style,
       }}
     >

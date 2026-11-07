@@ -8,12 +8,12 @@
     "typecheck": "tsgo -b"
   },
   "devDependencies": {
-    "@octokit/rest": "^22.0.1",
-    "@typescript/native-preview": "beta",
+    "@octokit/rest": "catalog:",
+    "@typescript/native-preview": "catalog:",
     "extensionless": "^2.0.6",
     "gray-matter": "^4.0.3",
     "listify": "^1.0.3",
-    "vitest": "^5.0.4"
+    "vitest": "catalog:"
   },
   "extensionless": {
     "lookFor": [

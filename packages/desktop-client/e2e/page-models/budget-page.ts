@@ -11,6 +11,9 @@ export class BudgetPage {
   readonly selectedMonthButton: Locator;
   readonly nextMonthButton: Locator;
   readonly budgetTableScrollContainer: Locator;
+  readonly overspentCard: Locator;
+  readonly moveMoneyPanel: Locator;
+  readonly coverOverspendingPanel: Locator;
 
   constructor(page: Page) {
     this.page = page;
@@ -19,9 +22,24 @@ export class BudgetPage {
     this.budgetTable = page.getByTestId('budget-table');
     this.budgetTableTotals = this.budgetTable.getByTestId('budget-totals');
     this.selectedMonthButton = page.getByTestId('selected-budget-month');
-    this.nextMonthButton = page.getByTitle('Next month');
+    this.nextMonthButton = page.getByRole('button', {
+      name: 'Next month',
+      exact: true,
+    });
     this.budgetTableScrollContainer = page.getByTestId(
       'budget-table-scroll-container',
+    );
+    // The month rail (one month) or the column summaries (compare mode)
+    // carry `budget-summary`; the panels open beside the table.
+    this.overspentCard = page.getByTestId('overspent-card');
+    this.moveMoneyPanel = page.getByTestId('move-money-panel');
+    this.coverOverspendingPanel = page.getByTestId('cover-overspending-panel');
+  }
+
+  /** The rail or column summary of one month (`yyyy-MM`). */
+  getMonthSummary(month: string) {
+    return this.page.locator(
+      `[data-testid="budget-summary"][data-month="${month}"]`,
     );
   }
 
@@ -220,23 +238,52 @@ export class BudgetPage {
       throw new Error(`Unable to get category name of row index ${toIdx}.`);
     }
 
-    await this.budgetTable
-      .getByTestId('row')
-      .nth(fromIdx)
-      .getByTestId('balance')
-      .getByTestId(/^budget/)
-      .click();
+    await this.openBalanceMenuForRow(fromIdx);
 
     await this.page
+      .getByRole('menu')
       .getByRole('button', { name: 'Transfer to another category' })
       .click();
 
-    await this.page.getByPlaceholder('(none)').click();
+    // The transfer happens in the Move money side panel.
+    await this.moveMoneyPanel.getByPlaceholder('(none)').click();
 
     await this.page.keyboard.type(toName);
     await this.page.keyboard.press('Enter');
 
-    await this.page.getByRole('button', { name: 'Transfer' }).click();
+    await this.moveMoneyPanel
+      .getByRole('button', { name: 'Transfer', exact: true })
+      .click();
+    await this.moveMoneyPanel.waitFor({ state: 'hidden' });
+  }
+
+  async openBalanceMenuForRow(idx: number) {
+    await this.budgetTable
+      .getByTestId('row')
+      .nth(idx)
+      .getByTestId('balance')
+      .getByTestId(/^budget/)
+      .click();
+  }
+
+  /** Opens the one-category cover stepper from an overspent balance. */
+  async openCoverOverspendingForRow(idx: number) {
+    await this.openBalanceMenuForRow(idx);
+    // The rail's Overspent card has a button of the same name.
+    await this.page
+      .getByRole('menu')
+      .getByRole('button', { name: 'Cover overspending' })
+      .click();
+    await this.coverOverspendingPanel.waitFor({ state: 'visible' });
+    return this.coverOverspendingPanel;
+  }
+
+  /** Picks where the cover's money comes from; nothing is preselected. */
+  async chooseCoverSource(sourceName: string) {
+    await this.coverOverspendingPanel.getByText('Choose a source…').click();
+    await this.page
+      .getByRole('option', { name: new RegExp(`^${sourceName}`) })
+      .click();
   }
 
   async rightClickCategory(idx: number) {

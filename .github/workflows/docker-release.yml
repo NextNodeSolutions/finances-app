@@ -78,14 +78,14 @@ jobs:
           password: ${{ secrets.GITHUB_TOKEN }}
 
       # Building outside of the docker image allows us to build once and push to multiple platforms
-      # This is faster and avoids yarn memory issues
+      # This is faster and avoids package manager memory issues
       - name: Set up environment
         uses: ./.github/actions/setup
         with:
           # Avoid restoring potentially poisoned caches in release jobs.
           cache: 'false'
       - name: Build Web
-        run: yarn build:server
+        run: pnpm build:server
 
       - name: Build ubuntu image for testing
         uses: docker/build-push-action@bcafcacb16a39f128d818304e6c9c0c18556b85f # v7.1.0

@@ -23,8 +23,9 @@ export function MobileSheetMenuRows({
             key={item.name}
             style={{
               ...styles.mediumText,
-              color: theme.pageTextLight,
-              padding: `${spacing.sm}px ${spacing.lg}px ${spacing.lg}px`,
+              fontWeight: 400,
+              color: theme.pageTextSubdued,
+              padding: `${spacing.sm}px ${spacing.lg + 4}px ${spacing.lg}px`,
             }}
           >
             {item.text}

@@ -18,6 +18,14 @@ import {
 } from 'recharts';
 
 import { FinancialText } from '#components/FinancialText';
+import {
+  chartBarRadius,
+  chartGrid,
+  chartLineWidth,
+  chartTooltipSurface,
+  chartXAxis,
+  chartYAxis,
+} from '#components/reports/chart-theme';
 import { Container } from '#components/reports/Container';
 import { useFormat } from '#hooks/useFormat';
 import type { FormatType } from '#hooks/useFormat';
@@ -89,12 +97,7 @@ function CustomTooltip({
   return (
     <div
       className={css({
-        pointerEvents: 'none',
-        borderRadius: 2,
-        boxShadow: '0 1px 6px rgba(0, 0, 0, .20)',
-        backgroundColor: theme.menuBackground,
-        color: theme.menuItemText,
-        padding: 10,
+        ...chartTooltipSurface,
       })}
     >
       <div>
@@ -256,15 +259,15 @@ export function BudgetAnalysisGraph({
 
         const sharedAxes = (
           <>
-            <CartesianGrid strokeDasharray="3 3" stroke={theme.pillBorder} />
+            <CartesianGrid {...chartGrid} />
             <XAxis
+              {...chartXAxis}
               dataKey="date"
-              tick={{ fill: theme.reportsLabel }}
               tickFormatter={formatDate}
               minTickGap={50}
             />
             <YAxis
-              tick={{ fill: theme.reportsLabel }}
+              {...chartYAxis}
               tickCount={8}
               tickFormatter={value =>
                 privacyMode && !yAxisIsHovered
@@ -273,7 +276,6 @@ export function BudgetAnalysisGraph({
               }
               onMouseEnter={() => setYAxisIsHovered(true)}
               onMouseLeave={() => setYAxisIsHovered(false)}
-              stroke={theme.pageTextSubdued}
             />
             <Tooltip
               cursor={{ fill: 'transparent' }}
@@ -295,18 +297,21 @@ export function BudgetAnalysisGraph({
             {sharedAxes}
             <Bar
               dataKey="budgeted"
+              radius={chartBarRadius}
               fill={theme.reportsNumberPositive}
               name={budgetedLabel}
               animationDuration={1000}
             />
             <Bar
               dataKey="spent"
+              radius={chartBarRadius}
               fill={theme.reportsNumberNegative}
               name={spentLabel}
               animationDuration={1000}
             />
             <Bar
               dataKey="overspendingAdjustment"
+              radius={chartBarRadius}
               fill={theme.templateNumberUnderFunded}
               name={overspendingLabel}
               animationDuration={1000}
@@ -316,7 +321,7 @@ export function BudgetAnalysisGraph({
                 type="monotone"
                 dataKey="balance"
                 stroke={theme.reportsGray}
-                strokeWidth={2}
+                strokeWidth={chartLineWidth}
                 name={balanceLabel}
                 dot={false}
                 animationDuration={1000}
@@ -331,7 +336,7 @@ export function BudgetAnalysisGraph({
                 type="monotone"
                 dataKey="budgeted"
                 stroke={theme.reportsNumberPositive}
-                strokeWidth={2}
+                strokeWidth={chartLineWidth}
                 name={budgetedLabel}
                 dot={false}
                 animationDuration={1000}
@@ -342,7 +347,7 @@ export function BudgetAnalysisGraph({
                 type="monotone"
                 dataKey="spent"
                 stroke={theme.reportsNumberNegative}
-                strokeWidth={2}
+                strokeWidth={chartLineWidth}
                 name={spentLabel}
                 dot={false}
                 animationDuration={1000}
@@ -353,7 +358,7 @@ export function BudgetAnalysisGraph({
                 type="monotone"
                 dataKey="overspendingAdjustment"
                 stroke={theme.templateNumberUnderFunded}
-                strokeWidth={2}
+                strokeWidth={chartLineWidth}
                 name={overspendingLabel}
                 dot={false}
                 animationDuration={1000}
@@ -364,7 +369,7 @@ export function BudgetAnalysisGraph({
                 type="monotone"
                 dataKey="balance"
                 stroke={theme.reportsGray}
-                strokeWidth={2}
+                strokeWidth={chartLineWidth}
                 name={balanceLabel}
                 dot={false}
                 animationDuration={1000}

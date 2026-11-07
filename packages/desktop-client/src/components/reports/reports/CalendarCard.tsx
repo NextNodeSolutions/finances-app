@@ -29,6 +29,7 @@ import { debounce } from 'es-toolkit/compat';
 import { FinancialText } from '#components/FinancialText';
 import { PrivacyFilter } from '#components/PrivacyFilter';
 import { CalendarCardSkeleton } from '#components/reports/CalendarCardSkeleton';
+import { cardHeaderStyle } from '#components/reports/chart-theme';
 import { DateRange } from '#components/reports/DateRange';
 import { CalendarGraph } from '#components/reports/graphs/CalendarGraph';
 import { ReportCard } from '#components/reports/ReportCard';
@@ -172,10 +173,10 @@ export function CalendarCard({
     >
       <View
         ref={el => (el ? cardRef(el) : undefined)}
-        style={{ flex: 1, margin: 2, overflow: 'hidden', width: '100%' }}
+        style={{ flex: 1, overflow: 'hidden', width: '100%' }}
       >
-        <View style={{ flexDirection: 'row', padding: 20, paddingBottom: 0 }}>
-          <View style={{ flex: 1, marginBottom: -5 }}>
+        <View style={{ ...cardHeaderStyle, paddingBottom: 0 }}>
+          <View style={{ flex: 1 }}>
             <ReportCardName
               name={meta?.name || t('Calendar')}
               isEditing={nameMenuOpen}
@@ -190,12 +191,7 @@ export function CalendarCard({
             />
           </View>
           <View style={{ textAlign: 'right' }}>
-            <Block
-              style={{
-                ...styles.mediumText,
-                fontWeight: 500,
-              }}
-            >
+            <Block>
               <Tooltip
                 content={
                   <View style={{ lineHeight: 1.5 }}>
@@ -432,8 +428,8 @@ function CalendarCardInner({
         <View
           ref={mergedRef}
           style={{
-            color: theme.pageTextSubdued,
-            fontWeight: 'bold',
+            color: theme.pageTextLight,
+            fontWeight: 600,
             flex: 1,
             overflow: 'hidden',
             display: 'block',
@@ -450,8 +446,8 @@ function CalendarCardInner({
               width: 'max-content',
               margin: 0,
               padding: 0,
-              color: theme.pageTextSubdued,
-              fontWeight: 'bold',
+              color: theme.pageTextLight,
+              fontWeight: 600,
               fontSize: '12px',
               marginBottom: 6,
             }}
@@ -475,7 +471,9 @@ function CalendarCardInner({
             style={{
               color: theme.reportsNumberPositive,
               flexDirection: 'row',
-              fontSize: '10px',
+              alignItems: 'center',
+              gap: 3,
+              fontSize: '10.5px',
               marginRight: 10,
             }}
             aria-label={t('Income')}
@@ -483,8 +481,8 @@ function CalendarCardInner({
             {calendar.totalIncome !== 0 ? (
               <>
                 <SvgArrowThickUp
-                  width={16}
-                  height={16}
+                  width={9}
+                  height={9}
                   style={{ flexShrink: 0 }}
                 />
                 <PrivacyFilter>
@@ -501,15 +499,17 @@ function CalendarCardInner({
             style={{
               color: theme.reportsNumberNegative,
               flexDirection: 'row',
-              fontSize: '10px',
+              alignItems: 'center',
+              gap: 3,
+              fontSize: '10.5px',
             }}
             aria-label={t('Expenses')}
           >
             {calendar.totalExpense !== 0 ? (
               <>
                 <SvgArrowThickDown
-                  width={16}
-                  height={16}
+                  width={9}
+                  height={9}
                   style={{ flexShrink: 0 }}
                 />
                 <PrivacyFilter>
@@ -539,7 +539,7 @@ function CalendarCardInner({
           }
         }}
       />
-      <View style={{ fontWeight: 'bold', fontSize: '12px' }}>
+      <View style={{ fontWeight: 600, fontSize: '12px' }}>
         {monthFormats.map((item, idx) => (
           <span
             key={item.format}

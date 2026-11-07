@@ -7,10 +7,11 @@ import { Button } from '@actual-app/components/button';
 import { AnimatedLoading } from '@actual-app/components/icons/AnimatedLoading';
 import { baseInputStyle } from '@actual-app/components/input';
 import { SpaceBetween } from '@actual-app/components/space-between';
+import { styles } from '@actual-app/components/styles';
 import { Text } from '@actual-app/components/text';
 import { TextOneLine } from '@actual-app/components/text-one-line';
 import { theme as themeStyle } from '@actual-app/components/theme';
-import { spacing } from '@actual-app/components/tokens';
+import { radius, spacing } from '@actual-app/components/tokens';
 import { View } from '@actual-app/components/view';
 
 import { Link } from '#components/common/Link';
@@ -183,14 +184,7 @@ export function ThemeInstaller({
   }, [pastedCss, setCustomCssOverride, t]);
 
   return (
-    <View
-      style={{
-        padding: 16,
-        backgroundColor: themeStyle.tableBackground,
-        borderRadius: 8,
-        border: `1px solid ${themeStyle.tableBorder}`,
-      }}
-    >
+    <View>
       <View
         style={{
           flexDirection: 'row',
@@ -199,7 +193,7 @@ export function ThemeInstaller({
           marginBottom: 16,
         }}
       >
-        <Text style={{ fontWeight: 600, fontSize: 14 }}>
+        <Text style={{ fontWeight: 600, fontSize: 13 }}>
           <Trans>Install Custom Theme</Trans>
         </Text>
         <Button variant="bare" onPress={onClose}>
@@ -303,14 +297,17 @@ export function ThemeInstaller({
                                   height: itemWidth,
                                   padding: 8,
                                   overflow: 'hidden',
-                                  borderRadius: 6,
-                                  border: `2px solid ${
+                                  borderRadius: radius.md + 2,
+                                  border: `1px solid ${
                                     hasError
                                       ? themeStyle.errorText
                                       : isActive
                                         ? themeStyle.buttonPrimaryBackground
-                                        : themeStyle.tableBorder
+                                        : themeStyle.hairline
                                   }`,
+                                  boxShadow: isActive
+                                    ? `inset 0 0 0 1px ${themeStyle.buttonPrimaryBackground}`
+                                    : 'none',
                                   backgroundColor: hasError
                                     ? themeStyle.errorBackground
                                     : isActive
@@ -330,7 +327,7 @@ export function ThemeInstaller({
                                     left: 0,
                                     right: 0,
                                     bottom: 0,
-                                    borderRadius: 6,
+                                    borderRadius: radius.md + 2,
                                     backgroundColor:
                                       themeStyle.overlayBackground,
                                     alignItems: 'center',
@@ -377,7 +374,7 @@ export function ThemeInstaller({
                                     }}
                                   >
                                     {t('by')}{' '}
-                                    <Text style={{ fontWeight: 'bold' }}>
+                                    <Text style={{ fontWeight: 600 }}>
                                       {extractRepoOwner(theme.repo)}
                                     </Text>
                                   </TextOneLine>
@@ -406,7 +403,7 @@ export function ThemeInstaller({
       {/* Paste CSS Input */}
       <View
         style={{
-          borderTop: `1px solid ${themeStyle.tableBorder}`,
+          borderTop: `1px solid ${themeStyle.hairlineSubtle}`,
           paddingTop: 16,
           marginBottom: 16,
         }}
@@ -421,6 +418,8 @@ export function ThemeInstaller({
           aria-label={t('Custom Theme CSS')}
           style={{
             ...baseInputStyle,
+            ...styles.tnum,
+            fontSize: 12,
             height: 120,
             resize: 'vertical',
           }}

@@ -8,6 +8,7 @@ import { theme } from '@actual-app/components/theme';
 import { useLocalPref } from '#hooks/useLocalPref';
 import { useModalState } from '#hooks/useModalState';
 import { useNavigate } from '#hooks/useNavigate';
+import { useOptionalFeature } from '#hooks/useOptionalFeature';
 import { useReducedMotion } from '#hooks/useReducedMotion';
 import { useSyncedPref } from '#hooks/useSyncedPref';
 import { removeNotification } from '#notifications/notificationsSlice';
@@ -36,9 +37,14 @@ export function TourHost({ tourId }: TourHostProps) {
   const [budgetTypePref] = useSyncedPref('budgetType');
   const pausedAtIndexRef = useRef<number | null>(null);
 
+  const [isBankSyncOn] = useOptionalFeature('bankSync');
+  const [isTagsOn] = useOptionalFeature('tags');
+
   const steps = getTourSteps(tourId, {
     navigate,
     budgetType: budgetTypePref === 'tracking' ? 'tracking' : 'envelope',
+    isBankSyncOn,
+    isTagsOn,
   });
 
   const completeTour = () => {

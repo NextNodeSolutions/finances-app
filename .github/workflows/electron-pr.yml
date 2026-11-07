@@ -12,7 +12,7 @@ on:
     paths:
       - 'packages/**'
       - 'package.json'
-      - 'yarn.lock'
+      - 'pnpm-lock.yaml'
       - '.github/workflows/electron-pr.yml'
       - '!packages/api/**' # API changes don't affect Electron
       - '!packages/ci-actions/**' # CI actions changes don't affect Electron
@@ -63,7 +63,7 @@ jobs:
 
           METAINFO_FILE="packages/desktop-electron/extra-resources/linux/com.actualbudget.actual.metainfo.xml"
           TODAY=$(date +%Y-%m-%d)
-          VERSION=$(yarn workspace @actual-app/ci-actions tsx bin/get-next-package-version.ts --package-json ./packages/desktop-electron/package.json --type nightly)
+          VERSION=$(pnpm --filter @actual-app/ci-actions run tsx bin/get-next-package-version.ts --package-json ./packages/desktop-electron/package.json --type nightly)
           sed -i "s/%RELEASE_VERSION%/$VERSION/g; s/%RELEASE_DATE%/$TODAY/g" "$METAINFO_FILE"
           flatpak run --command=flatpak-builder-lint org.flatpak.Builder appstream "$METAINFO_FILE"
       - if: ${{ startsWith(matrix.os, 'ubuntu') }}

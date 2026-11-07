@@ -6,16 +6,21 @@ import { Button } from '@actual-app/components/button';
 import { Paragraph } from '@actual-app/components/paragraph';
 import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
-import { View } from '@actual-app/components/view';
 import { send } from '@actual-app/core/platform/client/connection';
 
 import { createBudget } from '#budgetfiles/budgetfilesSlice';
 import { Link } from '#components/common/Link';
+import { ManagerCard } from '#components/manager/ManagerCard';
 import { useRefreshLoginMethods } from '#components/ServerContext';
 import { useNavigate } from '#hooks/useNavigate';
 import { useDispatch } from '#redux';
 
-import { Title, useBootstrapped } from './common';
+import {
+  bodyTextStyle,
+  errorTextStyle,
+  Title,
+  useBootstrapped,
+} from './common';
 import { ConfirmPasswordForm } from './ConfirmPasswordForm';
 
 export function Bootstrap() {
@@ -67,16 +72,16 @@ export function Bootstrap() {
   }
 
   return (
-    <View style={{ maxWidth: 450 }}>
+    <ManagerCard style={{ maxWidth: 450 }}>
       <Title text={t('Welcome to Actual!')} />
-      <Paragraph style={{ fontSize: 16, color: theme.pageTextDark }}>
+      <Paragraph style={bodyTextStyle}>
         <Trans>
           Actual is a super fast privacy-focused app for managing your finances.
           To secure your data, you'll need to set a password for your server.
         </Trans>
       </Paragraph>
 
-      <Paragraph isLast style={{ fontSize: 16, color: theme.pageTextDark }}>
+      <Paragraph isLast style={bodyTextStyle}>
         <Trans>
           Consider opening{' '}
           <Link variant="external" to="https://actualbudget.org/docs/tour/">
@@ -88,14 +93,7 @@ export function Bootstrap() {
       </Paragraph>
 
       {error && (
-        <Text
-          size="large"
-          style={{
-            marginTop: 20,
-            color: theme.errorText,
-            borderRadius: 4,
-          }}
-        >
+        <Text style={{ ...errorTextStyle, marginTop: 16 }}>
           {getErrorMessage(error)}
         </Text>
       )}
@@ -105,9 +103,8 @@ export function Bootstrap() {
           <Button
             variant="bare"
             style={{
-              fontSize: 15,
-              color: theme.pageTextLink,
-              marginRight: 15,
+              color: theme.accentText,
+              marginRight: 12,
             }}
             onPress={onDemo}
           >
@@ -117,6 +114,6 @@ export function Bootstrap() {
         onSetPassword={onSetPassword}
         onError={setError}
       />
-    </View>
+    </ManagerCard>
   );
 }

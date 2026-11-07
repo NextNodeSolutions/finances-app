@@ -5,25 +5,18 @@ RUN apt-get update && apt-get install -y openssl
 
 WORKDIR /app
 
-COPY .yarn ./.yarn
-COPY yarn.lock package.json .yarnrc.yml ./
+COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
+COPY patches ./patches
 COPY packages ./packages
 
+RUN npm install -g "$(node -p "require('./package.json').packageManager")"
+
 # Avoiding memory issues with ARMv7
-RUN if [ "$(uname -m)" = "armv7l" ]; then yarn config set taskPoolConcurrency 2; yarn config set networkConcurrency 5; fi
+RUN if [ "$(uname -m)" = "armv7l" ]; then pnpm config set --location project child-concurrency 2; pnpm config set --location project network-concurrency 5; fi
 
-# Focus the workspaces in production mode
-RUN yarn workspaces focus @actual-app/sync-server --production
-
-# Dereference yarn's workspace:* symlinks so the prod stage can copy just node_modules.
-RUN cp -RL node_modules node_modules.real \
-    && rm -rf node_modules \
-    && mv node_modules.real node_modules
-
-# Strip dev-only content from dereferenced workspace packages to keep the final image lean.
-RUN find node_modules/@actual-app -maxdepth 2 -type d \
-    \( -name src -o -name e2e -o -name __tests__ -o -name __mocks__ -o -name tests -o -name test -o -name build-stats \) \
-    -exec rm -rf {} +
+# Self-contained production copy of the sync-server: its build, package.json and
+# a node_modules holding copies of its workspace dependencies.
+RUN pnpm --filter @actual-app/sync-server deploy --prod /deploy
 
 FROM node:24-bookworm-slim AS prod
 
@@ -42,9 +35,9 @@ WORKDIR /app
 ENV NODE_ENV=production
 
 # sync-server entry flattened at /app so CMD stays `node app.js`.
-COPY --from=builder /app/node_modules ./node_modules
-COPY --from=builder /app/packages/sync-server/package.json ./
-COPY --from=builder /app/packages/sync-server/build ./
+COPY --from=builder /deploy/node_modules ./node_modules
+COPY --from=builder /deploy/package.json ./
+COPY --from=builder /deploy/build ./
 
 # script dir changed when we swapped build method, add the legacy dir in for compatibility
 RUN mkdir -p src && ln -s ../scripts src/scripts

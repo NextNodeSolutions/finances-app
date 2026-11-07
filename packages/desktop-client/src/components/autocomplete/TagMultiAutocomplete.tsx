@@ -4,6 +4,7 @@ import { Button } from '@actual-app/components/button';
 import { SvgRemove } from '@actual-app/components/icons/v2';
 import { SpaceBetween } from '@actual-app/components/space-between';
 import { theme } from '@actual-app/components/theme';
+import { radius } from '@actual-app/components/tokens';
 import type { View } from '@actual-app/components/view';
 import { extractTagsForFilter } from '@actual-app/core/shared/tags';
 import type { TagEntity } from '@actual-app/core/types/models';
@@ -90,7 +91,8 @@ function TagList<T extends AutocompleteItem>({
             className={css({
               unset: 'all',
               cursor: 'pointer',
-              padding: '4px 6px 1px 6px',
+              padding: '4px 8px 1px',
+              borderRadius: radius.sm,
               backgroundColor:
                 highlightedIndex === index
                   ? theme.menuAutoCompleteBackgroundHover

@@ -18,7 +18,17 @@ import {
 } from 'recharts';
 
 import { FinancialText } from '#components/FinancialText';
-import { useRechartsAnimation } from '#components/reports/chart-theme';
+import {
+  chartBarCursor,
+  chartBarRadius,
+  chartBaselineColor,
+  chartGrid,
+  chartLineWidth,
+  chartTooltipSurface,
+  chartXAxis,
+  chartYAxis,
+  useRechartsAnimation,
+} from '#components/reports/chart-theme';
 import { Container } from '#components/reports/Container';
 import { useFormat } from '#hooks/useFormat';
 import type { FormatType } from '#hooks/useFormat';
@@ -63,12 +73,7 @@ function CustomTooltip({
   return (
     <div
       className={css({
-        pointerEvents: 'none',
-        borderRadius: 2,
-        boxShadow: '0 1px 6px rgba(0, 0, 0, .20)',
-        backgroundColor: theme.menuBackground,
-        color: theme.menuItemText,
-        padding: 10,
+        ...chartTooltipSurface,
       })}
     >
       <div>
@@ -167,10 +172,10 @@ export function CashFlowGraph({
           stackOffset="sign"
           data={data}
         >
-          <CartesianGrid strokeDasharray="3 3" vertical={false} />
+          <CartesianGrid {...chartGrid} />
           <XAxis
+            {...chartXAxis}
             dataKey="date"
-            tick={{ fill: theme.reportsLabel }}
             tickFormatter={x => {
               return d.format(x, isConcise ? "MMM ''yy" : 'MMM d', {
                 locale,
@@ -179,7 +184,7 @@ export function CashFlowGraph({
             minTickGap={50}
           />
           <YAxis
-            tick={{ fill: theme.reportsLabel }}
+            {...chartYAxis}
             tickCount={8}
             tickFormatter={value =>
               privacyMode && !yAxisIsHovered
@@ -199,21 +204,24 @@ export function CashFlowGraph({
               });
             }}
             content={<CustomTooltip isConcise={isConcise} format={format} />}
+            cursor={chartBarCursor}
             isAnimationActive={false}
           />
 
-          <ReferenceLine y={0} stroke="#000" />
+          <ReferenceLine y={0} stroke={chartBaselineColor} />
           <Bar
             dataKey="income"
             stackId="a"
-            fill={theme.reportsNumberPositive}
+            fill={theme.reportsGreen}
+            radius={chartBarRadius}
             maxBarSize={MAX_BAR_SIZE}
             {...animationProps}
           />
           <Bar
             dataKey="expenses"
             stackId="a"
-            fill={theme.reportsNumberNegative}
+            fill={theme.reportsRed}
+            radius={chartBarRadius}
             maxBarSize={MAX_BAR_SIZE}
             {...animationProps}
           />
@@ -223,7 +231,7 @@ export function CashFlowGraph({
             dot={false}
             hide={!showBalance}
             stroke={theme.pageTextLight}
-            strokeWidth={2}
+            strokeWidth={chartLineWidth}
             {...animationProps}
           />
         </ComposedChart>

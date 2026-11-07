@@ -10,7 +10,11 @@ import { useTranslation } from 'react-i18next';
 
 import { Button } from '@actual-app/components/button';
 import { SvgAdd, SvgSubtract } from '@actual-app/components/icons/v1';
-import { baseInputStyle, Input } from '@actual-app/components/input';
+import {
+  baseInputStyle,
+  focusedInputStyle,
+  Input,
+} from '@actual-app/components/input';
 import { styles } from '@actual-app/components/styles';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
@@ -175,9 +179,11 @@ export function AmountInput({
         flexDirection: 'row',
         flex: 1,
         alignItems: 'stretch',
+        ':hover': { borderColor: theme.hairlineStrong },
         ...style,
         ...(isFocused && {
-          boxShadow: '0 0 0 1px ' + theme.formInputShadowSelected,
+          ...focusedInputStyle,
+          ':hover': focusedInputStyle,
         }),
       }}
     >
@@ -185,7 +191,7 @@ export function AmountInput({
         variant="bare"
         isDisabled={disabled || !!sign}
         aria-label={symbol === '-' ? t('Make positive') : t('Make negative')}
-        style={{ padding: '0 7px' }}
+        style={{ padding: '0 4px 0 9px', color: theme.pageTextLight }}
         onPress={onSwitch}
         ref={buttonRef}
       >

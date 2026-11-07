@@ -58,14 +58,21 @@ const expectMediaDeclaration = (
 };
 
 describe('Button size', () => {
-  it('keeps the legacy look when size is omitted', () => {
-    render(<Button>Default</Button>);
+  it('renders the medium size when size is omitted', () => {
+    render(
+      <>
+        <Button>Default</Button>
+        <Button size="medium">Medium</Button>
+      </>,
+    );
 
     const button = screen.getByRole('button', { name: 'Default' });
+    const medium = screen.getByRole('button', { name: 'Medium' });
     const computed = getComputedStyle(button);
 
-    expect(computed.padding).toBe('5px 10px');
+    expect(computed.padding).toBe('6px 12px');
     expect(computed.fontSize).toBe('13px');
+    expect(getComputedStyle(medium).padding).toBe(computed.padding);
   });
 
   it('applies small size styles', () => {
@@ -144,13 +151,13 @@ describe('Text size', () => {
 });
 
 describe('Input size', () => {
-  it('keeps the legacy look when size is omitted', () => {
+  it('renders the medium size when size is omitted', () => {
     render(<Input placeholder="Default" />);
 
     const input = screen.getByPlaceholderText('Default');
     const computed = getComputedStyle(input);
 
-    expect(computed.padding).toBe('5px');
+    expect(computed.padding).toBe('6px 10px');
     expect(computed.fontSize).toBe('13px');
   });
 
@@ -160,12 +167,16 @@ describe('Input size', () => {
     const input = screen.getByPlaceholderText('Large');
     const computed = getComputedStyle(input);
 
-    expect(computed.padding).toBe('8px');
+    expect(computed.padding).toBe('8px 10px');
     expect(computed.fontSize).toBe('16px');
-    expectMediaDeclaration(input, '@media (min-width: 512px)', 'padding:6px');
+    expectMediaDeclaration(
+      input,
+      '@media (min-width: 512px)',
+      'padding:6px 10px',
+    );
   });
 
-  it('keeps the legacy BigInput look when size is omitted', () => {
+  it('keeps the larger BigInput scale when size is omitted', () => {
     render(<BigInput placeholder="Big" />);
 
     const input = screen.getByPlaceholderText('Big');
@@ -173,18 +184,20 @@ describe('Input size', () => {
 
     expect(computed.padding).toBe('10px');
     expect(computed.fontSize).toBe('15px');
-    expect(computed.borderStyle).toBe('none');
   });
 
-  it('applies size styles to BigInput while keeping its chrome', () => {
+  it('applies size styles to BigInput', () => {
     render(<BigInput size="extra-large" placeholder="Big XL" />);
 
     const input = screen.getByPlaceholderText('Big XL');
     const computed = getComputedStyle(input);
 
-    expect(computed.padding).toBe('10px');
+    expect(computed.padding).toBe('10px 12px');
     expect(computed.fontSize).toBe('17px');
-    expect(computed.borderStyle).toBe('none');
-    expectMediaDeclaration(input, '@media (min-width: 730px)', 'padding:8px');
+    expectMediaDeclaration(
+      input,
+      '@media (min-width: 730px)',
+      'padding:8px 10px',
+    );
   });
 });

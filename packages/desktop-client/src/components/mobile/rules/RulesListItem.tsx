@@ -6,6 +6,7 @@ import { Button } from '@actual-app/components/button';
 import { SpaceBetween } from '@actual-app/components/space-between';
 import { styles } from '@actual-app/components/styles';
 import { theme } from '@actual-app/components/theme';
+import { radius } from '@actual-app/components/tokens';
 import { View } from '@actual-app/components/view';
 import type { RuleEntity } from '@actual-app/core/types/models';
 import type { WithRequired } from '@actual-app/core/types/util';
@@ -70,11 +71,11 @@ export function RulesListItem({
                   : rule.stage === 'post'
                     ? theme.warningBackground
                     : theme.pillBackgroundSelected,
-              paddingLeft: 6,
-              paddingRight: 6,
-              paddingTop: 2,
-              paddingBottom: 2,
-              borderRadius: 3,
+              paddingLeft: 7,
+              paddingRight: 7,
+              paddingTop: 1,
+              paddingBottom: 1,
+              borderRadius: radius.sm,
             }}
           >
             <span
@@ -111,9 +112,10 @@ export function RulesListItem({
           <SpaceBetween gap={6}>
             <span
               style={{
-                fontSize: 13,
+                fontSize: 12,
                 fontWeight: 600,
-                color: theme.pageTextLight,
+                letterSpacing: '0.02em',
+                color: theme.pageTextSubdued,
                 marginRight: 4,
               }}
             >
@@ -143,9 +145,10 @@ export function RulesListItem({
           >
             <span
               style={{
-                fontSize: 13,
+                fontSize: 12,
                 fontWeight: 600,
-                color: theme.pageTextLight,
+                letterSpacing: '0.02em',
+                color: theme.pageTextSubdued,
                 marginBottom: 2,
               }}
             >
@@ -161,10 +164,11 @@ export function RulesListItem({
                       flexDirection: 'column',
                       alignItems: 'flex-start',
                       marginTop: i > 0 ? 4 : 0,
-                      padding: '6px',
-                      borderColor: theme.tableBorder,
+                      padding: '6px 8px',
+                      borderColor: theme.hairline,
                       borderWidth: '1px',
-                      borderRadius: '5px',
+                      borderStyle: 'solid',
+                      borderRadius: radius.md,
                     }}
                   >
                     <span

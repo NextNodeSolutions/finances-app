@@ -6,7 +6,7 @@ import { Trans, useTranslation } from 'react-i18next';
 import { Button } from '@actual-app/components/button';
 import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
-import { spacing } from '@actual-app/components/tokens';
+import { radius, spacing } from '@actual-app/components/tokens';
 import { View } from '@actual-app/components/view';
 import { css } from '@emotion/css';
 
@@ -153,7 +153,7 @@ export function TransactionTableColumnsModal({
                 flexDirection: 'row',
                 alignItems: 'flex-start',
                 padding: '8px 10px',
-                borderRadius: 6,
+                borderRadius: radius.md,
                 backgroundColor: theme.tableRowBackgroundHover,
               }}
             >

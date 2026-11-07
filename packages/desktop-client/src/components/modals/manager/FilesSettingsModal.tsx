@@ -6,6 +6,7 @@ import { SvgPencil1 } from '@actual-app/components/icons/v2';
 import { styles } from '@actual-app/components/styles';
 import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
+import { radius } from '@actual-app/components/tokens';
 import { View } from '@actual-app/components/view';
 
 import { loadAllFiles } from '#budgetfiles/budgetfilesSlice';
@@ -46,12 +47,12 @@ function FileLocationSettings() {
     <View
       style={{
         gap: 15,
-        backgroundColor: theme.pillBackground,
+        backgroundColor: theme.trayBackground,
         alignSelf: 'flex-start',
         alignItems: 'flex-start',
         padding: 15,
-        borderRadius: 4,
-        border: '1px solid ' + theme.pillBorderDark,
+        borderRadius: radius.md,
+        border: '1px solid ' + theme.trayBorder,
         width: '100%',
       }}
     >
@@ -67,9 +68,10 @@ function FileLocationSettings() {
         <Text
           title={documentDir}
           style={{
-            backgroundColor: theme.pageBackground,
+            backgroundColor: theme.formInputBackground,
+            border: '1px solid ' + theme.hairline,
             padding: '5px 10px',
-            borderRadius: 4,
+            borderRadius: radius.sm,
             overflow: 'auto',
             whiteSpace: 'nowrap',
             width: '100%',
@@ -106,12 +108,12 @@ function SelfSignedCertLocationSettings() {
     <View
       style={{
         gap: 15,
-        backgroundColor: theme.pillBackground,
+        backgroundColor: theme.trayBackground,
         alignSelf: 'flex-start',
         alignItems: 'flex-start',
         padding: 15,
-        borderRadius: 4,
-        border: '1px solid ' + theme.pillBorderDark,
+        borderRadius: radius.md,
+        border: '1px solid ' + theme.trayBorder,
         width: '100%',
       }}
     >
@@ -127,9 +129,10 @@ function SelfSignedCertLocationSettings() {
         <Text
           title={serverSelfSignedCertPref}
           style={{
-            backgroundColor: theme.pageBackground,
+            backgroundColor: theme.formInputBackground,
+            border: '1px solid ' + theme.hairline,
             padding: '5px 10px',
-            borderRadius: 4,
+            borderRadius: radius.sm,
             overflow: 'auto',
             whiteSpace: 'nowrap',
             width: '100%',

@@ -23,7 +23,15 @@ import {
 } from 'recharts';
 
 import { FinancialText } from '#components/FinancialText';
-import { useRechartsAnimation } from '#components/reports/chart-theme';
+import {
+  chartBarCursor,
+  chartEndMargin,
+  chartGrid,
+  chartTooltipSurface,
+  chartXAxis,
+  chartYAxis,
+  useRechartsAnimation,
+} from '#components/reports/chart-theme';
 import { Container } from '#components/reports/Container';
 import { getCustomTick } from '#components/reports/getCustomTick';
 import { numberFormatterTooltip } from '#components/reports/numberFormatter';
@@ -112,13 +120,7 @@ const CustomTooltip = ({
     return (
       <div
         className={css({
-          zIndex: 1000,
-          pointerEvents: 'none',
-          borderRadius: 2,
-          boxShadow: '0 1px 6px rgba(0, 0, 0, .20)',
-          backgroundColor: theme.menuBackground,
-          color: theme.menuItemText,
-          padding: 10,
+          ...chartTooltipSurface,
         })}
       >
         <div>
@@ -245,7 +247,12 @@ export function StackedBarGraph({
               width={width}
               height={height}
               data={data.intervalData}
-              margin={{ top: 0, right: 0, left: leftMargin, bottom: 10 }}
+              margin={{
+                top: 0,
+                right: compact ? 0 : chartEndMargin,
+                left: leftMargin,
+                bottom: 10,
+              }}
               style={{ cursor: pointer }}
               stackOffset="sign" //stacked by sign
             >
@@ -261,25 +268,20 @@ export function StackedBarGraph({
                   }
                   formatter={numberFormatterTooltip}
                   isAnimationActive={false}
-                  cursor={{ fill: 'transparent' }}
+                  cursor={chartBarCursor}
                 />
               )}
-              <XAxis
-                dataKey="date"
-                tick={{ fill: theme.pageText }}
-                tickLine={{ stroke: theme.pageText }}
-              />
-              {!compact && <CartesianGrid strokeDasharray="3 3" />}
+              <XAxis {...chartXAxis} dataKey="date" />
+              {!compact && <CartesianGrid {...chartGrid} />}
               {!compact && (
                 <YAxis
+                  {...chartYAxis}
                   tickFormatter={value =>
                     getCustomTick(
                       format(value, 'financial-no-decimals'),
                       privacyMode,
                     )
                   }
-                  tick={{ fill: theme.pageText }}
-                  tickLine={{ stroke: theme.pageText }}
                   tickSize={0}
                 />
               )}
@@ -292,6 +294,8 @@ export function StackedBarGraph({
                     dataKey={entry.dataKey}
                     stackId="a"
                     fill={entry.color}
+                    stroke={theme.cardBackground}
+                    strokeWidth={1}
                     {...animationProps}
                     onMouseLeave={() => {
                       setPointer('');
@@ -320,6 +324,7 @@ export function StackedBarGraph({
                         field: groupBy.toLowerCase(),
                         id: entry.id,
                         uncategorizedId: entry.uncategorizedId,
+                        name: entry.name,
                         bucketTagNames: entry.bucketTagNames,
                         scopeTagNames: data.scopeTagNames,
                         interval,

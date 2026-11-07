@@ -10,14 +10,37 @@ import {
 import { Menu } from '@actual-app/components/menu';
 import { Paragraph } from '@actual-app/components/paragraph';
 import { Popover } from '@actual-app/components/popover';
+import { styles } from '@actual-app/components/styles';
 import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
+import { radius, spacing } from '@actual-app/components/tokens';
 import { View } from '@actual-app/components/view';
 
 import { Warning } from '#components/alerts';
 import { Link } from '#components/common/Link';
+import { pillStyle } from '#components/schedules/StatusBadge';
+import { sectionHeadingStyle } from '#components/settings/SettingsGroup';
 
 import type { BuiltInBankSyncProviderState } from './useBuiltInBankSyncProviders';
+
+const providerCardStyle = {
+  border: `1px solid ${theme.hairline}`,
+  borderRadius: radius.lg,
+  padding: spacing.lg + spacing.xs,
+  backgroundColor: theme.cardBackground,
+};
+
+const badgeStyle = {
+  ...pillStyle,
+  alignSelf: 'flex-start',
+} as const;
+
+const statusDotStyle = {
+  width: 6,
+  height: 6,
+  borderRadius: radius.pill,
+  backgroundColor: 'currentColor',
+};
 
 type BuiltInProvidersProps = {
   providers: BuiltInBankSyncProviderState[];
@@ -38,7 +61,7 @@ export function BuiltInProviders({
 
   const Cheveron = isCollapsed ? SvgCheveronRight : SvgCheveronDown;
   const title = (
-    <Text style={{ fontSize: 20, fontWeight: 600 }}>
+    <Text style={sectionHeadingStyle}>
       <Trans>Providers</Trans>
     </Text>
   );
@@ -73,7 +96,14 @@ export function BuiltInProviders({
         ) : (
           title
         )}
-        <Paragraph style={{ fontSize: 15, color: theme.pageTextSubdued }}>
+        <Paragraph
+          style={{
+            ...styles.smallText,
+            lineHeight: '18px',
+            color: theme.pageTextLight,
+            margin: 0,
+          }}
+        >
           <Trans>
             Set up a bank sync provider, then link new accounts or connect an
             existing Actual account.
@@ -82,18 +112,18 @@ export function BuiltInProviders({
       </View>
 
       {syncServerStatus !== 'online' ? (
-        <View
-          style={{
-            border: `1px solid ${theme.tableBorder}`,
-            borderRadius: 8,
-            padding: 16,
-            backgroundColor: theme.tableBackground,
-          }}
-        >
-          <Button isDisabled style={{ padding: '10px 0', fontSize: 15 }}>
+        <View style={{ ...providerCardStyle, alignItems: 'flex-start' }}>
+          <Button isDisabled>
             <Trans>Set up bank sync</Trans>
           </Button>
-          <Paragraph style={{ fontSize: 15, marginTop: 10 }}>
+          <Paragraph
+            style={{
+              ...styles.smallText,
+              color: theme.pageTextLight,
+              marginTop: spacing.md,
+              marginBottom: 0,
+            }}
+          >
             <Trans>
               Connect to an Actual server to set up{' '}
               <Link
@@ -119,13 +149,7 @@ export function BuiltInProviders({
             <View
               key={provider.id}
               data-testid={`bank-sync-provider-${provider.id}`}
-              style={{
-                border: `1px solid ${theme.tableBorder}`,
-                borderRadius: 8,
-                padding: 16,
-                backgroundColor: theme.tableBackground,
-                gap: 16,
-              }}
+              style={{ ...providerCardStyle, gap: spacing.lg }}
             >
               <View
                 style={{
@@ -149,19 +173,15 @@ export function BuiltInProviders({
                       flexWrap: 'wrap',
                     }}
                   >
-                    <Text size="extra-large" style={{ fontWeight: 600 }}>
+                    <Text style={sectionHeadingStyle}>
                       {provider.displayName}
                     </Text>
                     {provider.isConfigured && provider.credentialSource && (
                       <Text
-                        size="small"
                         style={{
-                          alignSelf: 'flex-start',
-                          borderRadius: 999,
-                          backgroundColor: theme.buttonPrimaryBackground,
-                          color: theme.buttonPrimaryText,
-                          fontWeight: 500,
-                          padding: '2px 8px',
+                          ...badgeStyle,
+                          backgroundColor: theme.pillBackground,
+                          color: theme.pillText,
                         }}
                       >
                         {provider.credentialSource === 'global' ? (
@@ -172,21 +192,29 @@ export function BuiltInProviders({
                       </Text>
                     )}
                   </View>
-                  <Text
-                    size="medium"
+                  <View
                     style={{
+                      ...badgeStyle,
+                      flexDirection: 'row',
+                      alignItems: 'center',
+                      gap: 6,
+                      backgroundColor: provider.isConfigured
+                        ? theme.noticeBackground
+                        : theme.pillBackgroundLight,
                       color: provider.isConfigured
-                        ? theme.noticeTextDark
-                        : theme.pageTextSubdued,
-                      fontWeight: 500,
+                        ? theme.noticeText
+                        : theme.pageTextLight,
                     }}
                   >
-                    {provider.isConfigured ? (
-                      <Trans>Configured</Trans>
-                    ) : (
-                      <Trans>Not configured</Trans>
-                    )}
-                  </Text>
+                    <View aria-hidden style={statusDotStyle} />
+                    <Text>
+                      {provider.isConfigured ? (
+                        <Trans>Configured</Trans>
+                      ) : (
+                        <Trans>Not configured</Trans>
+                      )}
+                    </Text>
+                  </View>
                 </View>
 
                 {provider.isConfigured && (
@@ -259,7 +287,9 @@ export function BuiltInProviders({
               {provider.supportsPerBudgetFile &&
                 provider.credentialSource === 'global' &&
                 !provider.canConfigure && (
-                  <Text size="medium" style={{ color: theme.pageTextSubdued }}>
+                  <Text
+                    style={{ ...styles.smallText, color: theme.pageTextLight }}
+                  >
                     <Trans>
                       Reset credentials before setting credentials for this
                       budget file.

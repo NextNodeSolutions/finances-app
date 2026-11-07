@@ -5,6 +5,7 @@ import { Button } from '@actual-app/components/button';
 import { SvgArrowDown } from '@actual-app/components/icons/v1';
 import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
+import { radius } from '@actual-app/components/tokens';
 import { View } from '@actual-app/components/view';
 
 import { Information } from '#components/alerts';
@@ -16,7 +17,7 @@ const mergePayeeStyle = {
   padding: 10,
   border: 'solid',
   borderWidth: 1,
-  borderRadius: 6,
+  borderRadius: radius.md,
   borderColor: theme.tableBorder,
   backgroundColor: theme.tableBackground,
 };
@@ -74,7 +75,7 @@ export function ConfirmPayeesMergeModal({
                 <View style={targetPayeeStyle}>
                   <Text
                     style={{
-                      fontWeight: 700,
+                      fontWeight: 600,
                       color: theme.tableRowBackgroundHighlightText,
                     }}
                   >

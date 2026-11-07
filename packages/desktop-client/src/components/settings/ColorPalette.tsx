@@ -1,3 +1,4 @@
+import { radius } from '@actual-app/components/tokens';
 import { View } from '@actual-app/components/view';
 
 const DEFAULT_COLORS = ['#ccc', '#999', '#666', '#333', '#111', '#000'];
@@ -19,7 +20,7 @@ export function ColorPalette({ colors }: ColorPaletteProps) {
         width: '100%',
         flex: 1,
         minHeight: 0,
-        borderRadius: 4,
+        borderRadius: radius.xs,
         overflow: 'hidden',
       }}
     >

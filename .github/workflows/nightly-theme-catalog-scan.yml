@@ -26,7 +26,7 @@ jobs:
         with:
           download-translations: 'false'
       - name: Validate themes
-        run: yarn workspace @actual-app/web validate:theme-catalog
+        run: pnpm --filter @actual-app/web run validate:theme-catalog
 
   notify-failure:
     name: Notify Discord on failure

@@ -2,6 +2,7 @@
 import React, { useEffect, useState } from 'react';
 import { useLocation } from 'react-router';
 
+import { styles } from '@actual-app/components/styles';
 import { theme } from '@actual-app/components/theme';
 import { send } from '@actual-app/core/platform/client/connection';
 import { isElectron } from '@actual-app/core/shared/environment';
@@ -147,13 +148,27 @@ export function Title({ text }: TitleProps) {
   return (
     <h1
       style={{
-        fontSize: 40,
-        fontWeight: 700,
-        color: theme.pageTextPositive,
-        marginBottom: 20,
+        ...styles.display,
+        fontSize: 28,
+        lineHeight: '34px',
+        color: theme.pageText,
+        margin: '0 0 12px',
       }}
     >
       {text}
     </h1>
   );
 }
+
+// Body copy on the file-manager screens.
+export const bodyTextStyle = {
+  fontSize: 14,
+  lineHeight: '22px',
+  color: theme.pageTextLight,
+};
+
+export const errorTextStyle = {
+  fontSize: 13.5,
+  lineHeight: '20px',
+  color: theme.errorText,
+};

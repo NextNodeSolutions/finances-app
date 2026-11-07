@@ -1,39 +1,29 @@
 FROM alpine:3.23 AS builder
 
 # Install required packages
-RUN apk add --no-cache nodejs python3 openssl build-base
+RUN apk add --no-cache nodejs npm python3 openssl build-base
 
 WORKDIR /app
 
-COPY .yarn ./.yarn
-COPY yarn.lock package.json .yarnrc.yml ./
+COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
+COPY patches ./patches
 COPY packages ./packages
 
-# Alpine's Node.js package does not include Corepack, so expose the vendored
-# Yarn release on PATH.
-RUN ln -s /app/.yarn/releases/yarn-*.cjs /usr/local/bin/yarn
+RUN npm install -g "$(node -p "require('./package.json').packageManager")"
 
 # Avoiding memory issues with ARMv7
-RUN if [ "$(uname -m)" = "armv7l" ]; then yarn config set taskPoolConcurrency 2; yarn config set networkConcurrency 5; fi
+RUN if [ "$(uname -m)" = "armv7l" ]; then pnpm config set --location project child-concurrency 2; pnpm config set --location project network-concurrency 5; fi
 
-# Focus the workspaces in production mode
-RUN yarn workspaces focus @actual-app/sync-server --production
+# Self-contained production copy of the sync-server: its build, package.json and
+# a node_modules holding copies of its workspace dependencies.
+RUN pnpm --filter @actual-app/sync-server deploy --prod /deploy
 
 # better-sqlite3 only ships prebuilt binaries for x64 and arm64, so compile it
 # on any other architecture (armv6/armv7 images).
+WORKDIR /deploy
 RUN if [ "$(node node_modules/better-sqlite3/lib/binding.js)" = "0" ]; then \
-      cd node_modules/better-sqlite3 && node ../node-gyp/bin/node-gyp.js rebuild --release; \
+      pnpm --dir node_modules/better-sqlite3 run build-release; \
     fi
-
-# Dereference yarn's workspace:* symlinks so the prod stage can copy just node_modules.
-RUN cp -RL node_modules node_modules.real \
-    && rm -rf node_modules \
-    && mv node_modules.real node_modules
-
-# Strip dev-only content from dereferenced workspace packages to keep the final image lean.
-RUN find node_modules/@actual-app -maxdepth 2 -type d \
-    \( -name src -o -name e2e -o -name __tests__ -o -name __mocks__ -o -name tests -o -name test -o -name build-stats \) \
-    -exec rm -rf {} +
 
 FROM alpine:3.23 AS prod
 
@@ -51,9 +41,9 @@ WORKDIR /app
 ENV NODE_ENV=production
 
 # sync-server entry flattened at /app so CMD stays `node app.js`.
-COPY --from=builder /app/node_modules ./node_modules
-COPY --from=builder /app/packages/sync-server/package.json ./
-COPY --from=builder /app/packages/sync-server/build ./
+COPY --from=builder /deploy/node_modules ./node_modules
+COPY --from=builder /deploy/package.json ./
+COPY --from=builder /deploy/build ./
 
 # script dir changed when we swapped build method, add the legacy dir in for compatibility
 RUN mkdir -p src && ln -s ../scripts src/scripts

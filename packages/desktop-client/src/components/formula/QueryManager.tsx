@@ -9,9 +9,10 @@ import { SvgCopy, SvgTrash } from '@actual-app/components/icons/v1';
 import { SvgDownloadThickBottom } from '@actual-app/components/icons/v2';
 import { Input } from '@actual-app/components/input';
 import { Popover } from '@actual-app/components/popover';
+import { styles } from '@actual-app/components/styles';
 import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
-import { spacing } from '@actual-app/components/tokens';
+import { fontFamily, radius, spacing } from '@actual-app/components/tokens';
 import { View } from '@actual-app/components/view';
 import { send } from '@actual-app/core/platform/client/connection';
 import * as monthUtils from '@actual-app/core/shared/months';
@@ -28,6 +29,7 @@ import {
   asMonthSlidingTimeFrame,
   calculateTimeRange,
 } from '#components/reports/reportRanges';
+import { sectionHeadingStyle } from '#components/settings/SettingsGroup';
 import { useDateFormat } from '#hooks/useDateFormat';
 import { useLanguage } from '#hooks/useLocale';
 import { useRuleConditionFilters } from '#hooks/useRuleConditionFilters';
@@ -199,7 +201,7 @@ export function QueryManager({ queries, onQueriesChange }: QueryManagerProps) {
           marginBottom: 16,
         }}
       >
-        <Text style={{ fontSize: 18, fontWeight: 600 }}>
+        <Text style={sectionHeadingStyle}>
           <Trans>Query Definitions</Trans>
         </Text>
         <Button
@@ -214,10 +216,10 @@ export function QueryManager({ queries, onQueriesChange }: QueryManagerProps) {
         <View
           style={{
             padding: 16,
-            border: `1px solid ${theme.tableBorder}`,
-            borderRadius: 4,
+            border: `1px solid ${theme.hairline}`,
+            borderRadius: radius.lg,
             marginBottom: 16,
-            backgroundColor: theme.tableBackground,
+            backgroundColor: theme.cardBackground,
           }}
         >
           <View style={{ display: 'flex', flexDirection: 'row', gap: 8 }}>
@@ -244,9 +246,9 @@ export function QueryManager({ queries, onQueriesChange }: QueryManagerProps) {
           style={{
             padding: 32,
             textAlign: 'center',
-            color: theme.pageTextSubdued,
-            border: `1px dashed ${theme.tableBorder}`,
-            borderRadius: 4,
+            color: theme.pageTextLight,
+            border: `1px dashed ${theme.hairlineStrong}`,
+            borderRadius: radius.lg,
             maxWidth: 400,
           }}
         >
@@ -601,9 +603,9 @@ function QueryItem({
       style={{
         padding: 16,
         marginBottom: 16,
-        border: `1px solid ${theme.tableBorder}`,
-        borderRadius: 4,
-        backgroundColor: theme.tableBackground,
+        border: `1px solid ${theme.hairline}`,
+        borderRadius: radius.lg,
+        backgroundColor: theme.cardBackground,
         display: 'block',
         flex: 1,
       }}
@@ -625,7 +627,7 @@ function QueryItem({
             alignItems: 'center',
           }}
         >
-          <Text style={{ fontWeight: 600, fontFamily: 'monospace' }}>
+          <Text style={{ ...styles.tnum, fontWeight: 500 }}>
             <Trans>QUERY("{queryName}")</Trans>
           </Text>
         </View>
@@ -656,13 +658,7 @@ function QueryItem({
               <Popover>
                 <Dialog>
                   <View style={{ padding: 16, minWidth: 400 }}>
-                    <Text
-                      style={{
-                        fontSize: 14,
-                        fontWeight: 600,
-                        marginBottom: 12,
-                      }}
-                    >
+                    <Text style={{ ...sectionHeadingStyle, marginBottom: 12 }}>
                       <Trans>Import Query Configuration</Trans>
                     </Text>
                     <Text
@@ -695,10 +691,10 @@ function QueryItem({
                         height: 200,
                         padding: 8,
                         border: `1px solid ${theme.formInputBorder}`,
-                        borderRadius: 4,
-                        backgroundColor: theme.tableBackground,
+                        borderRadius: radius.md,
+                        backgroundColor: theme.formInputBackground,
                         color: theme.formInputText,
-                        fontFamily: 'monospace',
+                        fontFamily: fontFamily.mono,
                         fontSize: 12,
                         resize: 'vertical',
                         outline: 'none',
@@ -852,7 +848,7 @@ function QueryItem({
           style={{
             fontWeight: 500,
             marginBottom: 6,
-            color: theme.pageTextSubdued,
+            color: theme.pageTextLight,
           }}
         >
           <Trans>Filters:</Trans>

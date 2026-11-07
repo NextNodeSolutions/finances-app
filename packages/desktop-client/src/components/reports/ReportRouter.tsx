@@ -19,6 +19,7 @@ import { Sankey } from './reports/Sankey';
 import { Spending } from './reports/Spending';
 import { Summary } from './reports/Summary';
 import { ReportsDashboardRouter } from './ReportsDashboardRouter';
+import { StatementsPage } from './statements/StatementsPage';
 
 function ReportBoundary({ children }: { children: ReactNode }) {
   const location = useLocation();
@@ -41,6 +42,14 @@ export function ReportRouter() {
   return (
     <Routes>
       <Route path="/" element={<ReportsDashboardRouter />} />
+      <Route
+        path="/statements"
+        element={
+          <ReportBoundary>
+            <StatementsPage />
+          </ReportBoundary>
+        }
+      />
       <Route path="/:dashboardId" element={<ReportsDashboardRouter />} />
       <Route
         path="/net-worth"

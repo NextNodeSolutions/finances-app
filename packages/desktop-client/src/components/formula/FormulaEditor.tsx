@@ -4,6 +4,7 @@ import { Trans } from 'react-i18next';
 
 import { styles } from '@actual-app/components/styles';
 import { theme } from '@actual-app/components/theme';
+import { fontFamily, radius, spacing } from '@actual-app/components/tokens';
 import { EditorView } from '@codemirror/view';
 import CodeMirror, { EditorState } from '@uiw/react-codemirror';
 import type { ReactCodeMirrorProps } from '@uiw/react-codemirror';
@@ -324,8 +325,8 @@ export function FormulaEditor({
   );
 
   const codeMirrorTheme: ReactCodeMirrorProps['theme'] = isDarkTheme
-    ? 'dark'
-    : 'light';
+    ? formulaChromeDark
+    : formulaChromeLight;
 
   return (
     <>
@@ -343,7 +344,7 @@ export function FormulaEditor({
           highlightActiveLineGutter: false,
         }}
         style={{
-          fontSize: '14px',
+          fontSize: '13px',
           border: 'none',
         }}
       />
@@ -428,6 +429,7 @@ export function FormulaEditor({
               onClick={applyCategoryPickerValue}
               style={{
                 ...pickerActionButtonStyle,
+                border: `1px solid ${theme.buttonPrimaryBorder}`,
                 background: theme.buttonPrimaryBackground,
                 color: theme.buttonPrimaryText,
               }}
@@ -472,13 +474,46 @@ export function FormulaEditor({
 
 const TIMEFRAME_PICKER_WIDTH = 260;
 
+// Editor chrome drawn from the app theme instead of CodeMirror's stock
+// light/dark looks: transparent ground, mono figures, sky caret and
+// selection. The dark flag keeps the `&dark` syntax colors working.
+function createFormulaChromeTheme(isDark: boolean) {
+  return EditorView.theme(
+    {
+      '&': { backgroundColor: 'transparent', color: theme.formInputText },
+      '&.cm-focused': { outline: 'none' },
+      '.cm-scroller': { fontFamily: fontFamily.mono, lineHeight: '1.6' },
+      '.cm-content': { caretColor: theme.accent },
+      '.cm-cursor, .cm-dropCursor': { borderLeftColor: theme.accent },
+      '&.cm-focused > .cm-scroller > .cm-selectionLayer .cm-selectionBackground, .cm-selectionBackground, .cm-content ::selection':
+        { backgroundColor: theme.formInputTextSelection },
+      '.cm-activeLine': { backgroundColor: theme.tableRowBackgroundHover },
+      '.cm-gutters': {
+        backgroundColor: 'transparent',
+        color: theme.pageTextSubdued,
+        border: 'none',
+        borderRight: `1px solid ${theme.hairlineSubtle}`,
+      },
+      '.cm-activeLineGutter': {
+        backgroundColor: 'transparent',
+        color: theme.pageTextLight,
+      },
+    },
+    { dark: isDark },
+  );
+}
+
+const formulaChromeLight = createFormulaChromeTheme(false);
+const formulaChromeDark = createFormulaChromeTheme(true);
+
 const pickerActionButtonStyle = {
-  border: 0,
-  borderRadius: 4,
-  padding: '5px 8px',
+  border: `1px solid ${theme.buttonNormalBorder}`,
+  borderRadius: radius.md,
+  padding: '5px 10px',
   background: theme.buttonNormalBackground,
   color: theme.buttonNormalText,
   fontSize: 12,
+  fontWeight: 500,
   cursor: 'pointer',
 };
 
@@ -508,7 +543,7 @@ function BadgeMenuPopover({
         maxWidth: 320,
         maxHeight: 260,
         overflowY: scrollable ? 'auto' : 'hidden',
-        padding: scrollable ? 4 : 0,
+        padding: scrollable ? spacing.xs : 0,
       }}
       onMouseDown={event => {
         event.stopPropagation();
@@ -537,10 +572,11 @@ function BadgeMenuButton({
         display: 'block',
         width: '100%',
         border: 0,
-        borderRadius: 4,
-        padding: '7px 8px',
+        borderRadius: radius.sm,
+        padding: '6px 10px',
         background: selected ? theme.menuItemBackgroundHover : 'transparent',
-        color: theme.pageText,
+        color: theme.menuItemText,
+        fontWeight: selected ? 500 : 400,
         textAlign: 'left',
         fontSize: 13,
         cursor: 'pointer',

@@ -12,57 +12,51 @@
     "type": "git",
     "url": "git@github.com:actualbudget/actual.git"
   },
-  "workspaces": {
-    "packages": [
-      "packages/*"
-    ]
-  },
   "scripts": {
-    "start": "yarn start:browser",
-    "start:server": "yarn workspace @actual-app/sync-server start",
-    "start:server-monitor": "yarn workspace @actual-app/sync-server start-monitor",
-    "start:server-dev": "NODE_ENV=development BROWSER_OPEN=localhost:5006 yarn npm-run-all --parallel 'start:server-monitor' 'start'",
-    "start:desktop": "yarn desktop-dependencies && npm-run-all --parallel 'start:desktop-*'",
-    "start:docs": "yarn workspace docs start",
+    "start": "pnpm run start:browser",
+    "start:server": "pnpm --filter @actual-app/sync-server run start",
+    "start:server-monitor": "pnpm --filter @actual-app/sync-server run start-monitor",
+    "start:server-dev": "NODE_ENV=development BROWSER_OPEN=localhost:5006 npm-run-all --parallel 'start:server-monitor' 'start'",
+    "start:desktop": "pnpm run desktop-dependencies && npm-run-all --parallel 'start:desktop-*'",
+    "start:docs": "pnpm --filter docs run start",
     "desktop-dependencies": "npm-run-all --parallel rebuild-electron build:plugins-service",
-    "start:desktop-node": "yarn workspace @actual-app/core watch:node",
-    "start:desktop-client": "yarn workspace @actual-app/web watch",
-    "start:desktop-server-client": "yarn workspace @actual-app/web build:browser",
-    "start:desktop-electron": "yarn workspace desktop-electron watch",
+    "start:desktop-node": "pnpm --filter @actual-app/core run watch:node",
+    "start:desktop-client": "pnpm --filter @actual-app/web run watch",
+    "start:desktop-server-client": "pnpm --filter @actual-app/web run build:browser",
+    "start:desktop-electron": "pnpm --filter desktop-electron run watch",
     "start:browser": "npm-run-all --parallel 'start:browser-*' 'start:service-plugins'",
-    "start:service-plugins": "yarn workspace plugins-service watch",
-    "start:browser-frontend": "yarn workspace @actual-app/web start:browser",
-    "start:storybook": "yarn workspace @actual-app/components start:storybook",
+    "start:service-plugins": "pnpm --filter plugins-service run watch",
+    "start:browser-frontend": "pnpm --filter @actual-app/web run start:browser",
+    "start:storybook": "pnpm --filter @actual-app/components run start:storybook",
     "build": "lage build",
-    "start:ios": "yarn build:browser && yarn workspace mobile-client start:ios",
-    "start:android": "yarn build:browser && yarn workspace mobile-client start:android",
-    "build:server": "yarn build:browser && yarn workspace @actual-app/sync-server build",
+    "start:ios": "pnpm run build:browser && pnpm --filter mobile-client run start:ios",
+    "start:android": "pnpm run build:browser && pnpm --filter mobile-client run start:android",
+    "build:server": "pnpm run build:browser && pnpm --filter @actual-app/sync-server run build",
     "build:browser": "./bin/package-browser",
     "build:desktop": "./bin/package-electron",
-    "build:plugins-service": "yarn workspace plugins-service build",
-    "build:api": "yarn build --scope=@actual-app/api",
-    "build:mobile": "yarn build --scope=mobile-client",
-    "build:cli": "yarn build --scope=@actual-app/cli",
-    "build:docs": "yarn workspace docs build",
-    "build:storybook": "yarn workspace @actual-app/components build:storybook",
-    "deploy:docs": "yarn workspace docs deploy",
-    "generate:i18n": "yarn workspace @actual-app/web generate:i18n",
+    "build:plugins-service": "pnpm --filter plugins-service run build",
+    "build:api": "lage build --scope=@actual-app/api",
+    "build:mobile": "lage build --scope=mobile-client",
+    "build:cli": "lage build --scope=@actual-app/cli",
+    "build:docs": "pnpm --filter docs run build",
+    "build:storybook": "pnpm --filter @actual-app/components run build:storybook",
+    "deploy:docs": "pnpm --filter docs run deploy",
+    "generate:i18n": "pnpm --filter @actual-app/web run generate:i18n",
     "generate:release-notes": "node ./bin/release-note-generator.mts",
-    "generate:news-feed": "yarn workspace @actual-app/ci-actions tsx bin/generate-news-feed.ts",
+    "generate:news-feed": "pnpm --filter @actual-app/ci-actions exec tsx bin/generate-news-feed.ts",
     "test": "lage test --continue",
     "test:debug": "lage test --no-cache --continue",
-    "e2e": "yarn workspace @actual-app/web run e2e",
-    "e2e:desktop": "yarn build:desktop --skip-exe-build --skip-translations && yarn workspace desktop-electron e2e",
-    "playwright": "yarn workspace @actual-app/web run playwright",
-    "vrt": "yarn workspace @actual-app/web run vrt",
+    "e2e": "pnpm --filter @actual-app/web run e2e",
+    "e2e:desktop": "pnpm run build:desktop --skip-exe-build --skip-translations && pnpm --filter desktop-electron run e2e",
+    "playwright": "pnpm --filter @actual-app/web run playwright",
+    "vrt": "pnpm --filter @actual-app/web run vrt",
     "vrt:docker": "./bin/run-vrt",
     "rebuild-electron": "./node_modules/.bin/electron-rebuild -m ./packages/desktop-electron -o better-sqlite3,bcrypt,argon2 --build-from-source -f",
-    "rebuild-node": "yarn workspace @actual-app/core rebuild",
+    "rebuild-node": "pnpm --filter @actual-app/core rebuild",
     "lint": "oxfmt --check . && oxlint --type-aware --quiet",
     "lint:fix": "oxfmt . && oxlint --fix --type-aware --quiet",
     "knip": "knip",
-    "install:server": "yarn workspaces focus @actual-app/sync-server --production",
-    "constraints": "yarn constraints",
+    "install:server": "pnpm install --prod --frozen-lockfile --filter @actual-app/sync-server...",
     "typecheck": "tsgo -p tsconfig.root.json --noEmit && lage typecheck",
     "check:tsconfig-references": "workspaces-to-typescript-project-references --check",
     "sync:tsconfig-references": "workspaces-to-typescript-project-references",
@@ -70,11 +64,10 @@
   },
   "devDependencies": {
     "@monorepo-utils/workspaces-to-typescript-project-references": "^2.11.0",
-    "@octokit/rest": "^22.0.1",
-    "@types/node": "^22.20.5",
+    "@octokit/rest": "catalog:",
+    "@types/node": "catalog:",
     "@types/prompts": "^2.4.9",
-    "@typescript/native-preview": "beta",
-    "@yarnpkg/types": "^4.0.1",
+    "@typescript/native-preview": "catalog:",
     "eslint": "^10.12.0",
     "eslint-plugin-perfectionist": "^5.12.1",
     "eslint-plugin-typescript-paths": "^0.0.33",
@@ -83,44 +76,15 @@
     "lage": "^2.17.0",
     "minimatch": "^10.2.6",
     "nano-staged": "^1.0.2",
-    "npm-run-all": "^4.1.5",
+    "npm-run-all": "catalog:",
     "oxfmt": "^0.73.0",
     "oxlint": "^1.88.0",
     "oxlint-tsgolint": "^7.0.2004",
     "p-limit": "^7.3.3",
     "prompts": "^2.4.2",
     "typescript": "^6.0.3",
-    "vitest": "^5.0.4"
-  },
-  "dependenciesMeta": {
-    "argon2": {
-      "built": true
-    },
-    "bcrypt": {
-      "built": true
-    },
-    "better-sqlite3": {
-      "built": false
-    },
-    "electron": {
-      "built": true
-    },
-    "esbuild": {
-      "built": true
-    },
-    "sharp": {
-      "built": true
-    }
-  },
-  "optionalDependencies": {
-    "glob-hasher-linux-arm64-gnu": "1.4.2"
-  },
-  "resolutions": {
-    "minimatch@3.1.2": "3.1.5",
-    "serialize-javascript": "^7.0.5",
-    "socks": ">=2.8.3",
-    "vite-plugin-node-polyfills": "patch:vite-plugin-node-polyfills@npm%3A0.28.0#~/.yarn/patches/vite-plugin-node-polyfills-npm-0.28.0-bac39616ee.patch",
-    "webpackbar": "^7.0.0"
+    "vite": "catalog:",
+    "vitest": "catalog:"
   },
   "browserslist": [
     "electron >= 35.0",
@@ -128,7 +92,7 @@
   ],
   "engines": {
     "node": ">=22.18.0",
-    "yarn": "^4.9.1"
+    "pnpm": ">=12.8.1"
   },
-  "packageManager": "yarn@4.17.1"
+  "packageManager": "pnpm@12.8.1"
 }

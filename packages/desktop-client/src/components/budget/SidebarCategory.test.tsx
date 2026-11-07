@@ -120,4 +120,36 @@ describe('SidebarCategory context menu', () => {
       'delete',
     ]);
   });
+
+  it('offers Details first and opens the panel from the hover button', async () => {
+    const onOpenDetails = vi.fn();
+
+    await renderRow(
+      <SidebarCategory
+        innerRef={null}
+        category={category}
+        editing={false}
+        onEditName={vi.fn()}
+        onSave={vi.fn()}
+        onDelete={vi.fn()}
+        onOpenDetails={onOpenDetails}
+      />,
+    );
+
+    fireEvent.contextMenu(screen.getByText('Groceries'));
+
+    expect(contextMenuItemNames()).toEqual([
+      'details',
+      'rename',
+      'toggle-visibility',
+      'delete',
+    ]);
+
+    // The button only shows on row hover; jsdom has no hover.
+    fireEvent.click(
+      screen.getByRole('button', { name: 'Category details', hidden: true }),
+    );
+
+    expect(onOpenDetails).toHaveBeenCalledWith(category.id);
+  });
 });

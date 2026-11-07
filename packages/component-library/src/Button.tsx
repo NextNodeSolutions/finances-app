@@ -6,10 +6,14 @@ import { css, cx } from '@emotion/css';
 
 import { AnimatedLoading } from './icons/AnimatedLoading';
 import { styles } from './styles';
+import type { CSSProperties as StyleObject } from './styles';
 import { theme } from './theme';
 import {
   componentSizeControl,
   componentSizeText,
+  elevation,
+  motion,
+  radius,
   sizeResponsiveStyles,
   type ComponentSize,
 } from './tokens';
@@ -80,6 +84,28 @@ const textColorHover: {
   menuSelected: theme.buttonMenuSelectedTextHover,
 };
 
+// Resting depth: framed buttons sit on the page with a hairline shadow,
+// primary carries its own ink shadow; bare and menu stay flat.
+const boxShadow: {
+  [key in ButtonVariant | `${ButtonVariant}Disabled`]?: string;
+} = {
+  normal: elevation.xs,
+  primary: elevation.buttonPrimary,
+};
+
+// Pressed reads as a slightly deeper fill, never as movement.
+const backgroundColorActive: Record<ButtonVariant, string> = {
+  normal: theme.buttonNormalBackgroundActive,
+  primary: theme.buttonPrimaryBackgroundActive,
+  bare: theme.buttonBareBackgroundActive,
+  menu: theme.buttonBareBackgroundActive,
+  menuSelected: theme.buttonMenuSelectedBackgroundHover,
+};
+
+const transition = ['background-color', 'border-color', 'color', 'box-shadow']
+  .map(property => `${property} ${motion.base} ${motion.ease}`)
+  .join(', ');
+
 const _getBorder = (
   variant: ButtonVariant,
   variantWithDisabled: keyof typeof borderColor,
@@ -93,45 +119,22 @@ const _getBorder = (
   }
 };
 
-const _getPadding = (variant: ButtonVariant): string => {
-  switch (variant) {
-    case 'bare':
-      return '5px';
-    default:
-      return '5px 10px';
-  }
-};
-
-const _getHoveredStyles = (variant: ButtonVariant): CSSProperties => ({
-  ...(variant !== 'bare' && styles.shadow),
+const _getHoveredStyles = (variant: ButtonVariant): StyleObject => ({
   backgroundColor: backgroundColorHover[variant],
   color: textColorHover[variant],
+  ...(variant === 'normal' && { borderColor: theme.hairlineStrong }),
   cursor: 'pointer',
 });
 
-const _getActiveStyles = (
-  variant: ButtonVariant,
-  bounce: boolean,
-): CSSProperties => {
-  switch (variant) {
-    case 'bare':
-      return { backgroundColor: theme.buttonBareBackgroundActive };
-    default:
-      return {
-        transform: bounce ? 'translateY(1px)' : undefined,
-        boxShadow: `0 1px 4px 0 ${
-          variant === 'primary'
-            ? theme.buttonPrimaryShadow
-            : theme.buttonNormalShadow
-        }`,
-        transition: 'none',
-      };
-  }
-};
+const _getActiveStyles = (variant: ButtonVariant): StyleObject => ({
+  backgroundColor: backgroundColorActive[variant],
+  ...(variant !== 'bare' && { boxShadow: 'none' }),
+});
 
-// Builds the padding/typography overrides for an explicit `size`, varying
-// by breakpoint via media queries (no per-instance hooks). Bare buttons
-// use uniform padding; framed buttons use the paddingX/paddingY split.
+// Builds the padding/typography overrides for a `size` (medium when the
+// prop is omitted), varying by breakpoint via media queries (no
+// per-instance hooks). Bare buttons use uniform padding; framed buttons
+// use the paddingX/paddingY split.
 const getButtonSizeOverrides = (
   size: ComponentSize,
   isBare: boolean,
@@ -147,8 +150,8 @@ const getButtonSizeOverrides = (
       padding: isBare ? `${paddingY}px` : `${paddingY}px ${paddingX}px`,
       ...(minHeight != null ? { minHeight } : null),
       fontSize,
-      // Medium matches today's default look, which inherits line-height;
-      // only the other sizes force their scale line-height.
+      // Medium (the default) inherits line-height so buttons placed in
+      // existing rows keep their height; other sizes force their scale.
       ...(size === 'medium' ? {} : { lineHeight }),
     };
   };
@@ -189,6 +192,7 @@ type ButtonProps = Omit<
 > & {
   variant?: ButtonVariant;
   size?: ComponentSize;
+  /** @deprecated No effect: buttons no longer move when pressed. */
   bounce?: boolean;
   children?: ReactNode;
 };
@@ -200,17 +204,16 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
     const {
       children,
       variant = 'normal',
-      bounce = true,
-      size,
+      bounce: _bounce,
+      size = 'medium',
       ...restProps
     } = props;
 
     const variantWithDisabled: ButtonVariant | `${ButtonVariant}Disabled` =
       props.isDisabled ? `${variant}Disabled` : variant;
 
-    const sizeOverrides = size
-      ? buttonSizeOverrides[size][variant === 'bare' ? 'bare' : 'framed']
-      : null;
+    const isBare = variant === 'bare';
+    const sizeOverrides = buttonSizeOverrides[size][isBare ? 'bare' : 'framed'];
 
     const defaultButtonClassName: string = useMemo(
       () =>
@@ -218,22 +221,24 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
           alignItems: 'center',
           justifyContent: 'center',
           flexShrink: 0,
-          padding: _getPadding(variant),
           margin: 0,
           overflow: 'hidden',
           display: 'flex',
-          borderRadius: 4,
+          borderRadius: radius.md,
           backgroundColor: backgroundColor[variantWithDisabled],
           border: _getBorder(variant, variantWithDisabled),
+          boxShadow: boxShadow[variantWithDisabled],
           color: textColor[variantWithDisabled],
-          transition: 'box-shadow .25s',
+          ...(!isBare && { fontWeight: 500 }),
+          transition,
           WebkitAppRegion: 'no-drag',
-          ...styles.smallText,
           ...sizeOverrides,
           '&[data-hovered]': _getHoveredStyles(variant),
-          '&[data-pressed]': _getActiveStyles(variant, bounce),
+          '&[data-pressed]': _getActiveStyles(variant),
+          '&[data-focus-visible]': styles.focusRing,
+          '&[data-disabled]': { cursor: 'default' },
         }),
-      [bounce, variant, variantWithDisabled, sizeOverrides],
+      [variant, variantWithDisabled, isBare, sizeOverrides],
     );
 
     const className = restProps.className;

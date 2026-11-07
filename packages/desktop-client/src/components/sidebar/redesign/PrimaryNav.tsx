@@ -16,7 +16,7 @@ export function PrimaryNav() {
       data-testid="sidebar-primary-buttons"
       style={{
         flexShrink: 0,
-        padding: `${spacing.xs}px ${spacing.sm}px 0`,
+        padding: `${spacing.md}px ${spacing.sm}px 0`,
       }}
     >
       {sidebarItems.map(item => (

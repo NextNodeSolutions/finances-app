@@ -14,7 +14,6 @@ import { SvgCalendar } from '@actual-app/components/icons/v1';
 import { Menu } from '@actual-app/components/menu';
 import { Paragraph } from '@actual-app/components/paragraph';
 import { Popover } from '@actual-app/components/popover';
-import { styles } from '@actual-app/components/styles';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 import { send } from '@actual-app/core/platform/client/connection';
@@ -27,19 +26,24 @@ import type {
 import * as d from 'date-fns';
 
 import { EditablePageHeaderTitle } from '#components/EditablePageHeaderTitle';
-import { MobileBackButton } from '#components/mobile/MobileBackButton';
 import { MobilePageHeader, Page, PageHeader } from '#components/Page';
 import { PrivacyFilter } from '#components/PrivacyFilter';
+import {
+  explainerStyle,
+  reportHeadlineStyle,
+  reportPanelStyle,
+} from '#components/reports/chart-theme';
 import { AgeOfMoneyGraph } from '#components/reports/graphs/AgeOfMoneyGraph';
 import { Header } from '#components/reports/Header';
 import { LoadingIndicator } from '#components/reports/LoadingIndicator';
+import { ReportBackButton } from '#components/reports/ReportBackButton';
+import { ReportMobileBackButton } from '#components/reports/ReportMobileBackButton';
 import { calculateTimeRange } from '#components/reports/reportRanges';
 import { createAgeOfMoneySpreadsheet } from '#components/reports/spreadsheets/age-of-money-spreadsheet';
 import { useReport } from '#components/reports/useReport';
 import { fromDateRepr } from '#components/reports/util';
 import { useDashboardWidget } from '#hooks/useDashboardWidget';
 import { useLocale } from '#hooks/useLocale';
-import { useNavigate } from '#hooks/useNavigate';
 import { useRuleConditionFilters } from '#hooks/useRuleConditionFilters';
 import { useSyncedPref } from '#hooks/useSyncedPref';
 import { addNotification } from '#notifications/notificationsSlice';
@@ -224,7 +228,6 @@ function AgeOfMoneyInner({ widget }: AgeOfMoneyInnerProps) {
     t,
   ]);
 
-  const navigate = useNavigate();
   const { isNarrowWidth } = useResponsive();
 
   const title = widget?.meta?.name || t('Age of Money');
@@ -258,12 +261,11 @@ function AgeOfMoneyInner({ widget }: AgeOfMoneyInnerProps) {
         isNarrowWidth ? (
           <MobilePageHeader
             title={title}
-            leftContent={
-              <MobileBackButton onPress={() => navigate('/reports')} />
-            }
+            leftContent={<ReportMobileBackButton />}
           />
         ) : (
           <PageHeader
+            leading={<ReportBackButton />}
             title={
               widget ? (
                 <EditablePageHeaderTitle
@@ -311,7 +313,7 @@ function AgeOfMoneyInner({ widget }: AgeOfMoneyInnerProps) {
 
       <View
         style={{
-          backgroundColor: theme.tableBackground,
+          ...reportPanelStyle,
           padding: 20,
           paddingTop: 0,
           flex: '1 0 auto',
@@ -327,9 +329,8 @@ function AgeOfMoneyInner({ widget }: AgeOfMoneyInnerProps) {
         >
           <View
             style={{
-              ...styles.largeText,
-              fontWeight: 400,
-              marginBottom: 5,
+              ...reportHeadlineStyle,
+              marginBottom: 2,
               color: getAgeColor(data.currentAge),
             }}
           >
@@ -339,7 +340,7 @@ function AgeOfMoneyInner({ widget }: AgeOfMoneyInnerProps) {
                 : t('N/A')}
             </PrivacyFilter>
           </View>
-          <View style={{ color: theme.pageTextSubdued }}>
+          <View style={{ fontSize: 12, color: theme.pageTextSubdued }}>
             {data.trend === 'up'
               ? t('↑ Improving')
               : data.trend === 'down'
@@ -359,7 +360,7 @@ function AgeOfMoneyInner({ widget }: AgeOfMoneyInnerProps) {
 
         <AgeOfMoneyGraph data={data.graphData} />
 
-        <View style={{ marginTop: 30, userSelect: 'none' }}>
+        <View style={explainerStyle}>
           <Paragraph>
             <strong>
               <Trans>What is Age of Money?</Trans>

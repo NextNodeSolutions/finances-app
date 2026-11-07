@@ -2,6 +2,7 @@ import type { SyncedPrefs } from '@actual-app/core/types/prefs';
 
 import {
   getSidebarMenuItemPath,
+  isSidebarMenuItemAvailable,
   parseSidebarMenuItems,
   parseSidebarStartPage,
 } from '#components/sidebar/sidebarMenu';
@@ -10,6 +11,7 @@ import type {
   SidebarMenuItemId,
 } from '#components/sidebar/sidebarMenu';
 import { useIsTestEnv } from '#hooks/useIsTestEnv';
+import { useOptionalFeatureStatus } from '#hooks/useOptionalFeature';
 import { useSyncedPref } from '#hooks/useSyncedPref';
 import { useSyncServerStatus } from '#hooks/useSyncServerStatus';
 import { mergeSyncedPrefs, saveSyncedPrefs } from '#prefs/prefsSlice';
@@ -22,9 +24,18 @@ export function useSidebarMenu() {
   const syncServerStatus = useSyncServerStatus();
   const isTestEnv = useIsTestEnv();
   const isUsingServer = syncServerStatus !== 'no-server' || isTestEnv;
+  const bankSync = useOptionalFeatureStatus('bankSync');
+  const tags = useOptionalFeatureStatus('tags');
 
   const isItemAvailable = (id: SidebarMenuItemId) =>
-    id !== 'bank-sync' || isUsingServer;
+    isSidebarMenuItemAvailable(id, {
+      isUsingServer,
+      isBankSyncOn: bankSync.isOn,
+      isTagsOn: tags.isOn,
+    });
+  // While a feature's default still waits on the account list, an
+  // unavailable page may only look unavailable: route guards hold off.
+  const isAvailabilityResolved = bankSync.isResolved && tags.isResolved;
 
   const items = parseSidebarMenuItems(itemsPref);
   const availableItems = items.filter(item => isItemAvailable(item.id));
@@ -58,6 +69,7 @@ export function useSidebarMenu() {
     startPage,
     startPath,
     isItemAvailable,
+    isAvailabilityResolved,
     saveItems,
     saveStartPage,
   };

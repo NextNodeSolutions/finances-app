@@ -23,9 +23,9 @@ export function DragHandle() {
           alignItems: 'center',
           border: 'none',
           background: 'none',
-          color: 'inherit',
+          color: theme.sidebarTextMuted,
           borderRadius: radius.sm,
-          outline: `2px solid ${theme.formInputBorderSelected}`,
+          outline: `2px solid ${theme.focusRing}`,
           outlineOffset: 1,
         },
       })}

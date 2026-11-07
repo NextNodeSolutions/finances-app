@@ -1,6 +1,7 @@
 import React, { lazy, Suspense } from 'react';
 
 import { theme } from '@actual-app/components/theme';
+import { motion, radius, spacing } from '@actual-app/components/tokens';
 import { View } from '@actual-app/components/view';
 
 const FormulaEditor = lazy(() =>
@@ -31,12 +32,19 @@ export function FormulaActionEditor({
       style={{
         flex: 1,
         border: `1px solid ${theme.formInputBorder}`,
-        borderRadius: 4,
+        borderRadius: radius.md,
         overflow: 'visible',
+        paddingInline: spacing.xs,
         backgroundColor: disabled
           ? theme.formInputBackgroundSelection
-          : theme.tableBackground,
+          : theme.formInputBackground,
         opacity: disabled ? 0.6 : 1,
+        transition: `border-color ${motion.base} ${motion.ease}, box-shadow ${motion.base} ${motion.ease}`,
+        ':hover': { borderColor: theme.hairlineStrong },
+        ':focus-within': {
+          borderColor: theme.formInputBorderSelected,
+          boxShadow: `0 0 0 3px ${theme.formInputShadowSelected}`,
+        },
       }}
     >
       <Suspense fallback={<div style={{ height: 32 }} />}>

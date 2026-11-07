@@ -3,7 +3,7 @@
 # See here for more information: https://github.com/actualbudget/actual/tree/master/packages/desktop-client#visual-regression
 
 if [ ! -d "node_modules" ] || [ "$(ls -A node_modules)" = "" ]; then
-    yarn
+    pnpm install
 fi
 
 E2E_START_URL="${E2E_START_URL:-https://localhost:3001}"
@@ -29,4 +29,4 @@ echo "E2E_START_URL: $E2E_START_URL"
 echo "VRT_ARGS: $VRT_ARGS"
 
 MSYS_NO_PATHCONV=1 docker run --rm --network host -v "$(pwd)":/work/ -w /work/ -it mcr.microsoft.com/playwright:v1.61.1-jammy /bin/bash \
-  -c "E2E_START_URL=$E2E_START_URL yarn vrt $VRT_ARGS"
+  -c "npm install -g \$(node -p \"require('./package.json').packageManager\") > /dev/null && E2E_START_URL=$E2E_START_URL pnpm vrt $VRT_ARGS"

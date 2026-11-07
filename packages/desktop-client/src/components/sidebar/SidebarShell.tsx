@@ -94,7 +94,7 @@ export function SidebarShell({
                 width: hasWindowButtons ? null : 'auto',
               } as CSSProperties,
               flex: 1,
-              ...styles.darkScrollbar,
+              ...styles.lightScrollbar,
             }),
           )}
         >

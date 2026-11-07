@@ -8,6 +8,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { useAccounts } from '#hooks/useAccounts';
 import { useCurrentAccess } from '#hooks/useCurrentAccess';
 import { useFailedAccounts } from '#hooks/useFailedAccounts';
+import { useOptionalFeature } from '#hooks/useOptionalFeature';
 import { TestProviders } from '#mocks';
 import { pushModal } from '#modals/modalsSlice';
 
@@ -30,6 +31,10 @@ vi.mock('#hooks/useCurrentAccess', () => ({
 
 vi.mock('#hooks/useFailedAccounts', () => ({
   useFailedAccounts: vi.fn(),
+}));
+
+vi.mock('#hooks/useOptionalFeature', () => ({
+  useOptionalFeature: vi.fn(),
 }));
 
 vi.mock('#accounts', () => ({
@@ -62,6 +67,26 @@ describe('AccountSyncCheck', () => {
       isFileOwner: true,
       cloudFileId: 'file-1',
     });
+    vi.mocked(useOptionalFeature).mockReturnValue([true, vi.fn()]);
+  });
+
+  it('renders nothing when bank sync is off', () => {
+    vi.mocked(useOptionalFeature).mockReturnValue([false, vi.fn()]);
+    vi.mocked(useFailedAccounts).mockReturnValue(
+      new Map([['acc-1', { type: 'ITEM_ERROR', code: 'ITEM_LOGIN_REQUIRED' }]]),
+    );
+
+    render(
+      <TestProviders>
+        <AccountSyncCheck />
+      </TestProviders>,
+    );
+
+    expect(
+      screen.queryByText(
+        "This account is experiencing connection problems. Let's fix it.",
+      ),
+    ).not.toBeInTheDocument();
   });
 
   it('renders clear error message and Configure button when GoCardless credentials are missing', async () => {

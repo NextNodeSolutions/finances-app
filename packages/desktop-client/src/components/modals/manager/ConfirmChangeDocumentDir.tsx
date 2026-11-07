@@ -4,6 +4,7 @@ import { Trans, useTranslation } from 'react-i18next';
 import { Button, ButtonWithLoading } from '@actual-app/components/button';
 import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
+import { radius } from '@actual-app/components/tokens';
 import { View } from '@actual-app/components/view';
 
 import { Information } from '#components/alerts';
@@ -91,12 +92,12 @@ export function ConfirmChangeDocumentDirModal({
             <View
               style={{
                 gap: 15,
-                backgroundColor: theme.pillBackground,
+                backgroundColor: theme.trayBackground,
                 alignSelf: 'flex-start',
                 alignItems: 'flex-start',
                 padding: 15,
-                borderRadius: 4,
-                border: '1px solid ' + theme.pillBorderDark,
+                borderRadius: radius.md,
+                border: '1px solid ' + theme.trayBorder,
                 width: '100%',
               }}
             >

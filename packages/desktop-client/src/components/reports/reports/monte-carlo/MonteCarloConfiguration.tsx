@@ -5,7 +5,10 @@ import { Trans, useTranslation } from 'react-i18next';
 
 import { Button } from '@actual-app/components/button';
 import { SvgAdd } from '@actual-app/components/icons/v1';
-import { ModeButton } from '@actual-app/components/mode-button';
+import {
+  ModeButton,
+  ModeButtonGroup,
+} from '@actual-app/components/mode-button';
 import { Select } from '@actual-app/components/select';
 import { styles } from '@actual-app/components/styles';
 import { Text } from '@actual-app/components/text';
@@ -19,6 +22,7 @@ import { css } from '@emotion/css';
 import { v4 as uuidv4 } from 'uuid';
 
 import { LabeledCheckbox } from '#components/forms/LabeledCheckbox';
+import { reportSectionStyle } from '#components/reports/chart-theme';
 import { MonteCarloContributions } from '#components/reports/reports/monte-carlo/MonteCarloContributions';
 import { MonteCarloHelpTooltip } from '#components/reports/reports/monte-carlo/MonteCarloHelpTooltip';
 import { MonteCarloIncomeStreams } from '#components/reports/reports/monte-carlo/MonteCarloIncomeStreams';
@@ -153,14 +157,14 @@ export function MonteCarloConfiguration({
   return (
     <View
       style={{
-        backgroundColor: theme.tableBackground,
+        ...reportSectionStyle,
         padding: 20,
         flexShrink: 0,
         gap: 15,
       }}
     >
       {/* Tab bar; wraps onto extra lines on narrow screens */}
-      <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 5 }}>
+      <ModeButtonGroup style={{ flexWrap: 'wrap' }}>
         <ModeButton
           selected={activeTab === 'plan'}
           onSelect={() => setActiveTab('plan')}
@@ -197,7 +201,7 @@ export function MonteCarloConfiguration({
         >
           <Trans>Tax</Trans>
         </ModeButton>
-      </View>
+      </ModeButtonGroup>
 
       <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
         <Text style={{ color: theme.pageText }}>

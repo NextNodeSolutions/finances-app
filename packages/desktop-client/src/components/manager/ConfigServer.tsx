@@ -21,7 +21,8 @@ import { saveGlobalPrefs } from '#prefs/prefsSlice';
 import { useDispatch, useSelector } from '#redux';
 import { loggedIn, signOut } from '#users/usersSlice';
 
-import { Title } from './subscribe/common';
+import { ManagerCard } from './ManagerCard';
+import { bodyTextStyle, errorTextStyle, Title } from './subscribe/common';
 
 export function ElectronServerConfig({
   onDoNotUseServer,
@@ -125,25 +126,10 @@ export function ElectronServerConfig({
           gap: 20,
         }}
       >
-        <Text
-          style={{
-            fontSize: 16,
-            color: theme.pageText,
-            lineHeight: 1.5,
-          }}
-        >
-          <Trans>
-            Set up your server below to enable seamless data synchronization
-            across your devices, bank sync and more...
-          </Trans>
+        <Text style={bodyTextStyle}>
+          <Trans>A server keeps your budget in sync across devices.</Trans>
         </Text>
-        <Text
-          style={{
-            fontSize: 16,
-            color: theme.pageText,
-            lineHeight: 1.5,
-          }}
-        >
+        <Text style={bodyTextStyle}>
           <Trans>
             Need to expose your server to the internet? Follow our step-by-step{' '}
             <Link
@@ -157,7 +143,7 @@ export function ElectronServerConfig({
         </Text>
 
         {configError && (
-          <Text style={{ color: theme.errorText, marginTop: 10 }}>
+          <Text style={{ ...errorTextStyle, marginTop: 10 }}>
             {configError}
           </Text>
         )}
@@ -387,7 +373,7 @@ export function ConfigServer() {
   });
 
   return (
-    <View style={{ maxWidth: 500, marginTop: -30 }}>
+    <ManagerCard style={{ maxWidth: 500 }}>
       {(userData || currentUrl) && (
         <MobileBackButton
           onPress={() =>
@@ -411,13 +397,7 @@ export function ConfigServer() {
       {serverConfigView === 'external' && (
         <>
           <Title text={t('Connect to a server')} />
-          <Text
-            style={{
-              fontSize: 16,
-              color: theme.tableRowHeaderText,
-              lineHeight: 1.5,
-            }}
-          >
+          <Text style={bodyTextStyle}>
             {currentUrl ? (
               <Trans>
                 Existing sessions will be logged out and you will log in to this
@@ -425,21 +405,13 @@ export function ConfigServer() {
               </Trans>
             ) : (
               <Trans>
-                A sync server keeps your budget up to date across all your
-                devices and unlocks features like bank syncing. It is completely
-                optional: Actual works great on just this device too.
+                A server keeps your budget in sync across devices. It is
+                optional: Actual works fully on this device alone.
               </Trans>
             )}
           </Text>
           {!currentUrl && (
-            <Text
-              style={{
-                fontSize: 16,
-                color: theme.pageTextLight,
-                lineHeight: 1.5,
-                marginTop: 10,
-              }}
-            >
+            <Text style={{ ...bodyTextStyle, marginTop: 10 }}>
               <Trans>
                 If you already run a server, enter its URL below. Otherwise you
                 can{' '}
@@ -456,14 +428,7 @@ export function ConfigServer() {
           )}
           {error && (
             <>
-              <Text
-                size="large"
-                style={{
-                  marginTop: 20,
-                  color: theme.errorText,
-                  borderRadius: 4,
-                }}
-              >
+              <Text style={{ ...errorTextStyle, marginTop: 20 }}>
                 {getErrorMessage(error)}
               </Text>
               {isElectron() && (
@@ -474,18 +439,11 @@ export function ConfigServer() {
                     marginTop: 20,
                   }}
                 >
-                  <Text
-                    size="large"
-                    style={{
-                      color: theme.errorText,
-                      borderRadius: 4,
-                    }}
-                  >
+                  <Text style={errorTextStyle}>
                     <Trans>
                       If the server is using a self-signed certificate{' '}
                       <Link
                         variant="text"
-                        style={{ fontSize: 15 }}
                         onClick={onSelectSelfSignedCertificate}
                       >
                         select it here
@@ -498,7 +456,7 @@ export function ConfigServer() {
             </>
           )}
           <View
-            style={{ display: 'flex', flexDirection: 'row', marginTop: 30 }}
+            style={{ display: 'flex', flexDirection: 'row', marginTop: 24 }}
           >
             <BigInput
               autoFocus
@@ -511,7 +469,7 @@ export function ConfigServer() {
             <ButtonWithLoading
               variant="primary"
               isLoading={loading}
-              style={{ fontSize: 15 }}
+              style={{ paddingInline: 16 }}
               onPress={onSubmit}
             >
               <Trans>Connect</Trans>
@@ -520,14 +478,16 @@ export function ConfigServer() {
           <View
             style={{
               alignItems: 'center',
-              gap: 15,
-              marginTop: 30,
+              gap: 4,
+              marginTop: 20,
+              paddingTop: 16,
+              borderTop: `1px solid ${theme.hairlineSubtle}`,
             }}
           >
             {currentUrl ? (
               <Button
                 variant="bare"
-                style={{ color: theme.pageTextLink }}
+                style={{ color: theme.accentText }}
                 onPress={onSkip}
               >
                 <Trans>Stop using a server</Trans>
@@ -537,7 +497,7 @@ export function ConfigServer() {
                 {!isElectron() && (
                   <Button
                     variant="bare"
-                    style={{ color: theme.pageTextLink }}
+                    style={{ color: theme.accentText }}
                     onPress={onSameDomain}
                   >
                     <Trans>Use the current domain</Trans>
@@ -546,7 +506,7 @@ export function ConfigServer() {
                 {!userData && (
                   <Button
                     variant="bare"
-                    style={{ color: theme.pageTextLink }}
+                    style={{ color: theme.accentText }}
                     onPress={onSkip}
                   >
                     <Trans>Don't use a server</Trans>
@@ -557,6 +517,6 @@ export function ConfigServer() {
           </View>
         </>
       )}
-    </View>
+    </ManagerCard>
   );
 }

@@ -11,7 +11,7 @@ import {
   validateSessionMiddleware,
 } from './util/middlewares';
 
-const app = express();
+const app: express.Express = express();
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(requestLoggerMiddleware);

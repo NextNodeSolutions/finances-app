@@ -19,14 +19,14 @@ function onScrollbarChange() {
       borderRadius: 30,
       backgroundClip: 'padding-box',
       border: '2px solid rgba(0, 0, 0, 0)',
-      backgroundColor: '#d0d0d0',
+      backgroundColor: 'var(--color-hairlineStrong)',
     },
   };
 
   styles.lightScrollbar = !hiddenScrollbars && {
     '& ::-webkit-scrollbar': {
       width: 11,
-      backgroundColor: 'rgba(200, 200, 200, .2)',
+      backgroundColor: 'transparent',
     },
     '& ::-webkit-scrollbar-thumb': {
       width: 7,
@@ -35,10 +35,12 @@ function onScrollbarChange() {
       border: '2px solid rgba(0, 0, 0, 0)',
     },
     '& ::-webkit-scrollbar-thumb:vertical': {
-      backgroundColor: '#d0d0d0',
+      backgroundColor: 'var(--color-hairlineStrong)',
     },
   };
 
+  // Every surface now follows the theme, so the "dark" variant shares the
+  // hairline thumb; it stays a separate entry for its existing callers.
   styles.darkScrollbar = !hiddenScrollbars && {
     '& ::-webkit-scrollbar': {
       width: 11,
@@ -48,7 +50,7 @@ function onScrollbarChange() {
       width: 7,
       borderRadius: 30,
       backgroundClip: 'padding-box',
-      backgroundColor: 'rgba(200, 200, 200, .5)',
+      backgroundColor: 'var(--color-hairlineStrong)',
       border: '2px solid rgba(0, 0, 0, 0)',
     },
   };

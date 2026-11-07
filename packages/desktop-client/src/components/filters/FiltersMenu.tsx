@@ -40,6 +40,7 @@ import { useAccounts } from '#hooks/useAccounts';
 import { useCategories } from '#hooks/useCategories';
 import { useDateFormat } from '#hooks/useDateFormat';
 import { useFormat } from '#hooks/useFormat';
+import { useOptionalFeature } from '#hooks/useOptionalFeature';
 import { usePayees } from '#hooks/usePayees';
 import { useTransactionFilters } from '#hooks/useTransactionFilters';
 import { mapField } from '#util/rule';
@@ -88,6 +89,8 @@ type ConfigureFieldProps<T extends RuleConditionEntity> =
       onApply: (cond: T) => void;
     };
 
+const TAG_OPS: readonly string[] = ['hasAnyTag', 'hasTags'];
+
 function ConfigureField<T extends RuleConditionEntity>({
   field: initialField,
   initialSubfield = initialField,
@@ -99,6 +102,7 @@ function ConfigureField<T extends RuleConditionEntity>({
   const { t } = useTranslation();
   const format = useFormat();
   const dateFormat = useDateFormat() || 'MM/dd/yyyy';
+  const [isTagsOn] = useOptionalFeature('tags');
   const accounts = useAccounts();
   const categories = useCategories();
   const payees = usePayees();
@@ -124,7 +128,13 @@ function ConfigureField<T extends RuleConditionEntity>({
   }, [subfield]);
 
   const type = FIELD_TYPES.get(field);
-  let ops = getValidOps(field).filter(op => op !== 'isbetween');
+  // With tags off, new filters cannot pick a tag op; a filter that already
+  // uses one keeps it.
+  let ops = getValidOps(field).filter(
+    validOp =>
+      validOp !== 'isbetween' &&
+      (isTagsOn || !TAG_OPS.includes(validOp) || validOp === op),
+  );
 
   // Month and year fields are quite hacky right now! Figure out how
   // to clean this up later
@@ -160,7 +170,7 @@ function ConfigureField<T extends RuleConditionEntity>({
   // For account ops that do not use an input value but should preserve the current value in state
   const isNoValueAccountOp = (op: T['op']) =>
     ['onBudget', 'offBudget'].includes(op);
-  const isTagOp = (op: T['op']) => ['hasAnyTag', 'hasTags'].includes(op);
+  const isTagOp = (op: T['op']) => TAG_OPS.includes(op);
 
   // Convert stored ID value into text
   const resolveIdToText = (field: string, subfield: string, value: unknown) => {
@@ -380,7 +390,16 @@ function ConfigureField<T extends RuleConditionEntity>({
                 padding: 0,
               }}
             >
-              <View style={{ flexGrow: 1 }}>{titleFirst(mapField(field))}</View>
+              <View
+                style={{
+                  flexGrow: 1,
+                  fontSize: 13,
+                  fontWeight: 600,
+                  color: theme.pageText,
+                }}
+              >
+                {titleFirst(mapField(field))}
+              </View>
             </View>
           )}
         </SpaceBetween>
@@ -396,8 +415,8 @@ function ConfigureField<T extends RuleConditionEntity>({
       </View>
 
       <SpaceBetween
-        gap={5}
-        style={{ alignItems: 'flex-start', marginBottom: 15 }}
+        gap={6}
+        style={{ alignItems: 'flex-start', marginBottom: 14 }}
       >
         {type === 'boolean' ? (
           <>
@@ -809,8 +828,8 @@ export function FilterButton<T extends RuleConditionEntity>({
           return true;
         }}
         style={{
-          width: 275,
-          padding: 15,
+          width: 288,
+          padding: 16,
           color: theme.menuItemText,
           zIndex: '2500 !important',
         }}

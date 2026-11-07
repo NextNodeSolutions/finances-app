@@ -4,7 +4,6 @@ import { Trans, useTranslation } from 'react-i18next';
 import { useParams } from 'react-router';
 
 import { Button } from '@actual-app/components/button';
-import { styles } from '@actual-app/components/styles';
 import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
@@ -17,6 +16,10 @@ import type {
 } from '@actual-app/core/types/models';
 
 import { MobileBackButton } from '#components/mobile/MobileBackButton';
+import {
+  mobileFooterButtonStyle,
+  mobileFormFooterStyle,
+} from '#components/mobile/utils';
 import { MobilePageHeader, Page } from '#components/Page';
 import { updateScheduleConditions } from '#components/schedules/schedule-edit-utils';
 import { ScheduleEditForm } from '#components/schedules/ScheduleEditForm';
@@ -234,21 +237,11 @@ export function MobileScheduleEditPage() {
         />
       }
       footer={
-        <View
-          style={{
-            paddingLeft: styles.mobileEditingPadding,
-            paddingRight: styles.mobileEditingPadding,
-            paddingTop: 10,
-            paddingBottom: 'calc(10px + env(safe-area-inset-bottom))',
-            backgroundColor: theme.tableHeaderBackground,
-            borderTopWidth: 1,
-            borderColor: theme.tableBorder,
-          }}
-        >
+        <View style={mobileFormFooterStyle}>
           <Button
             variant="primary"
             onPress={onSave}
-            style={{ height: styles.mobileMinHeight }}
+            style={mobileFooterButtonStyle}
           >
             <Trans>Save</Trans>
           </Button>

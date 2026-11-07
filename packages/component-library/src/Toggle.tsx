@@ -3,8 +3,16 @@ import type { CSSProperties } from 'react';
 
 import { css } from '@emotion/css';
 
+import { styles } from './styles';
 import { theme } from './theme';
+import { elevation, motion, radius } from './tokens';
 import { View } from './View';
+
+const TRACK_WIDTH = 30;
+const TRACK_HEIGHT = 18;
+const KNOB_INSET = 2;
+const KNOB_SIZE = TRACK_HEIGHT - KNOB_INSET * 2;
+const KNOB_TRAVEL = TRACK_WIDTH - KNOB_SIZE - KNOB_INSET * 2;
 
 type ToggleProps = {
   id: string;
@@ -37,9 +45,7 @@ export const Toggle = ({
           height: 0,
           width: 0,
           opacity: 0,
-          '&:focus-visible + label': {
-            boxShadow: '0 0 0 2px ' + theme.formInputBorderSelected,
-          },
+          '&:focus-visible + label': styles.focusRing,
         })}
         type="checkbox"
       />
@@ -52,12 +58,12 @@ export const Toggle = ({
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'space-between',
-            cursor: 'pointer',
-            width: '32px',
-            height: '16px',
-            borderRadius: '100px',
+            cursor: isDisabled ? 'default' : 'pointer',
+            width: TRACK_WIDTH,
+            height: TRACK_HEIGHT,
+            borderRadius: radius.pill,
             position: 'relative',
-            transition: 'background-color .2s',
+            transition: `background-color ${motion.base} ${motion.ease}`,
             backgroundColor: isOn
               ? theme.checkboxToggleBackgroundSelected
               : theme.checkboxToggleBackground,
@@ -72,20 +78,21 @@ export const Toggle = ({
             {
               content: '" "',
               position: 'absolute',
-              top: '2px',
-              left: '2px',
-              width: '12px',
-              height: '12px',
-              borderRadius: '100px',
-              transition: '0.2s',
-              boxShadow: '0 0 2px 0 rgba(10, 10, 10, 0.29)',
+              top: KNOB_INSET,
+              left: KNOB_INSET,
+              width: KNOB_SIZE,
+              height: KNOB_SIZE,
+              borderRadius: radius.pill,
+              transition: `transform ${motion.base} ${motion.ease}, background-color ${motion.base} ${motion.ease}`,
+              boxShadow: elevation.xs,
               backgroundColor: isDisabled
                 ? theme.checkboxToggleDisabled
-                : '#fff',
+                : isOn
+                  ? theme.checkboxText
+                  : theme.checkboxToggleKnob,
             },
             isOn && {
-              left: 'calc(100% - 2px)',
-              transform: 'translateX(-100%)',
+              transform: `translateX(${KNOB_TRAVEL}px)`,
             },
           )}
         />

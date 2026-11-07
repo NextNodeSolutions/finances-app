@@ -97,6 +97,7 @@ export const ReportTableRow = memo(
             endDate,
             field: drilldownField,
             id: item.id,
+            name: item.name,
           };
     const canShowActivity = !isNarrowWidth && !compact;
 
@@ -190,6 +191,7 @@ export const ReportTableRow = memo(
                         endDate: intervalItem.intervalEndDate || '',
                         field: drilldownField,
                         id: item.id,
+                        name: item.name,
                         uncategorizedId: item.uncategorizedId,
                         interval,
                         bucketTagNames: item.bucketTagNames,
@@ -308,7 +310,7 @@ export const ReportTableRow = memo(
             }
             textAlign="right"
             style={{
-              fontWeight: 600,
+              fontWeight: 500,
               minWidth: compact ? 50 : 85,
               backgroundColor: style?.backgroundColor,
               ...(colorized && { color: getAmountColor(item[balanceTypeOp]) }),
@@ -354,7 +356,7 @@ export const ReportTableRow = memo(
             }
             textAlign="right"
             style={{
-              fontWeight: 600,
+              fontWeight: 500,
               minWidth: compact ? 50 : 85,
               backgroundColor: style?.backgroundColor,
               ...(colorized && { color: getAmountColor(average) }),

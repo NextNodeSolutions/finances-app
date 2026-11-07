@@ -25,15 +25,15 @@
     "@mdx-js/react": "^3.1.1",
     "@r74tech/docusaurus-plugin-panzoom": "^2.5.0",
     "prism-react-renderer": "^2.4.1",
-    "react": "19.3.0",
-    "react-dom": "19.3.0",
+    "react": "catalog:",
+    "react-dom": "catalog:",
     "unist-util-visit-parents": "^6.0.2"
   },
   "devDependencies": {
     "@actual-app/ci-actions": "workspace:*",
     "@docusaurus/module-type-aliases": "^3.10.2",
     "@docusaurus/types": "^3.10.2",
-    "@types/react": "^19.3.0"
+    "@types/react": "catalog:"
   },
   "browserslist": {
     "production": [

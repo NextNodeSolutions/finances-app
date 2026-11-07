@@ -79,10 +79,27 @@ test.describe('Schedules', () => {
     // Go back to schedules page
     await navigation.goToSchedulesPage();
     await schedulesPage.completeNthSchedule(2);
-    await expect(schedulesPage.getNthScheduleRow(4)).toHaveText(
-      'Show completed schedules',
-    );
+    await schedulesPage.selectStatusFilter('Completed');
+    const completed = schedulesPage.getNthSchedule(0);
+    await expect(completed.payee).toHaveText('Home Depot');
+    await expect(completed.status).toHaveText('Completed');
     await expect(page).toMatchThemeScreenshots();
+  });
+
+  test('opens a schedule in the side panel and edits it from there', async () => {
+    const schedule = schedulesPage.getNthSchedule(0);
+    const payee = await schedule.payee.textContent();
+
+    const panel = await schedulesPage.openSchedulePanel(0);
+    await expect(panel.getByText('Next dates')).toBeVisible();
+    await expect(
+      panel.getByRole('button', { name: `Open payee ${payee}` }),
+    ).toBeVisible();
+
+    const scheduleEditModal = await schedulesPage.editNthSchedule(0);
+    await expect(scheduleEditModal.locator).toBeVisible();
+    await scheduleEditModal.cancelButton.click();
+    await expect(scheduleEditModal.locator).toBeHidden();
   });
 
   test('shows a scheduled split transfer in its destination account', async () => {

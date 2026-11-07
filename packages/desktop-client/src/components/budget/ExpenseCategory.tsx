@@ -36,6 +36,7 @@ type ExpenseCategoryProps = {
   onBudgetAction: (month: string, action: string, arg: unknown) => void;
   onShowActivity: (id: CategoryEntity['id'], month: string) => void;
   onReorder: OnDropCallback;
+  onOpenDetails?: ComponentProps<typeof SidebarCategory>['onOpenDetails'];
 };
 
 export function ExpenseCategory({
@@ -51,6 +52,7 @@ export function ExpenseCategory({
   onShowActivity,
   onDragChange,
   onReorder,
+  onOpenDetails,
 }: ExpenseCategoryProps) {
   let dragging = dragState && dragState.item === cat;
 
@@ -100,6 +102,7 @@ export function ExpenseCategory({
           onEditName={onEditName}
           onSave={onSave}
           onDelete={onDelete}
+          onOpenDetails={onOpenDetails}
         />
 
         <RenderMonths>

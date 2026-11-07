@@ -1,206 +1,153 @@
-import { useCallback, useMemo, useRef, useState } from 'react';
+import { useRef, useState } from 'react';
 import type { ComponentProps } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 
 import { Button } from '@actual-app/components/button';
-import { SvgExpandArrow, SvgSubtract } from '@actual-app/components/icons/v0';
-import { Popover } from '@actual-app/components/popover';
 import { styles } from '@actual-app/components/styles';
 import { theme } from '@actual-app/components/theme';
+import { spacing } from '@actual-app/components/tokens';
 import { View } from '@actual-app/components/view';
-import { memoizeOne } from '@actual-app/core/shared/memoize';
 import { getNormalisedString } from '@actual-app/core/shared/normalisation';
 import { groupById } from '@actual-app/core/shared/util';
 import type { Diff } from '@actual-app/core/shared/util';
 import type { PayeeEntity } from '@actual-app/core/types/models';
 
 import { Search } from '#components/common/Search';
-import { Cell, SelectCell, TableHeader } from '#components/table';
-import {
-  SelectedProvider,
-  useSelected,
-  useSelectedDispatch,
-  useSelectedItems,
-} from '#hooks/useSelected';
+import { SegmentedControl } from '#components/rules/SegmentedControl';
+import { SegmentedControlItem } from '#components/rules/SegmentedControlItem';
+import { SelectedProvider, useSelected } from '#hooks/useSelected';
 import { pushModal } from '#modals/modalsSlice';
 import { useDispatch } from '#redux';
 
-import { PayeeMenu } from './PayeeMenu';
+import { usePayeePanel } from './panels/usePayeePanel';
+import { PayeeSelectionBar } from './PayeeSelectionBar';
+import { PayeesEmptyMessage } from './PayeesEmptyMessage';
+import type { PayeeView } from './PayeesEmptyMessage';
 import { PayeeTable } from './PayeeTable';
+import { PayeeTableHeader } from './PayeeTableHeader';
+import type { usePayeeUsage } from './usePayeeUsage';
 
-const getPayeesById = memoizeOne((payees: PayeeEntity[]) => groupById(payees));
+type PayeeFilter = {
+  text: string;
+  view: PayeeView;
+  isUnused: (payee: PayeeEntity) => boolean;
+  transferPrefix: string;
+};
 
-function PayeeTableHeader() {
-  const { t } = useTranslation();
-
-  const dispatchSelected = useSelectedDispatch();
-  const selectedItems = useSelectedItems();
-
-  return (
-    <View>
-      <TableHeader collapsed>
-        <SelectCell
-          exposed
-          focused={false}
-          selected={selectedItems.size > 0}
-          icon={<SvgSubtract width={6} height={6} />}
-          onSelect={e =>
-            dispatchSelected({ type: 'select-all', isRangeSelect: e.shiftKey })
-          }
-        />
-        <Cell value={t('Name')} width="flex" />
-      </TableHeader>
-    </View>
+function filterPayees(payees: PayeeEntity[], filter: PayeeFilter) {
+  const needle = getNormalisedString(filter.text);
+  return payees.filter(
+    payee =>
+      (filter.view === 'all' || filter.isUnused(payee)) &&
+      getNormalisedString(
+        (payee.transfer_acct ? filter.transferPrefix : '') + payee.name,
+      ).includes(needle),
   );
 }
 
 type ManagePayeesProps = {
   payees: PayeeEntity[];
+  isLoading: boolean;
   ruleCounts: ComponentProps<typeof PayeeTable>['ruleCounts'];
+  usage: ReturnType<typeof usePayeeUsage>;
   orphanedPayees: Array<Pick<PayeeEntity, 'id'>>;
   initialSelectedIds: string[];
-  onBatchChange: (diff: Diff<PayeeEntity>) => void;
+  onBatchChange: (diff: Diff<PayeeEntity>) => Promise<void>;
   onViewRules: ComponentProps<typeof PayeeTable>['onViewRules'];
   onCreateRule: ComponentProps<typeof PayeeTable>['onCreateRule'];
   onMerge: (ids: string[]) => Promise<void>;
 };
 
-export const ManagePayees = ({
+export function ManagePayees({
   payees,
+  isLoading,
   ruleCounts,
+  usage,
   orphanedPayees,
   initialSelectedIds,
   onBatchChange,
   onViewRules,
   onCreateRule,
-  ...props
-}: ManagePayeesProps) => {
-  const [filter, setFilter] = useState('');
-  const table = useRef(null);
-  const triggerRef = useRef(null);
-  const [orphanedOnly, setOrphanedOnly] = useState(false);
+  onMerge,
+}: ManagePayeesProps) {
   const { t } = useTranslation();
   const dispatch = useDispatch();
+  const payeePanel = usePayeePanel();
+  const table = useRef(null);
+  const [filter, setFilter] = useState('');
+  const [view, setView] = useState<PayeeView>('all');
 
-  const filteredPayees = useMemo(() => {
-    let filtered = payees;
-    if (filter) {
-      filtered = filtered.filter(p =>
-        getNormalisedString(
-          (p.transfer_acct ? t('Transfer: ') : '') + p.name,
-        ).includes(getNormalisedString(filter)),
-      );
-    }
-    if (orphanedOnly) {
-      filtered = filtered.filter(p =>
-        orphanedPayees.map(o => o.id).includes(p.id),
-      );
-    }
-    return filtered;
-  }, [payees, filter, orphanedOnly, orphanedPayees, t]);
+  const orphanIds = new Set(orphanedPayees.map(orphan => orphan.id));
+  // Until the counts arrive, the server's list of orphans stands in.
+  const isUnused = (payee: PayeeEntity) =>
+    payee.transfer_acct == null &&
+    (usage.isLoading
+      ? orphanIds.has(payee.id)
+      : (usage.counts.get(payee.id) ?? 0) === 0);
 
+  const filteredPayees = filterPayees(payees, {
+    text: filter,
+    view,
+    isUnused,
+    transferPrefix: t('Transfer: '),
+  });
+  const payeesById = groupById(payees);
   const selected = useSelected('payees', filteredPayees, initialSelectedIds);
+  const selectedIds = [...selected.items];
 
-  function applyFilter(f: string) {
-    if (filter !== f) {
-      setFilter(f);
+  const onUpdate = <T extends 'name' | 'favorite' | 'learn_categories'>(
+    id: PayeeEntity['id'],
+    name: T,
+    value: PayeeEntity[T],
+  ) => {
+    const payee = payeesById[id];
+    if (payee && payee[name] !== value) {
+      void onBatchChange({
+        updated: [{ id, [name]: value }],
+        added: [],
+        deleted: [],
+      });
     }
-  }
+  };
 
-  const onUpdate = useCallback(
-    <T extends 'name' | 'favorite' | 'learn_categories'>(
-      id: PayeeEntity['id'],
-      name: T,
-      value: PayeeEntity[T],
-    ) => {
-      const payee = payees.find(p => p.id === id);
-      if (payee && payee[name] !== value) {
-        onBatchChange({
-          updated: [{ id, [name]: value }],
-          added: [],
-          deleted: [],
-        });
-      }
-    },
-    [payees, onBatchChange],
-  );
-
-  const getSelectableIds = useCallback(() => {
-    return Promise.resolve(
+  const getSelectableIds = () =>
+    Promise.resolve(
       filteredPayees.filter(p => p.transfer_acct == null).map(p => p.id),
     );
-  }, [filteredPayees]);
 
-  function onDelete(ids?: { id: string }[]) {
-    onBatchChange({
-      deleted: ids ?? [...selected.items].map(id => ({ id })),
+  function onDelete(ids?: Array<{ id: string }>) {
+    void onBatchChange({
+      deleted: ids ?? selectedIds.map(id => ({ id })),
       updated: [],
       added: [],
     });
     if (!ids) selected.dispatch({ type: 'select-none' });
   }
 
-  function onFavorite() {
-    const allFavorited = [...selected.items]
-      .map(id => payeesById[id].favorite)
-      .every(f => f);
-    if (allFavorited) {
-      onBatchChange({
-        updated: [...selected.items].map(id => ({ id, favorite: false })),
-        added: [],
-        deleted: [],
-      });
-    } else {
-      onBatchChange({
-        updated: [...selected.items].map(id => ({ id, favorite: true })),
-        added: [],
-        deleted: [],
-      });
-    }
+  // Toggles a flag on every selected payee: all on turns it off, else on.
+  function onToggleSelected(field: 'favorite' | 'learn_categories') {
+    const isOn = !selectedIds.every(id => payeesById[id]?.[field]);
+    void onBatchChange({
+      updated: selectedIds.map(id => ({ id, [field]: isOn })),
+      added: [],
+      deleted: [],
+    });
     selected.dispatch({ type: 'select-none' });
   }
 
-  function onLearn() {
-    const allLearnCategories = [...selected.items]
-      .map(id => payeesById[id].learn_categories)
-      .every(f => f);
-    if (allLearnCategories) {
-      onBatchChange({
-        updated: [...selected.items].map(id => ({
-          id,
-          learn_categories: false,
-        })),
-        added: [],
-        deleted: [],
-      });
-    } else {
-      onBatchChange({
-        updated: [...selected.items].map(id => ({
-          id,
-          learn_categories: true,
-        })),
-        added: [],
-        deleted: [],
-      });
-    }
-    selected.dispatch({ type: 'select-none' });
-  }
+  async function onMergeSelected() {
+    if (selectedIds.length < 2) return;
 
-  async function onMerge() {
-    const ids = [...selected.items];
-    if (ids.length < 2) return;
-
-    const targetPayeeId = ids[0];
-
+    const [targetPayeeId] = selectedIds;
     dispatch(
       pushModal({
         modal: {
           name: 'confirm-payees-merge',
           options: {
-            payeeIds: ids.filter(id => id !== targetPayeeId),
+            payeeIds: selectedIds.filter(id => id !== targetPayeeId),
             targetPayeeId,
             onConfirm: async () => {
-              await props.onMerge(ids);
+              await onMerge(selectedIds);
               selected.dispatch({ type: 'select-none' });
             },
           },
@@ -209,139 +156,82 @@ export const ManagePayees = ({
     );
   }
 
-  const onChangeCategoryLearning = useCallback(() => {
-    dispatch(pushModal({ modal: { name: 'payee-category-learning' } }));
-  }, [dispatch]);
-
-  const buttonsDisabled = selected.items.size === 0;
-
-  const payeesById = getPayeesById(payees);
-
-  const [menuOpen, setMenuOpen] = useState(false);
-
   return (
     <View style={{ height: '100%' }}>
       <View
         style={{
           flexDirection: 'row',
           alignItems: 'center',
-          padding: '0 0 15px',
+          gap: spacing.md,
+          paddingBottom: spacing.lg,
+          flexShrink: 0,
         }}
       >
-        <View style={{ flexShrink: 0 }}>
-          <Button
-            ref={triggerRef}
-            variant="bare"
-            style={{ marginRight: 10 }}
-            isDisabled={buttonsDisabled}
-            onPress={() => setMenuOpen(true)}
-          >
-            {buttonsDisabled
-              ? t('No payees selected')
-              : t('{{count}} payees', {
-                  count: selected.items.size,
-                })}
-            <SvgExpandArrow width={8} height={8} style={{ marginLeft: 5 }} />
-          </Button>
-
-          <Popover
-            triggerRef={triggerRef}
-            isOpen={menuOpen}
-            placement="bottom start"
-            style={{ width: 250 }}
-            onOpenChange={() => setMenuOpen(false)}
-          >
-            <PayeeMenu
-              payeesById={payeesById}
-              selectedPayees={selected.items}
-              onClose={() => setMenuOpen(false)}
-              onDelete={onDelete}
-              onMerge={onMerge}
-              onFavorite={onFavorite}
-              onLearn={onLearn}
-            />
-          </Popover>
-        </View>
-        <View
-          style={{
-            flexShrink: 0,
-          }}
-        >
-          {(orphanedOnly || (orphanedPayees && orphanedPayees.length > 0)) && (
-            <Button
-              variant="bare"
-              style={{ marginRight: 10 }}
-              onPress={() => setOrphanedOnly(prev => !prev)}
-            >
-              {orphanedOnly
-                ? t('Show all payees')
-                : t('Show {{count}} unused payees', {
-                    count: orphanedPayees.length,
-                  })}
-            </Button>
-          )}
-        </View>
-        <View style={{ flex: 1 }} />
         <Search
           placeholder={t('Filter payees...')}
           value={filter}
-          onChange={applyFilter}
+          onChange={setFilter}
         />
+        <SegmentedControl>
+          <SegmentedControlItem
+            isSelected={view === 'all'}
+            onPress={() => setView('all')}
+          >
+            <Trans>All</Trans>
+          </SegmentedControlItem>
+          <SegmentedControlItem
+            isSelected={view === 'unused'}
+            onPress={() => setView('unused')}
+          >
+            <Trans>Unused</Trans>
+          </SegmentedControlItem>
+        </SegmentedControl>
+        <View style={{ flex: 1 }} />
+        <Button
+          variant="bare"
+          style={{ color: theme.pageTextLight }}
+          onPress={() =>
+            dispatch(pushModal({ modal: { name: 'payee-category-learning' } }))
+          }
+        >
+          <Trans>Category learning settings</Trans>
+        </Button>
       </View>
 
       <SelectedProvider instance={selected} fetchAllIds={getSelectableIds}>
         <View style={styles.tableContainer}>
           <PayeeTableHeader />
           {filteredPayees.length === 0 ? (
-            <View
-              style={{
-                textAlign: 'center',
-                color: theme.pageTextSubdued,
-                fontStyle: 'italic',
-                fontSize: 13,
-                marginTop: 5,
-              }}
-            >
-              <Trans>No payees</Trans>
-            </View>
+            <PayeesEmptyMessage
+              isLoading={isLoading}
+              hasPayees={payees.length > 0}
+              view={view}
+            />
           ) : (
             <PayeeTable
               ref={table}
               payees={filteredPayees}
               ruleCounts={ruleCounts}
+              transactionCounts={usage.isLoading ? null : usage.counts}
               onUpdate={onUpdate}
               onViewRules={onViewRules}
               onCreateRule={onCreateRule}
+              onOpenDetails={payeePanel.open}
               onDelete={ids => onDelete(ids.map(id => ({ id })))}
             />
           )}
         </View>
+        {selected.items.size > 0 && (
+          <PayeeSelectionBar
+            payeesById={payeesById}
+            selectedPayees={selected.items}
+            onDelete={() => onDelete()}
+            onMerge={onMergeSelected}
+            onFavorite={() => onToggleSelected('favorite')}
+            onLearn={() => onToggleSelected('learn_categories')}
+          />
+        )}
       </SelectedProvider>
-
-      <View
-        style={{
-          flexDirection: 'row',
-          justifyContent: 'space-between',
-          margin: '20px 0',
-          flexShrink: 0,
-        }}
-      >
-        <View
-          style={{
-            flexDirection: 'row',
-            alignItems: 'center',
-            gap: '1em',
-          }}
-        >
-          <Button
-            aria-label={t('Category learning settings')}
-            variant="normal"
-            onPress={onChangeCategoryLearning}
-          >
-            <Trans>Category learning settings</Trans>
-          </Button>
-        </View>
-      </View>
     </View>
   );
-};
+}

@@ -5,6 +5,7 @@ import { SvgDelete } from '@actual-app/components/icons/v0';
 import { styles } from '@actual-app/components/styles';
 import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
+import { elevation, radius } from '@actual-app/components/tokens';
 import { View } from '@actual-app/components/view';
 
 import { TourTooltipButton } from './TourTooltipButton';
@@ -28,50 +29,65 @@ export function TourTooltip({
       data-testid="tour-tooltip"
       style={{
         backgroundColor: theme.menuBackground,
-        borderRadius: 8,
-        color: theme.pageText,
+        border: `1px solid ${theme.menuBorder}`,
+        borderRadius: radius.lg,
+        color: theme.pageTextLight,
+        fontSize: 13,
+        lineHeight: '20px',
         maxWidth: 360,
-        padding: 16,
-        ...styles.shadowLarge,
+        padding: '16px 18px',
+        boxShadow: elevation.popover,
       }}
     >
       <TourTooltipButton
         handleProps={closeProps}
         style={{
           color: theme.pageTextSubdued,
-          padding: 6,
+          width: 24,
+          height: 24,
+          padding: 0,
+          borderRadius: radius.sm,
           position: 'absolute',
-          right: 8,
-          top: 8,
+          right: 10,
+          top: 10,
         }}
       >
-        <SvgDelete style={{ width: 9, height: 9 }} />
+        <SvgDelete style={{ width: 8, height: 8 }} />
       </TourTooltipButton>
 
       {step.title != null && (
         <Text
           style={{
-            ...styles.mediumText,
-            fontWeight: 700,
-            marginBottom: 8,
-            paddingRight: 24,
+            fontSize: 13.5,
+            lineHeight: '20px',
+            fontWeight: 600,
+            color: theme.pageText,
+            marginBottom: 6,
+            paddingRight: 28,
           }}
         >
           {step.title}
         </Text>
       )}
 
-      <Text style={{ lineHeight: '1.4em' }}>{step.content}</Text>
+      <Text>{step.content}</Text>
 
       <View
         style={{
           alignItems: 'center',
           flexDirection: 'row',
-          gap: 10,
-          marginTop: 14,
+          gap: 6,
+          marginTop: 16,
         }}
       >
-        <Text style={{ color: theme.pageTextSubdued, flex: 1 }}>
+        <Text
+          style={{
+            ...styles.tnum,
+            fontSize: 11.5,
+            color: theme.pageTextSubdued,
+            flex: 1,
+          }}
+        >
           {t('{{current}} of {{total}}', {
             current: index + 1,
             total: size,

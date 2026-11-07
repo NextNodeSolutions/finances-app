@@ -1,10 +1,8 @@
-import { ModeButton } from '#ModeButton';
-import { theme } from '#theme';
-import { View } from '#View';
+import { ModeButton, ModeButtonGroup } from '#ModeButton';
 
 import type { DateRangeGranularity } from './util';
 
-const segmentStyle = { borderRadius: 0, fontSize: 12, padding: '4px 12px' };
+const segmentStyle = { fontSize: 12, padding: '3px 12px' };
 
 type GranularityToggleProps = {
   value: DateRangeGranularity;
@@ -20,15 +18,7 @@ export function GranularityToggle({
   onChange,
 }: GranularityToggleProps) {
   return (
-    <View
-      style={{
-        flexDirection: 'row',
-        border: `1px solid ${theme.buttonNormalBorder}`,
-        borderRadius: 4,
-        overflow: 'hidden',
-        alignSelf: 'flex-start',
-      }}
-    >
+    <ModeButtonGroup>
       <ModeButton
         selected={value === 'month'}
         onSelect={() => onChange('month')}
@@ -43,6 +33,6 @@ export function GranularityToggle({
       >
         {dayLabel}
       </ModeButton>
-    </View>
+    </ModeButtonGroup>
   );
 }

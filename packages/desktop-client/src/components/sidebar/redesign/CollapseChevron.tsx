@@ -12,8 +12,8 @@ type CollapseChevronProps = {
 
 export function CollapseChevron({
   isOpen,
-  size = 12,
-  color = theme.sidebarTextSubdued,
+  size = 11,
+  color = theme.sidebarTextMuted,
 }: CollapseChevronProps) {
   const Chevron = isOpen ? SvgCheveronDown : SvgCheveronRight;
 

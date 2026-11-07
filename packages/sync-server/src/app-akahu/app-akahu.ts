@@ -42,7 +42,7 @@ type AkahuTransaction = {
   };
 };
 
-const app = express();
+const app: express.Express = express();
 export { app as handlers };
 app.use(express.json());
 app.use(requestLoggerMiddleware);

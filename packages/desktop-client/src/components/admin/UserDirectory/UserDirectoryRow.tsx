@@ -9,6 +9,7 @@ import { PossibleRoles } from '@actual-app/core/shared/user';
 import type { UserEntity } from '@actual-app/core/types/models';
 
 import { Checkbox } from '#components/forms';
+import { pillStyle } from '#components/schedules/StatusBadge';
 import { Cell, Row, SelectCell } from '#components/table';
 import { useSelectedDispatch } from '#hooks/useSelected';
 
@@ -102,7 +103,16 @@ export const UserDirectoryRow = memo(
           plain
           style={{ padding: '0 15px', paddingLeft: 5 }}
         >
-          <View>{PossibleRoles[user.role]}</View>
+          <View
+            style={{
+              ...pillStyle,
+              alignSelf: 'flex-start',
+              backgroundColor: theme.pillBackground,
+              color: theme.pillText,
+            }}
+          >
+            {PossibleRoles[user.role]}
+          </View>
         </Cell>
 
         <Cell
@@ -130,7 +140,7 @@ export const UserDirectoryRow = memo(
           style={{ padding: 0, paddingLeft: 5 }}
         >
           <Button
-            style={{ margin: 4, fontSize: 14, color: theme.pageTextLink }}
+            style={{ margin: 4, color: theme.pageTextLink }}
             variant="bare"
             onPress={() => onEditUser?.(user)}
           >

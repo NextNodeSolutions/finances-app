@@ -1,11 +1,18 @@
 import React from 'react';
 import type { ComponentProps, ReactNode } from 'react';
 
+import { styles } from '@actual-app/components/styles';
 import type { CSSProperties } from '@actual-app/components/styles';
 import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
+import { motion, radius } from '@actual-app/components/tokens';
 import { View } from '@actual-app/components/view';
 import { css } from '@emotion/css';
+
+// The check is drawn as a mask so it takes the theme's checkbox text color
+// (white on ink in light, ink on ivory in dark).
+const checkMark =
+  'url(\'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><path d="M0 11l2-2 5 5L18 3l2 2L7 18z"/></svg>\') center / contain no-repeat';
 
 type SectionLabelProps = {
   title?: string;
@@ -16,10 +23,12 @@ export const SectionLabel = ({ title, style }: SectionLabelProps) => {
   return (
     <View
       style={{
-        fontWeight: 500,
+        fontSize: 11.5,
+        fontWeight: 600,
+        letterSpacing: '0.05em',
         textTransform: 'uppercase',
         color: theme.formLabelText,
-        marginBottom: 5,
+        marginBottom: 8,
         lineHeight: '1em',
         ...style,
       }}
@@ -38,7 +47,8 @@ type FormLabelProps = {
 
 const defaultLabelStyle: CSSProperties = {
   fontSize: 13,
-  marginBottom: 3,
+  fontWeight: 500,
+  marginBottom: 6,
   color: theme.tableText,
 };
 
@@ -106,50 +116,42 @@ export const Checkbox = (props: CheckboxProps) => {
           appearance: 'none',
           outline: 0,
           border: '1px solid ' + theme.formInputBorder,
-          borderRadius: 4,
+          borderRadius: radius.xs,
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
           color: theme.checkboxText,
-          backgroundColor: theme.tableBackground,
+          backgroundColor: theme.formInputBackground,
+          transition: `background-color ${motion.fast} ${motion.ease}, border-color ${motion.fast} ${motion.ease}`,
+          ':hover:not(:disabled)': {
+            borderColor: theme.pillBorderDark,
+          },
           ':checked': {
             border: '1px solid ' + theme.checkboxBorderSelected,
             backgroundColor: theme.checkboxBackgroundSelected,
             '::after': {
               display: 'block',
-              background:
-                theme.checkboxBackgroundSelected +
-                ' url(\'data:image/svg+xml; utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><path fill="white" d="M0 11l2-2 5 5L18 3l2 2L7 18z"/></svg>\') 9px 9px',
               width: 9,
               height: 9,
+              backgroundColor: theme.checkboxText,
+              mask: checkMark,
+              WebkitMask: checkMark,
 
               content: '" "',
             },
           },
           ':disabled': {
             border: '1px solid ' + theme.buttonNormalDisabledBorder,
-            backgroundColor: theme.buttonNormalDisabledBorder,
+            backgroundColor: theme.buttonNormalDisabledBackground,
           },
           ':checked:disabled': {
             border: '1px solid ' + theme.buttonNormalDisabledBorder,
             backgroundColor: theme.buttonNormalDisabledBorder,
             '::after': {
-              backgroundColor: theme.buttonNormalDisabledBorder,
+              backgroundColor: theme.buttonNormalDisabledText,
             },
           },
-          '&:focus-visible': {
-            '::before': {
-              position: 'absolute',
-              top: -5,
-              bottom: -5,
-              left: -5,
-              right: -5,
-              border: '2px solid ' + theme.checkboxBorderSelected,
-              borderRadius: 6,
-
-              content: '" "',
-            },
-          },
+          '&:focus-visible': styles.focusRing,
         },
         props.style,
       ])}

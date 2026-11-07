@@ -21,10 +21,10 @@ Actual server is used for syncing changes across devices. It comes with the late
   - If you're on Windows, during installation of Node.js, be sure to select _Automatically install the necessary tools_ from the _Tools for Native Modules_ page. This is required to build better-sqlite3. If you missed this when you installed Node.js, double-click `C:\Program Files\nodejs\install_tools.bat` from the File Explorer or run it in a terminal.
 - Consider using a tool like [nvm](https://github.com/nvm-sh/nvm) or [asdf](https://asdf-vm.com) to install and manage multiple versions of Node.js.
 - You'll also need to have Git installed. For Windows users, you'll also need Git Bash. The Git website has [instructions for downloading and working with Git for all supported operating systems](https://git-scm.com/download).
-- Actual uses yarn packages. You can install [yarn](https://yarnpkg.com/getting-started/install) using the following command:
+- Actual uses [pnpm](https://pnpm.io/installation) to manage its packages. You can install it using the following command:
 
   ```bash
-  npm install --global yarn
+  npm install --global pnpm
   ```
 
 ## Installing Actual
@@ -39,13 +39,13 @@ git clone https://github.com/actualbudget/actual.git
    ```bash
    cd actual
    ```
-3. Install all the required dependencies using yarn.
+3. Install all the required dependencies using pnpm.
    ```bash
-   yarn install
+   pnpm install
    ```
 4. Build the server with
    ```bash
-   yarn build:server
+   pnpm build:server
    ```
 
 ## Running Actual
@@ -53,7 +53,7 @@ git clone https://github.com/actualbudget/actual.git
 After the Actual is installed and built, start the Actual server by running the following command:
 
 ```bash
-yarn start:server
+pnpm start:server
 ```
 
 Note that if you restart your computer, you'll have to run this command again to start the server.
@@ -71,7 +71,7 @@ After=network.target
 
 [Service]
 WorkingDirectory=[Link to your actual-server install directory, ex. /var/www/html/actual]
-ExecStart=/usr/bin/yarn start:server
+ExecStart=/usr/bin/pnpm start:server
 Restart=on-watchdog
 
 [Install]
@@ -92,8 +92,7 @@ root@server:/etc/systemd/system# systemctl status actual-server
      Memory: 45.9M
         CPU: 1.995s
      CGroup: /system.slice/actual-server.service
-             ├─842857 node /usr/bin/yarn start:server
-             ├─842870 /usr/bin/node /var/www/html/actual-server/.yarn/releases/yarn->
+             ├─842857 node /usr/bin/pnpm start:server
              └─842881 /usr/bin/node app
 ```
 
@@ -115,9 +114,9 @@ When accessing Actual for the first time, you may be prompted to provide a URL f
 
 1. Stop the server if it's running. You can use the keyboard shortcut <kbd>CTRL-C</kbd> (even on macOS) to stop the server or close the terminal window it's running from.
 2. In Bash, run `git pull` from the directory you cloned the project into. This will download the latest code.
-3. Run `yarn install` from that directory. This will download any updated dependencies.
-4. Run `yarn build:server` to build the server from the latest code.
-5. Restart the server by running `yarn start:server`.
+3. Run `pnpm install` from that directory. This will download any updated dependencies.
+4. Run `pnpm build:server` to build the server from the latest code.
+5. Restart the server by running `pnpm start:server`.
 
 Actual is constantly evolving to include new features and improve the user's experience. It is always recommended that your local installation be updated with our [latest releases](https://actualbudget.org/docs/releases).
 

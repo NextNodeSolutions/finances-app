@@ -7,6 +7,7 @@ import type { CategoryEntity } from '@actual-app/core/types/models';
 import { css } from '@emotion/css';
 
 import { useMoveCategoryMutation } from '#budget';
+import { cardRowsClassName } from '#components/mobile/utils';
 
 import { IncomeCategoryListItem } from './IncomeCategoryListItem';
 
@@ -40,10 +41,11 @@ export function IncomeCategoryList({
           target={target}
           className={css({
             '&[data-drop-target]': {
-              height: 4,
-              backgroundColor: theme.tableBorderSeparator,
+              height: 2,
+              margin: '0 12px',
+              backgroundColor: theme.accent,
               opacity: 1,
-              borderRadius: 4,
+              borderRadius: 2,
             },
           })}
         />
@@ -104,6 +106,7 @@ export function IncomeCategoryList({
   return (
     <GridList
       aria-label={t('Income categories')}
+      className={cardRowsClassName}
       items={categories}
       dragAndDropHooks={dragAndDropHooks}
       dependencies={[month, onEditCategory, onBudgetAction]}

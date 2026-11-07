@@ -17,10 +17,12 @@ export const Label = forwardRef<HTMLSpanElement, LabelProps>(
         ref={ref}
         style={{
           ...styles.text,
-          color: theme.tableRowHeaderText,
+          color: theme.formLabelText,
           textAlign: 'right',
-          fontSize: 14,
-          marginBottom: 2,
+          fontSize: 13,
+          fontWeight: 500,
+          lineHeight: '18px',
+          marginBottom: 4,
           ...style,
         }}
       >

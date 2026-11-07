@@ -1,5 +1,6 @@
 // @ts-strict-ignore
 import React from 'react';
+import type { ReactNode } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 
 import { Select } from '@actual-app/components/select';
@@ -27,7 +28,12 @@ const dateFormats: { value: SyncedPrefs['dateFormat']; label: string }[] = [
   { value: 'dd-MM-yyyy', label: 'DD-MM-YYYY' },
 ];
 
-export function FormatSettings() {
+type FormatSettingsProps = {
+  /** More rows of the section, after the number and date formats. */
+  children?: ReactNode;
+};
+
+export function FormatSettings({ children }: FormatSettingsProps) {
   const { t } = useTranslation();
   const dispatch = useDispatch();
 
@@ -111,6 +117,7 @@ export function FormatSettings() {
           />
         }
       />
+      {children}
     </SettingsGroup>
   );
 }

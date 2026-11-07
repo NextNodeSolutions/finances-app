@@ -5,9 +5,9 @@ import {
   SvgExclamationOutline,
   SvgInformationOutline,
 } from '@actual-app/components/icons/v1';
-import { styles } from '@actual-app/components/styles';
 import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
+import { radius } from '@actual-app/components/tokens';
 import { View } from '@actual-app/components/view';
 
 type AlertProps = {
@@ -32,10 +32,10 @@ export const Alert = ({
       style={{
         color,
         fontSize: 13,
-        ...styles.shadow,
-        borderRadius: 4,
+        borderRadius: radius.md,
         backgroundColor,
-        padding: 10,
+        padding: '10px 12px',
+        gap: 8,
         flexDirection: 'row',
         '& a, & a:active, & a:visited': {
           color: theme.formLabelText,
@@ -45,11 +45,9 @@ export const Alert = ({
     >
       <View
         style={{
-          paddingLeft: 2,
           paddingTop: '.11em',
           alignSelf: 'stretch',
           flexShrink: 0,
-          marginRight: 5,
           ...iconStyle,
         }}
       >

@@ -10,6 +10,7 @@ import { css } from '@emotion/css';
 import { useCurrentWordRange } from '#hooks/useCurrentWordRange';
 import { useCursorPosition } from '#hooks/useCursorPosition';
 import { useInputRefValue } from '#hooks/useInputRefValue';
+import { useOptionalFeature } from '#hooks/useOptionalFeature';
 import { useRefEventListener } from '#hooks/useRefEventListener';
 import { useTagCSS } from '#hooks/useTagCSS';
 import { useFilteredTags } from '#hooks/useTags';
@@ -30,6 +31,7 @@ export function NoteTagAutocomplete({ inputRef }: NoteTagAutocompleteProps) {
   // 4. Given we are already using inputRef in multiple locations, I elected to simplify the props to just the ref and use HTML/JS events
 
   const [note, setNote] = useInputRefValue(inputRef);
+  const [isTagsOn] = useOptionalFeature('tags');
 
   const [cursorPosition] = useCursorPosition(inputRef);
   const [startIdx, endIdx] = useCurrentWordRange(note, cursorPosition);
@@ -83,7 +85,7 @@ export function NoteTagAutocomplete({ inputRef }: NoteTagAutocompleteProps) {
   }
 
   useRefEventListener(inputRef, 'keydown', e => {
-    if (e.key !== 'Tab') return;
+    if (e.key !== 'Tab' || !isTagsOn) return;
     if (filteredTags.length) {
       e.preventDefault();
       e.stopPropagation();
@@ -102,6 +104,10 @@ export function NoteTagAutocomplete({ inputRef }: NoteTagAutocompleteProps) {
       display: 'none',
     },
   });
+
+  if (!isTagsOn) {
+    return null;
+  }
 
   return (
     <View

@@ -2,6 +2,7 @@ import type { ReactNode } from 'react';
 
 import { Button } from '#Button';
 import { theme } from '#theme';
+import { radius } from '#tokens';
 
 import type { RangePosition } from './util';
 
@@ -41,26 +42,30 @@ export function GridButton({
       onPress={onSelect}
       onHoverStart={onHover}
       style={{
-        padding: '8px 4px',
+        padding: '7px 4px',
         fontSize: 12,
+        fontWeight: selected ? 500 : 400,
         minWidth: 0,
         // Match the selected (primary) variant's 1px border so selecting a
         // cell doesn't resize the grid.
         ...(!selected && { border: '1px solid transparent' }),
         ...(isToday && {
-          fontWeight: 'bold',
-          // Inset ring marks the current period without shifting layout.
-          boxShadow: `inset 0 0 0 1px ${theme.pageTextPositive}`,
-          ...(!selected && { color: theme.pageTextPositive }),
+          fontWeight: 600,
+          // A quiet inset hairline marks the current period without
+          // shifting layout or competing with the selection.
+          ...(!selected && {
+            boxShadow: `inset 0 0 0 1px ${theme.hairlineStrong}`,
+            color: theme.pageText,
+          }),
         }),
         ...(inRange &&
           !selected && {
             backgroundColor: theme.datePickerRangeBackground,
             borderRadius:
               rangeEdge === 'start'
-                ? '4px 0 0 4px'
+                ? `${radius.sm}px 0 0 ${radius.sm}px`
                 : rangeEdge === 'end'
-                  ? '0 4px 4px 0'
+                  ? `0 ${radius.sm}px ${radius.sm}px 0`
                   : 0,
           }),
       }}

@@ -8,7 +8,7 @@
 # blocks the call and feeds the reason back to the agent.
 #
 # Best-effort by design: it catches the honest mistakes agents actually make
-# (plain push-to-main, a forgotten [AI] commit prefix, --no-verify, yarn in a
+# (plain push-to-main, a forgotten [AI] commit prefix, --no-verify, pnpm in a
 # workspace). It does NOT try to defend against deliberate evasion via unusual
 # shell forms (git global options before the subcommand, `git commit -F`/`-C`/
 # `--amend`, etc.) — CI and branch protection are the real gates for what lands.
@@ -28,16 +28,17 @@ cmd=$(jq -r '.tool_input.command // empty' 2>/dev/null) ||
   block "Blocked: could not parse the hook payload (.tool_input.command)."
 [ -z "$cmd" ] && exit 0
 
-# Enforce: always run yarn from the repo root, never in a child workspace.
-# Catch cd/pushd into a package dir, or `yarn --cwd packages/...`.
+# Enforce: always run pnpm from the repo root, never in a child workspace.
+# Catch cd/pushd into a package dir, or `pnpm --dir/-C packages/...`.
 case "$cmd" in
   *"cd packages/"* | *"cd ./packages/"* | *"cd packages "* | *"cd ./packages "* | \
     *"pushd packages/"* | *"pushd ./packages/"* | *"pushd packages "* | *"pushd ./packages "* | \
-    *"yarn --cwd packages/"* | *"yarn --cwd ./packages/"* | *"yarn --cwd packages "* | *"yarn --cwd ./packages "* | \
-    *"yarn --cwd=packages/"* | *"yarn --cwd=./packages/"* | *"yarn --cwd=packages "* | *"yarn --cwd=./packages "*)
+    *"pnpm --dir packages/"* | *"pnpm --dir ./packages/"* | *"pnpm --dir packages "* | *"pnpm --dir ./packages "* | \
+    *"pnpm --dir=packages/"* | *"pnpm --dir=./packages/"* | *"pnpm --dir=packages "* | *"pnpm --dir=./packages "* | \
+    *"pnpm -C packages/"* | *"pnpm -C ./packages/"* | *"pnpm -C packages "* | *"pnpm -C ./packages "*)
     case "$cmd" in
-      *yarn*)
-        block "Blocked: run yarn from the repo root, not a child workspace (AGENTS.md). Use 'yarn workspace <name> <cmd>' from the root instead." ;;
+      *pnpm*)
+        block "Blocked: run pnpm from the repo root, not a child workspace (AGENTS.md). Use 'pnpm --filter <name> <cmd>' from the root instead." ;;
     esac ;;
 esac
 

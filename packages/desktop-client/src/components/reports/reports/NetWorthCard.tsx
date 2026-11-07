@@ -3,7 +3,6 @@ import { useTranslation } from 'react-i18next';
 
 import { Block } from '@actual-app/components/block';
 import { useResponsive } from '@actual-app/components/hooks/useResponsive';
-import { styles } from '@actual-app/components/styles';
 import { View } from '@actual-app/components/view';
 import { send } from '@actual-app/core/platform/client/connection';
 import * as monthUtils from '@actual-app/core/shared/months';
@@ -15,6 +14,11 @@ import type {
 import { FinancialText } from '#components/FinancialText';
 import { PrivacyFilter } from '#components/PrivacyFilter';
 import { Change } from '#components/reports/Change';
+import {
+  cardChartInset,
+  cardHeaderStyle,
+  cardHeadlineStyle,
+} from '#components/reports/chart-theme';
 import { DateRange } from '#components/reports/DateRange';
 import { NetWorthGraph } from '#components/reports/graphs/NetWorthGraph';
 import { LoadingIndicator } from '#components/reports/LoadingIndicator';
@@ -115,7 +119,7 @@ export function NetWorthCard({
         onPointerEnter={onCardHover}
         onPointerLeave={onCardHoverEnd}
       >
-        <View style={{ flexDirection: 'row', padding: 20 }}>
+        <View style={cardHeaderStyle}>
           <View style={{ flex: 1 }}>
             <ReportCardName
               name={meta?.name || t('Net Worth')}
@@ -132,16 +136,10 @@ export function NetWorthCard({
             <DateRange start={start} end={end} />
           </View>
           {data && (
-            <View style={{ textAlign: 'right' }}>
-              <Block
-                style={{
-                  ...styles.mediumText,
-                  fontWeight: 500,
-                  marginBottom: 5,
-                }}
-              >
+            <View style={{ alignItems: 'flex-end' }}>
+              <Block style={{ marginBottom: 2 }}>
                 <PrivacyFilter activationFilters={[!isCardHovered]}>
-                  <FinancialText>
+                  <FinancialText style={cardHeadlineStyle}>
                     {format(data.netWorth, 'financial')}
                   </FinancialText>
                 </PrivacyFilter>
@@ -161,7 +159,7 @@ export function NetWorthCard({
             showTooltip={!isEditing && !isNarrowWidth}
             interval={meta?.interval || 'Monthly'}
             mode={meta?.mode || 'trend'}
-            style={{ height: 'auto', flex: 1 }}
+            style={{ height: 'auto', flex: 1, ...cardChartInset }}
           />
         ) : (
           <LoadingIndicator />

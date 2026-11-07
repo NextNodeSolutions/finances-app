@@ -27,7 +27,7 @@ jobs:
         uses: ./.github/actions/setup
         with:
           download-translations: 'false'
-  constraints:
+  tsconfig-references:
     needs: setup
     runs-on: depot-ubuntu-latest
     steps:
@@ -38,10 +38,8 @@ jobs:
         uses: ./.github/actions/setup
         with:
           download-translations: 'false'
-      - name: Check dependency version consistency
-        run: yarn constraints
       - name: Check tsconfig project references are in sync
-        run: yarn check:tsconfig-references
+        run: pnpm check:tsconfig-references
   lint:
     needs: setup
     runs-on: depot-ubuntu-latest
@@ -54,7 +52,7 @@ jobs:
         with:
           download-translations: 'false'
       - name: Lint
-        run: yarn lint
+        run: pnpm lint
   knip:
     needs: setup
     runs-on: depot-ubuntu-latest
@@ -67,9 +65,9 @@ jobs:
         with:
           download-translations: 'false'
       - name: Build plugins service
-        run: yarn build:plugins-service
+        run: pnpm build:plugins-service
       - name: Check for unused files, dependencies and exports
-        run: yarn knip
+        run: pnpm knip
   typecheck:
     needs: setup
     runs-on: depot-ubuntu-latest
@@ -82,7 +80,7 @@ jobs:
         with:
           download-translations: 'false'
       - name: Typecheck
-        run: yarn typecheck
+        run: pnpm typecheck
   validate-cli:
     needs: setup
     runs-on: depot-ubuntu-latest
@@ -95,7 +93,7 @@ jobs:
         with:
           download-translations: 'false'
       - name: Build Web
-        run: yarn build:server
+        run: pnpm build:server
       - name: Check that the built CLI works
         run: node packages/sync-server/build/bin/actual-server.js --version
   test:
@@ -113,7 +111,7 @@ jobs:
         with:
           download-translations: 'false'
       - name: Test
-        run: yarn test
+        run: pnpm test
       - name: Report test results to Depot
         uses: depot/test-report-action@2ad5779840a9c63e884fa26f11d019768a27a941 # v1.0.1
         if: ${{ !cancelled() && github.event_name == 'push' }}
@@ -149,7 +147,7 @@ jobs:
         with:
           download-translations: 'false'
       - name: Check migrations
-        run: yarn workspace @actual-app/ci-actions tsx bin/check-migrations.ts
+        run: pnpm --filter @actual-app/ci-actions run tsx bin/check-migrations.ts
       - name: Save PR number for the warnings comment workflow
         if: always() && hashFiles('packages/ci-actions/migration-warnings.json') != ''
         env:

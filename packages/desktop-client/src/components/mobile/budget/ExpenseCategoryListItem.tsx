@@ -84,6 +84,7 @@ function ExpenseCategoryName({
               width: sidebarColumnWidth,
               textAlign: 'left',
               ...styles.smallText,
+              color: theme.tableText,
             }}
             data-testid="category-name"
           >
@@ -91,8 +92,8 @@ function ExpenseCategoryName({
           </Text>
           <SvgCheveronRight
             style={{ flexShrink: 0, color: theme.tableTextSubdued }}
-            width={14}
-            height={14}
+            width={12}
+            height={12}
           />
         </View>
       </Button>
@@ -428,8 +429,8 @@ export function ExpenseCategoryListItem({
           flexDirection: 'row',
           alignItems: 'center',
           justifyContent: 'space-between',
-          paddingLeft: 5,
-          paddingRight: 5,
+          paddingLeft: 6,
+          paddingRight: 6,
           borderBottomWidth: 1,
           opacity: isHidden ? 0.5 : undefined,
           backgroundColor: monthUtils.isCurrentMonth(month)

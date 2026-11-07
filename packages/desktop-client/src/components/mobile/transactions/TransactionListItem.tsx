@@ -42,7 +42,20 @@ import { useSelector } from '#redux';
 
 import { lookupName, Status } from './TransactionEdit';
 
-export const ROW_HEIGHT = 60;
+export const ROW_HEIGHT = 68;
+
+function getRowBackground({
+  isSelected,
+  isPreview,
+}: {
+  isSelected: boolean;
+  isPreview: boolean;
+}): string {
+  if (isSelected) {
+    return theme.tableRowBackgroundHighlight;
+  }
+  return isPreview ? theme.tableRowHeaderBackground : theme.tableBackground;
+}
 
 const getTextStyle = ({
   isPreview,
@@ -51,12 +64,8 @@ const getTextStyle = ({
 }): CSSProperties => ({
   ...styles.text,
   fontSize: 14,
-  ...(isPreview
-    ? {
-        fontStyle: 'italic',
-        color: theme.pageTextLight,
-      }
-    : {}),
+  lineHeight: '18px',
+  ...(isPreview && { color: theme.pageTextLight }),
 });
 
 const getScheduleIconStyle = ({ isPreview }: { isPreview: boolean }) => ({
@@ -163,24 +172,13 @@ export function TransactionListItem({
         width: '100%',
         height: ROW_HEIGHT,
         overflow: 'hidden',
-        ...(itemProps.isSelected
-          ? {
-              borderWidth: '0 0 0 4px',
-              borderColor: theme.mobileTransactionSelected,
-              borderStyle: 'solid',
-            }
-          : {
-              borderWidth: '0 0 1px 0',
-              borderColor: theme.tableBorder,
-              borderStyle: 'solid',
-            }),
-        ...(isPreview
-          ? {
-              backgroundColor: theme.tableRowHeaderBackground,
-            }
-          : {
-              backgroundColor: theme.tableBackground,
-            }),
+        borderWidth: '0 0 1px 0',
+        borderColor: theme.tableBorder,
+        borderStyle: 'solid',
+        backgroundColor: getRowBackground({
+          isSelected: itemProps.isSelected,
+          isPreview,
+        }),
       }}
     >
       <PressResponder {...mergeProps(pressProps, longPressProps)}>
@@ -193,13 +191,10 @@ export function TransactionListItem({
             borderRadius: 0,
             borderWidth: 0,
             ...(isReconciling && { paddingRight: 0 }),
-            ...(isPreview
-              ? {
-                  backgroundColor: theme.tableRowHeaderBackground,
-                }
-              : {
-                  backgroundColor: theme.tableBackground,
-                }),
+            backgroundColor: getRowBackground({
+              isSelected: itemProps.isSelected,
+              isPreview,
+            }),
           }}
         >
           <View
@@ -208,7 +203,7 @@ export function TransactionListItem({
               flex: 1,
               alignItems: 'center',
               justifyContent: 'space-between',
-              padding: isReconciling ? '0 0 0 4px' : '0 4px',
+              padding: isReconciling ? '0 0 0 10px' : '0 10px',
             }}
           >
             <View style={{ flex: 1 }}>
@@ -220,7 +215,7 @@ export function TransactionListItem({
                 <TextOneLine
                   style={{
                     ...textStyle,
-                    fontWeight: isAdded ? '600' : '400',
+                    fontWeight: isAdded ? 600 : 500,
                     ...(!displayPayee && !isPreview
                       ? {
                           color: theme.pageTextLight,
@@ -275,12 +270,12 @@ export function TransactionListItem({
                   )}
                   <TextOneLine
                     style={{
-                      fontSize: 11,
+                      fontSize: 12,
                       marginTop: 1,
-                      fontWeight: '400',
+                      fontWeight: 400,
                       color: prettyCategory
-                        ? theme.tableText
-                        : theme.menuItemTextSelected,
+                        ? theme.pageTextLight
+                        : theme.signalText,
                       fontStyle:
                         specialCategory || !prettyCategory
                           ? 'italic'
@@ -295,12 +290,11 @@ export function TransactionListItem({
               {displayedNotes && (
                 <TextOneLine
                   style={{
-                    fontSize: 11,
+                    fontSize: 11.5,
                     marginTop: 4,
-                    fontWeight: '400',
-                    color: theme.tableText,
+                    fontWeight: 400,
+                    color: theme.pageTextLight,
                     textAlign: 'left',
-                    opacity: 0.85,
                   }}
                 >
                   <NotesTagFormatter notes={displayedNotes} />
@@ -310,13 +304,15 @@ export function TransactionListItem({
             <View style={{ justifyContent: 'center', alignItems: 'flex-end' }}>
               <Text
                 style={{
+                  ...textStyle,
                   ...styles.tnum,
+                  fontWeight: 500,
                   ...makeAmountFullStyle(amount, {
                     positiveColor: theme.tableText,
                     negativeColor: theme.tableText,
                     zeroColor: theme.numberNeutral,
                   }),
-                  ...textStyle,
+                  ...(isPreview && { color: theme.pageTextLight }),
                 }}
               >
                 {integerToCurrency(amount)}
@@ -324,11 +320,12 @@ export function TransactionListItem({
               {showRunningBalance && runningBalance !== undefined && (
                 <Text
                   style={{
-                    fontSize: 11,
-                    fontWeight: '400',
+                    fontSize: 11.5,
+                    fontWeight: 400,
+                    marginTop: 2,
                     ...styles.tnum,
                     ...makeAmountFullStyle(runningBalance, {
-                      positiveColor: theme.numberPositive,
+                      positiveColor: theme.pageTextLight,
                       negativeColor: theme.numberNegative,
                       zeroColor: theme.numberNeutral,
                     }),

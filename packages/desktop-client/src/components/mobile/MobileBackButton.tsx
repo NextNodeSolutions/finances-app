@@ -7,6 +7,7 @@ import { SvgCheveronLeft } from '@actual-app/components/icons/v1';
 import { styles } from '@actual-app/components/styles';
 import { Text } from '@actual-app/components/text';
 
+import { mobileHeaderIconButtonStyle } from '#components/mobile/utils';
 import { useNavigate } from '#hooks/useNavigate';
 
 type MobileBackButtonProps = ComponentPropsWithoutRef<typeof Button>;
@@ -21,21 +22,23 @@ export function MobileBackButton({
     <Button
       variant="bare"
       style={{
-        margin: 10,
+        ...mobileHeaderIconButtonStyle,
+        // Also used outside the page header; keep the button's own color.
+        color: undefined,
+        width: 'auto',
+        padding: '0 10px 0 2px',
         ...style,
       }}
       onPress={onPress || (() => navigate(-1))}
       {...props}
     >
-      <SvgCheveronLeft
-        style={{ width: 30, height: 30, margin: -10, marginLeft: -5 }}
-      />
+      <SvgCheveronLeft style={{ width: 22, height: 22, flexShrink: 0 }} />
       <Text
         style={{
           ...styles.text,
+          fontSize: 15,
           fontWeight: 500,
-          marginLeft: 5,
-          marginRight: 5,
+          marginLeft: 1,
         }}
       >
         <Trans>Back</Trans>

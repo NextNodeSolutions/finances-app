@@ -10,7 +10,13 @@ import {
   YAxis,
 } from 'recharts';
 
-import { useRechartsAnimation } from '#components/reports/chart-theme';
+import {
+  chartEndMargin,
+  chartGrid,
+  chartXAxis,
+  chartYAxis,
+  useRechartsAnimation,
+} from '#components/reports/chart-theme';
 import { Container } from '#components/reports/Container';
 import { MonteCarloHistogramTooltip } from '#components/reports/graphs/MonteCarloHistogramTooltip';
 
@@ -47,19 +53,11 @@ export function MonteCarloHistogram({
           width={width}
           height={height}
           data={data}
-          margin={{ top: 15, right: 0, left: 20, bottom: 10 }}
+          margin={{ top: 15, right: chartEndMargin, left: 20, bottom: 10 }}
         >
-          <CartesianGrid strokeDasharray="3 3" />
-          <XAxis
-            dataKey="age"
-            tick={{ fill: theme.pageText }}
-            tickLine={{ stroke: theme.pageText }}
-          />
-          <YAxis
-            allowDecimals={false}
-            tick={{ fill: theme.pageText }}
-            tickLine={{ stroke: theme.pageText }}
-          />
+          <CartesianGrid {...chartGrid} />
+          <XAxis {...chartXAxis} dataKey="age" />
+          <YAxis {...chartYAxis} allowDecimals={false} />
           {showTooltip && (
             <Tooltip
               content={

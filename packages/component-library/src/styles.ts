@@ -1,7 +1,7 @@
 import { keyframes } from '@emotion/css';
 
 import { theme } from './theme';
-import { tokens } from './tokens';
+import { elevation, fontFamily, radius, tokens } from './tokens';
 
 // oxlint-disable-next-line typescript/no-explicit-any
 export type CSSProperties = Record<string, any>;
@@ -9,7 +9,7 @@ export type CSSProperties = Record<string, any>;
 const MOBILE_MIN_HEIGHT = 40;
 
 const shadowLarge = {
-  boxShadow: '0 15px 30px 0 rgba(0,0,0,0.11), 0 5px 15px 0 rgba(0,0,0,0.08)',
+  boxShadow: elevation.popover,
 };
 
 const shadowSheet = {
@@ -18,9 +18,9 @@ const shadowSheet = {
 
 export const styles: CSSProperties = {
   incomeHeaderHeight: 70,
-  cardShadow: '0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24)',
+  cardShadow: elevation.card,
   monthRightPadding: 5,
-  menuBorderRadius: 4,
+  menuBorderRadius: radius.md + 2,
   mobileMinHeight: MOBILE_MIN_HEIGHT,
   mobileMenuItem: {
     fontSize: 17,
@@ -37,7 +37,7 @@ export const styles: CSSProperties = {
   },
   altMenuHeaderText: {
     fontSize: 13,
-    fontWeight: 700,
+    fontWeight: 600,
   },
   veryLargeText: {
     fontSize: 30,
@@ -45,8 +45,8 @@ export const styles: CSSProperties = {
   },
   largeText: {
     fontSize: 20,
-    fontWeight: 700,
-    letterSpacing: 0.5,
+    fontWeight: 600,
+    letterSpacing: '-0.01em',
   },
   mediumText: {
     fontSize: 15,
@@ -90,17 +90,40 @@ export const styles: CSSProperties = {
     userSelect: 'none',
   },
   shadow: {
-    boxShadow: '0 2px 4px 0 rgba(0,0,0,0.1)',
+    boxShadow: elevation.raised,
   },
   shadowLarge,
   shadowSheet,
-  tnum: {
-    // tnum: Tabular numbers
-    // ss01: Open digits
-    // ss04: Disambiguation w/o zero
-    fontFeatureSettings: '"tnum", "ss01", "ss04"',
+  // Keyboard focus indicator shared by every control: a sky ring held
+  // off the edge so it never merges with the control's own border.
+  focusRing: {
+    outline: `2px solid ${theme.focusRing}`,
+    outlineOffset: 2,
   },
-  notFixed: { fontFeatureSettings: '' },
+  // Money and measurements: set in the mono face with tabular figures so
+  // every amount reads like an instrument readout and columns align.
+  tnum: {
+    fontFamily: fontFamily.mono,
+    fontFeatureSettings: '"tnum"',
+    fontVariantNumeric: 'tabular-nums',
+    letterSpacing: '-0.01em',
+  },
+  notFixed: { fontFeatureSettings: '', fontFamily: 'inherit' },
+  // Display serif for page titles and headline balances only.
+  display: {
+    fontFamily: fontFamily.display,
+    fontWeight: 400,
+    letterSpacing: '-0.01em',
+    fontVariantNumeric: 'lining-nums tabular-nums',
+  },
+  // Small uppercase mono labels naming columns and groups of figures.
+  monoLabel: {
+    fontFamily: fontFamily.mono,
+    fontSize: 10.5,
+    fontWeight: 500,
+    letterSpacing: '0.07em',
+    textTransform: 'uppercase',
+  },
   text: {
     fontSize: 16,
     // lineHeight: 22.4 // TODO: This seems like trouble, but what's the right value?
@@ -150,10 +173,10 @@ export const styles: CSSProperties = {
     border: 0,
   },
   tooltip: {
-    padding: 5,
+    padding: '8px 10px',
     ...shadowLarge,
-    borderWidth: 2,
-    borderRadius: 4,
+    borderWidth: 1,
+    borderRadius: radius.md + 2,
     borderStyle: 'solid',
     borderColor: theme.tooltipBorder,
     backgroundColor: theme.tooltipBackground,
@@ -161,7 +184,9 @@ export const styles: CSSProperties = {
     overflow: 'auto',
   },
   popover: {
-    border: 'none',
+    border: '1px solid ' + theme.menuBorder,
+    borderRadius: radius.md + 2,
+    boxShadow: elevation.popover,
     backgroundColor: theme.menuBackground,
     color: theme.menuItemText,
   },
@@ -173,8 +198,8 @@ export const styles: CSSProperties = {
   editorPill: {
     color: theme.pillText,
     backgroundColor: theme.pillBackground,
-    borderRadius: 4,
-    padding: '3px 5px',
+    borderRadius: radius.sm,
+    padding: '2px 7px',
   },
   mobileListItem: {
     borderBottom: `1px solid ${theme.tableBorder}`,
@@ -184,9 +209,10 @@ export const styles: CSSProperties = {
   },
   tableContainer: {
     flex: 1,
-    border: '1px solid ' + theme.tableBorder,
-    borderTopLeftRadius: 6,
-    borderTopRightRadius: 6,
+    border: '1px solid ' + theme.hairline,
+    borderRadius: radius.lg,
+    backgroundColor: theme.tableBackground,
+    boxShadow: elevation.card,
     overflow: 'hidden',
   },
 };

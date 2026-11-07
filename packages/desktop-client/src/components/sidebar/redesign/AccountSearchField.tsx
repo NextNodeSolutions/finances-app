@@ -5,7 +5,7 @@ import { SvgRemove } from '@actual-app/components/icons/v2';
 import { InitialFocus } from '@actual-app/components/initial-focus';
 import { Input } from '@actual-app/components/input';
 import { theme } from '@actual-app/components/theme';
-import { spacing } from '@actual-app/components/tokens';
+import { radius, spacing } from '@actual-app/components/tokens';
 import { View } from '@actual-app/components/view';
 
 type AccountSearchFieldProps = {
@@ -27,7 +27,8 @@ export function AccountSearchField({
         flexDirection: 'row',
         alignItems: 'center',
         gap: spacing.xs,
-        marginBottom: spacing.xs,
+        paddingInline: spacing.xs,
+        marginBottom: spacing.sm,
       }}
     >
       <InitialFocus>
@@ -39,10 +40,10 @@ export function AccountSearchField({
           onEscape={onClose}
           style={{
             flex: 1,
-            fontSize: 12,
-            backgroundColor: theme.sidebarControlBackground,
-            border: '1px solid transparent',
-            color: theme.sidebarItemText,
+            height: 28,
+            padding: '0 10px',
+            fontSize: 12.5,
+            borderRadius: radius.md,
           }}
         />
       </InitialFocus>
@@ -50,7 +51,13 @@ export function AccountSearchField({
         variant="bare"
         aria-label={t('Close search')}
         onPress={onClose}
-        style={{ color: theme.sidebarTextSubdued, padding: spacing.xxs }}
+        style={{
+          width: 22,
+          height: 22,
+          padding: 0,
+          borderRadius: radius.sm,
+          color: theme.sidebarTextMuted,
+        }}
       >
         <SvgRemove width={9} height={9} />
       </Button>

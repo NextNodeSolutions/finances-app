@@ -49,12 +49,13 @@ export function ManageTags() {
 
   return (
     <SelectedProvider instance={selectedInst}>
-      <View>
+      {/* The tag list is sized to its rows, so the page scrolls rather than
+        squeezing the header and the new-tag row under the list. */}
+      <View style={{ flexShrink: 0 }}>
         <View
           style={{
             flexDirection: 'row',
             alignItems: 'center',
-            padding: '0 0 15px',
             flexShrink: 0,
           }}
         >
@@ -70,8 +71,8 @@ export function ManageTags() {
           </View>
         </View>
         <SpaceBetween gap={10} style={{ marginTop: 12, alignItems: 'center' }}>
-          <Button variant="bare" onPress={() => setCreate(true)}>
-            <SvgAdd width={10} height={10} style={{ marginRight: 3 }} />
+          <Button variant="normal" onPress={() => setCreate(true)}>
+            <SvgAdd width={9} height={9} style={{ marginRight: 6 }} />
             <Trans>Add New</Trans>
           </Button>
           <View style={{ flex: 1 }} />
@@ -85,7 +86,7 @@ export function ManageTags() {
           />
           <TagsMenuButton />
         </SpaceBetween>
-        <View style={{ marginTop: 12, ...styles.tableContainer }}>
+        <View style={{ marginTop: 12, ...styles.tableContainer, flex: 'none' }}>
           <TagsHeader />
           {create && (
             <TagCreationRow onClose={() => setCreate(false)} tags={tags} />
@@ -101,7 +102,7 @@ export function ManageTags() {
             <View
               style={{
                 background: theme.tableBackground,
-                fontStyle: 'italic',
+                color: theme.pageTextLight,
               }}
             >
               <Text style={{ margin: 'auto', padding: '20px' }}>

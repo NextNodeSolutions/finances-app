@@ -19,6 +19,7 @@ import { isElectron } from '@actual-app/core/shared/environment';
 import type { OpenIdConfig } from '@actual-app/core/types/models';
 
 import { Link } from '#components/common/Link';
+import { ManagerCard } from '#components/manager/ManagerCard';
 import {
   useAvailableLoginMethods,
   useLoginMethod,
@@ -27,7 +28,12 @@ import { useNavigate } from '#hooks/useNavigate';
 import { useDispatch } from '#redux';
 import { loggedIn } from '#users/usersSlice';
 
-import { Title, useBootstrapped } from './common';
+import {
+  bodyTextStyle,
+  errorTextStyle,
+  Title,
+  useBootstrapped,
+} from './common';
 import { OpenIdForm } from './OpenIdForm';
 
 function PasswordLogin({ setError, dispatch }) {
@@ -76,8 +82,7 @@ function PasswordLogin({ setError, dispatch }) {
         variant="primary"
         isLoading={loading}
         style={{
-          fontSize: 15,
-          width: isNarrowWidth ? '100%' : 170,
+          width: isNarrowWidth ? '100%' : 132,
           ...(isNarrowWidth ? { padding: 10 } : null),
         }}
         onPress={onSubmitPassword}
@@ -357,18 +362,11 @@ export function Login() {
   }
 
   return (
-    <View style={{ maxWidth: 450, marginTop: -30, color: theme.pageText }}>
+    <ManagerCard style={{ maxWidth: 450 }}>
       <Title text={t('Sign in to this Actual instance')} />
 
       {loginMethods?.length > 1 && (
-        <Text
-          style={{
-            fontSize: 16,
-            color: theme.pageTextDark,
-            lineHeight: 1.4,
-            marginBottom: 10,
-          }}
-        >
+        <Text style={{ ...bodyTextStyle, marginBottom: 16 }}>
           <Trans>
             If you lost your password, you likely still have access to your
             server to manually reset it.
@@ -434,17 +432,10 @@ export function Login() {
       )}
 
       {error && (
-        <Text
-          size="large"
-          style={{
-            marginTop: 20,
-            color: theme.errorText,
-            borderRadius: 4,
-          }}
-        >
+        <Text style={{ ...errorTextStyle, marginTop: 16 }}>
           {getErrorMessage(error)}
         </Text>
       )}
-    </View>
+    </ManagerCard>
   );
 }

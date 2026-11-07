@@ -10,6 +10,7 @@ import {
 } from './util/middlewares';
 import { validateSession } from './util/validate-user';
 
+/** @type {express.Express} */
 const app = express();
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));

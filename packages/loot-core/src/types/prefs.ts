@@ -15,6 +15,12 @@ export type FeatureFlag =
   | 'monteCarloReport';
 
 /**
+ * Features a budget can hide entirely. Stored per budget file as
+ * `features.<name>` = 'true' | 'false'; unset means "use the default".
+ */
+export type OptionalFeature = 'bankSync' | 'tags';
+
+/**
  * Cross-device preferences. These sync across devices when they are changed.
  */
 export type SyncedPrefs = Partial<
@@ -70,6 +76,7 @@ export type SyncedPrefs = Partial<
     | `camt-swap-payee-memo-${string}`
     | `flip-amount-${string}-${'csv' | 'qif'}`
     | `flags.${FeatureFlag}`
+    | `features.${OptionalFeature}`
     | `learn-categories`
     | `show-hidden-tags`,
     string
@@ -107,6 +114,8 @@ export type LocalPrefs = Partial<{
   'flags.updateNotificationShownForVersion': string;
   'tour.introSeen': boolean;
   'schedules.showCompleted': boolean;
+  /** The account the last new transaction (side panel or palette) went to. */
+  'ui.lastTransactionAccount': string;
   reportsViewLegend: boolean;
   reportsViewSummary: boolean;
   reportsViewLabel: boolean;

@@ -15,15 +15,15 @@ import type { FormulaWidget } from '@actual-app/core/types/models';
 
 import { EditablePageHeaderTitle } from '#components/EditablePageHeaderTitle';
 import { QueryManager } from '#components/formula/QueryManager';
-import { MobileBackButton } from '#components/mobile/MobileBackButton';
 import { MobilePageHeader, Page, PageHeader } from '#components/Page';
 import { FormulaResult } from '#components/reports/FormulaResult';
 import { LoadingIndicator } from '#components/reports/LoadingIndicator';
+import { ReportBackButton } from '#components/reports/ReportBackButton';
+import { ReportMobileBackButton } from '#components/reports/ReportMobileBackButton';
 import { useAccounts } from '#hooks/useAccounts';
 import { useCategories } from '#hooks/useCategories';
 import { useDashboardWidget } from '#hooks/useDashboardWidget';
 import { useFormulaExecution } from '#hooks/useFormulaExecution';
-import { useNavigate } from '#hooks/useNavigate';
 import { useThemeColors } from '#hooks/useThemeColors';
 import { addNotification } from '#notifications/notificationsSlice';
 import { useDispatch } from '#redux';
@@ -56,7 +56,6 @@ type FormulaInnerProps = {
 function FormulaInner({ widget }: FormulaInnerProps) {
   const { t } = useTranslation();
   const dispatch = useDispatch();
-  const navigate = useNavigate();
   const { isNarrowWidth } = useResponsive();
   const themeColors = useThemeColors();
 
@@ -239,12 +238,11 @@ function FormulaInner({ widget }: FormulaInnerProps) {
         isNarrowWidth ? (
           <MobilePageHeader
             title={title}
-            leftContent={
-              <MobileBackButton onPress={() => navigate('/reports')} />
-            }
+            leftContent={<ReportMobileBackButton />}
           />
         ) : (
           <PageHeader
+            leading={<ReportBackButton />}
             title={
               widget ? (
                 <EditablePageHeaderTitle

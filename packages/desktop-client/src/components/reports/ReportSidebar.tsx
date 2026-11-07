@@ -3,12 +3,16 @@ import { Trans, useTranslation } from 'react-i18next';
 
 import { Button } from '@actual-app/components/button';
 import { Menu } from '@actual-app/components/menu';
-import { ModeButton } from '@actual-app/components/mode-button';
+import {
+  ModeButton,
+  ModeButtonGroup,
+} from '@actual-app/components/mode-button';
 import { Popover } from '@actual-app/components/popover';
 import { Select } from '@actual-app/components/select';
 import type { SelectOption } from '@actual-app/components/select';
 import { SpaceBetween } from '@actual-app/components/space-between';
 import { styles } from '@actual-app/components/styles';
+import type { CSSProperties } from '@actual-app/components/styles';
 import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import { Tooltip } from '@actual-app/components/tooltip';
@@ -29,6 +33,7 @@ import type { SyncedPrefs } from '@actual-app/core/types/prefs';
 import { Information } from '#components/alerts';
 import { useDateFormat } from '#hooks/useDateFormat';
 import { useLocale } from '#hooks/useLocale';
+import { useOptionalFeature } from '#hooks/useOptionalFeature';
 
 import { CategorySelector } from './CategorySelector';
 import { defaultsList, disabledList } from './disabledList';
@@ -84,6 +89,20 @@ type ReportSidebarProps = {
   isComplexCategoryCondition?: boolean;
 };
 
+const sectionHeadingStyle: CSSProperties = {
+  fontSize: 13,
+  fontWeight: 600,
+  letterSpacing: '-0.005em',
+  color: theme.pageText,
+};
+
+const fieldLabelStyle: CSSProperties = {
+  width: 50,
+  textAlign: 'right',
+  fontSize: 12.5,
+  color: theme.pageTextLight,
+};
+
 export function ReportSidebar({
   customReportItems,
   selectedCategories,
@@ -121,6 +140,12 @@ export function ReportSidebar({
   const { t } = useTranslation();
   const locale = useLocale();
   const dateFormat = useDateFormat() || 'MM/dd/yyyy';
+  const [isTagsOn] = useOptionalFeature('tags');
+  // With tags off, Tag grouping is offered only to a report that already uses it.
+  const usesTagGrouping = customReportItems.groupBy === 'Tag';
+  const splitOptions = ReportOptions.groupBy.filter(
+    option => isTagsOn || usesTagGrouping || option.key !== 'Tag',
+  );
 
   const [menuOpen, setMenuOpen] = useState(false);
   const triggerRef = useRef(null);
@@ -276,10 +301,8 @@ export function ReportSidebar({
             alignItems: 'center',
           }}
         >
-          <Text>
-            <strong>
-              <Trans>Display</Trans>
-            </strong>
+          <Text style={sectionHeadingStyle}>
+            <Trans>Display</Trans>
           </Text>
         </View>
         <SpaceBetween
@@ -288,21 +311,23 @@ export function ReportSidebar({
             padding: 5,
           }}
         >
-          <Text style={{ width: 50, textAlign: 'right' }}>
+          <Text style={fieldLabelStyle}>
             <Trans>Mode:</Trans>
           </Text>
-          <ModeButton
-            selected={customReportItems.mode === 'total'}
-            onSelect={() => onChangeMode('total')}
-          >
-            <Trans>Total</Trans>
-          </ModeButton>
-          <ModeButton
-            selected={customReportItems.mode === 'time'}
-            onSelect={() => onChangeMode('time')}
-          >
-            <Trans>Time</Trans>
-          </ModeButton>
+          <ModeButtonGroup>
+            <ModeButton
+              selected={customReportItems.mode === 'total'}
+              onSelect={() => onChangeMode('total')}
+            >
+              <Trans>Total</Trans>
+            </ModeButton>
+            <ModeButton
+              selected={customReportItems.mode === 'time'}
+              onSelect={() => onChangeMode('time')}
+            >
+              <Trans>Time</Trans>
+            </ModeButton>
+          </ModeButtonGroup>
         </SpaceBetween>
 
         <View
@@ -312,13 +337,13 @@ export function ReportSidebar({
             alignItems: 'center',
           }}
         >
-          <Text style={{ width: 50, textAlign: 'right', marginRight: 5 }}>
+          <Text style={{ ...fieldLabelStyle, marginRight: 5 }}>
             <Trans>Split:</Trans>
           </Text>
           <Select
             value={customReportItems.groupBy}
             onChange={e => onChangeSplit(e)}
-            options={ReportOptions.groupBy.map(option => [
+            options={splitOptions.map(option => [
               option.key,
               option.description,
             ])}
@@ -336,7 +361,7 @@ export function ReportSidebar({
             }
             style={{ minWidth: 0 }}
           />
-          {customReportItems.groupBy === 'Tag' && (
+          {usesTagGrouping && (
             <View style={{ marginLeft: 5, minWidth: 0 }}>
               <TagScopeSelector
                 tags={tags}
@@ -346,6 +371,17 @@ export function ReportSidebar({
             </View>
           )}
         </View>
+        {usesTagGrouping && !isTagsOn && (
+          <Text
+            style={{
+              padding: '0 5px 5px',
+              fontSize: 12,
+              color: theme.pageTextSubdued,
+            }}
+          >
+            <Trans>Tags are hidden</Trans>
+          </Text>
+        )}
 
         <View
           style={{
@@ -354,7 +390,7 @@ export function ReportSidebar({
             alignItems: 'center',
           }}
         >
-          <Text style={{ width: 50, textAlign: 'right', marginRight: 5 }}>
+          <Text style={{ ...fieldLabelStyle, marginRight: 5 }}>
             <Trans>Type:</Trans>
           </Text>
           <Select
@@ -374,7 +410,7 @@ export function ReportSidebar({
             alignItems: 'center',
           }}
         >
-          <Text style={{ width: 50, textAlign: 'right', marginRight: 5 }}>
+          <Text style={{ ...fieldLabelStyle, marginRight: 5 }}>
             <Trans>Interval:</Trans>
           </Text>
           <Select
@@ -412,7 +448,7 @@ export function ReportSidebar({
               alignItems: 'center',
             }}
           >
-            <Text style={{ width: 50, textAlign: 'right', marginRight: 5 }}>
+            <Text style={{ ...fieldLabelStyle, marginRight: 5 }}>
               <Trans>Sort:</Trans>
             </Text>
             <Select
@@ -434,7 +470,7 @@ export function ReportSidebar({
             alignItems: 'center',
           }}
         >
-          <Text style={{ width: 50, textAlign: 'right', marginRight: 5 }} />
+          <Text style={{ ...fieldLabelStyle, marginRight: 5 }} />
           <Button
             ref={triggerRef}
             onPress={() => {
@@ -560,8 +596,8 @@ export function ReportSidebar({
         <View
           style={{
             height: 1,
-            backgroundColor: theme.pillBorderDark,
-            marginTop: 10,
+            backgroundColor: theme.hairline,
+            marginTop: 14,
             flexShrink: 0,
           }}
         />
@@ -572,36 +608,36 @@ export function ReportSidebar({
             marginBottom: 5,
           }}
         >
-          <Text>
-            <strong>
-              <Trans>Date filters</Trans>
-            </strong>
+          <Text style={sectionHeadingStyle}>
+            <Trans>Date filters</Trans>
           </Text>
           <View style={{ flex: 1 }} />
-          <ModeButton
-            selected={!customReportItems.isDateStatic}
-            onSelect={() => {
-              setSessionReport('isDateStatic', false);
-              setIsDateStatic(false);
-              onSelectRange(customReportItems.dateRange);
-            }}
-          >
-            <Trans>Live</Trans>
-          </ModeButton>
-          <ModeButton
-            selected={customReportItems.isDateStatic}
-            onSelect={() => {
-              setSessionReport('isDateStatic', true);
-              setIsDateStatic(true);
-              onChangeDates(
-                customReportItems.startDate,
-                customReportItems.endDate,
-                'static',
-              );
-            }}
-          >
-            <Trans>Static</Trans>
-          </ModeButton>
+          <ModeButtonGroup>
+            <ModeButton
+              selected={!customReportItems.isDateStatic}
+              onSelect={() => {
+                setSessionReport('isDateStatic', false);
+                setIsDateStatic(false);
+                onSelectRange(customReportItems.dateRange);
+              }}
+            >
+              <Trans>Live</Trans>
+            </ModeButton>
+            <ModeButton
+              selected={customReportItems.isDateStatic}
+              onSelect={() => {
+                setSessionReport('isDateStatic', true);
+                setIsDateStatic(true);
+                onChangeDates(
+                  customReportItems.startDate,
+                  customReportItems.endDate,
+                  'static',
+                );
+              }}
+            >
+              <Trans>Static</Trans>
+            </ModeButton>
+          </ModeButtonGroup>
         </SpaceBetween>
         {!customReportItems.isDateStatic ? (
           <View
@@ -611,7 +647,7 @@ export function ReportSidebar({
               alignItems: 'center',
             }}
           >
-            <Text style={{ width: 50, textAlign: 'right', marginRight: 5 }}>
+            <Text style={{ ...fieldLabelStyle, marginRight: 5 }}>
               <Trans>Range:</Trans>
             </Text>
             <Select
@@ -648,7 +684,7 @@ export function ReportSidebar({
                 alignItems: 'center',
               }}
             >
-              <Text style={{ width: 50, textAlign: 'right', marginRight: 5 }}>
+              <Text style={{ ...fieldLabelStyle, marginRight: 5 }}>
                 <Trans>From:</Trans>
               </Text>
               <Select
@@ -680,7 +716,7 @@ export function ReportSidebar({
                 alignItems: 'center',
               }}
             >
-              <Text style={{ width: 50, textAlign: 'right', marginRight: 5 }}>
+              <Text style={{ ...fieldLabelStyle, marginRight: 5 }}>
                 <Trans>To:</Trans>
               </Text>
               <Select
@@ -710,8 +746,8 @@ export function ReportSidebar({
         <View
           style={{
             height: 1,
-            backgroundColor: theme.pillBorderDark,
-            marginTop: 10,
+            backgroundColor: theme.hairline,
+            marginTop: 14,
             flexShrink: 0,
           }}
         />

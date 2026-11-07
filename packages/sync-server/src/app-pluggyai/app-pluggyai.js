@@ -12,6 +12,7 @@ import { isValidFileId } from '#util/paths';
 
 import { pluggyaiService } from './pluggyai-service';
 
+/** @type {express.Express} */
 const app = express();
 export { app as handlers };
 app.use(requestLoggerMiddleware);

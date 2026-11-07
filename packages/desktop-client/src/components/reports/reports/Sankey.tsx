@@ -12,12 +12,15 @@ import {
   SvgRefresh,
 } from '@actual-app/components/icons/v1';
 import { Menu } from '@actual-app/components/menu';
-import { ModeButton } from '@actual-app/components/mode-button';
+import {
+  ModeButton,
+  ModeButtonGroup,
+} from '@actual-app/components/mode-button';
 import { Paragraph } from '@actual-app/components/paragraph';
 import { Popover } from '@actual-app/components/popover';
-import { SpaceBetween } from '@actual-app/components/space-between';
 import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
+import { radius } from '@actual-app/components/tokens';
 import { View } from '@actual-app/components/view';
 import { send } from '@actual-app/core/platform/client/connection';
 import * as monthUtils from '@actual-app/core/shared/months';
@@ -31,11 +34,16 @@ import type { TFunction } from 'i18next';
 import type { SankeyData } from 'recharts/types/chart/Sankey';
 
 import { EditablePageHeaderTitle } from '#components/EditablePageHeaderTitle';
-import { MobileBackButton } from '#components/mobile/MobileBackButton';
 import { MobilePageHeader, Page, PageHeader } from '#components/Page';
+import {
+  explainerStyle,
+  reportPanelStyle,
+} from '#components/reports/chart-theme';
 import { SankeyGraph } from '#components/reports/graphs/SankeyGraph';
 import { Header } from '#components/reports/Header';
 import { LoadingIndicator } from '#components/reports/LoadingIndicator';
+import { ReportBackButton } from '#components/reports/ReportBackButton';
+import { ReportMobileBackButton } from '#components/reports/ReportMobileBackButton';
 import {
   boundMonthRangeFromDates,
   calculateTimeRange,
@@ -55,7 +63,6 @@ import { useCategories } from '#hooks/useCategories';
 import { useDashboardWidget } from '#hooks/useDashboardWidget';
 import { useFormatList } from '#hooks/useFormatList';
 import { useLocale } from '#hooks/useLocale';
-import { useNavigate } from '#hooks/useNavigate';
 import { useResizeObserver } from '#hooks/useResizeObserver';
 import { useRuleConditionFilters } from '#hooks/useRuleConditionFilters';
 import { addNotification } from '#notifications/notificationsSlice';
@@ -347,12 +354,9 @@ type GraphModeSelectorProps = {
 
 function GraphModeSelector({ mode, onChange }: GraphModeSelectorProps) {
   return (
-    <SpaceBetween gap={5}>
+    <ModeButtonGroup>
       <ModeButton
         selected={mode === 'spent'}
-        style={{
-          backgroundColor: 'inherit',
-        }}
         onSelect={() => {
           onChange('spent');
         }}
@@ -364,13 +368,10 @@ function GraphModeSelector({ mode, onChange }: GraphModeSelectorProps) {
         onSelect={() => {
           onChange('budgeted');
         }}
-        style={{
-          backgroundColor: 'inherit',
-        }}
       >
         <Trans>Budgeted</Trans>
       </ModeButton>
-    </SpaceBetween>
+    </ModeButtonGroup>
   );
 }
 
@@ -441,7 +442,6 @@ function SankeyInner({ widget }: SankeyInnerProps) {
   const locale = useLocale();
   const dispatch = useDispatch();
   const { t, i18n } = useTranslation();
-  const navigate = useNavigate();
   const { isNarrowWidth } = useResponsive();
 
   const {
@@ -796,12 +796,11 @@ function SankeyInner({ widget }: SankeyInnerProps) {
         isNarrowWidth ? (
           <MobilePageHeader
             title={title}
-            leftContent={
-              <MobileBackButton onPress={() => navigate('/reports')} />
-            }
+            leftContent={<ReportMobileBackButton />}
           />
         ) : (
           <PageHeader
+            leading={<ReportBackButton />}
             title={
               widget ? (
                 <EditablePageHeaderTitle
@@ -908,7 +907,7 @@ function SankeyInner({ widget }: SankeyInnerProps) {
       </Header>
       <View
         style={{
-          backgroundColor: theme.tableBackground,
+          ...reportPanelStyle,
           padding: 20,
           paddingTop: 0,
           flex: '1 0 auto',
@@ -930,7 +929,6 @@ function SankeyInner({ widget }: SankeyInnerProps) {
           >
             <View
               style={{
-                backgroundColor: theme.tableBackground,
                 padding: 20,
                 paddingTop: 0,
                 flex: '1 0 auto',
@@ -993,7 +991,7 @@ function SankeyInner({ widget }: SankeyInnerProps) {
                       marginTop: 10,
                       padding: '8px 12px',
                       backgroundColor: theme.warningBackground,
-                      borderRadius: 4,
+                      borderRadius: radius.md,
                       color: theme.warningText,
                     }}
                   >
@@ -1007,7 +1005,7 @@ function SankeyInner({ widget }: SankeyInnerProps) {
                 )}
 
                 {!isNarrowWidth && (
-                  <View style={{ marginTop: 30 }}>
+                  <View style={explainerStyle}>
                     <Trans>
                       <Paragraph>
                         <strong>What is a Sankey plot?</strong>

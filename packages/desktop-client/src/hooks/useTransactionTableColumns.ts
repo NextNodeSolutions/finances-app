@@ -4,6 +4,7 @@ import type { SyncedPrefs } from '@actual-app/core/types/prefs';
 
 import { parseTransactionTableColumns } from '#components/transactions/table/columns';
 import type { TransactionTableColumn } from '#components/transactions/table/columns';
+import { useAccounts } from '#hooks/useAccounts';
 import { useSyncedPref } from '#hooks/useSyncedPref';
 import { saveSyncedPrefs } from '#prefs/prefsSlice';
 import { useDispatch, useSelector } from '#redux';
@@ -21,7 +22,8 @@ export const SPECIAL_VIEW_IDS: string[] = [
  * The transaction-table column configuration for one view. Columns saved for
  * the specific view win over the budget-wide configuration, and budgets that
  * haven't used the column manager yet fall back to the old per-account
- * visibility prefs (`show-balances-*` / `hide-cleared-*`).
+ * visibility prefs (`show-balances-*` / `hide-cleared-*`). Off-budget views
+ * hide the category column unless their own configuration shows it.
  */
 export function useTransactionTableColumns(accountId: string | undefined) {
   const dispatch = useDispatch();
@@ -35,15 +37,24 @@ export function useTransactionTableColumns(accountId: string | undefined) {
   );
   const [globalColumnsConfig] = useSyncedPref('transaction-table-columns');
   const syncedPrefs = useSelector(state => state.prefs.synced);
+  const { data: accounts = [] } = useAccounts();
+  const isOffBudgetView =
+    accountId === 'offbudget' ||
+    accounts.some(account => account.id === accountId && account.offbudget);
+  const hidesCategoryByDefault = isOffBudgetView && !viewColumnsConfig;
 
   const columnsConfig = viewColumnsConfig || globalColumnsConfig;
   // Memoized manually (the React Compiler bails out on the consuming
   // components): `columnOrder` crosses the `memo()` boundary of every
   // transaction row, so its identity must only change when the config does.
-  const transactionColumns = useMemo(
-    () => parseTransactionTableColumns(columnsConfig),
-    [columnsConfig],
-  );
+  const transactionColumns = useMemo(() => {
+    const columns = parseTransactionTableColumns(columnsConfig);
+    return hidesCategoryByDefault
+      ? columns.map(column =>
+          column.id === 'category' ? { ...column, hidden: true } : column,
+        )
+      : columns;
+  }, [columnsConfig, hidesCategoryByDefault]);
   const showBalances = columnsConfig
     ? !transactionColumns.find(column => column.id === 'balance')?.hidden
     : String(legacyShowBalances) === 'true';

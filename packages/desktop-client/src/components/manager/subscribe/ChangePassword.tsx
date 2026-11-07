@@ -6,12 +6,12 @@ import { Button } from '@actual-app/components/button';
 import { BigInput } from '@actual-app/components/input';
 import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
-import { View } from '@actual-app/components/view';
 import { send } from '@actual-app/core/platform/client/connection';
 
+import { ManagerCard } from '#components/manager/ManagerCard';
 import { useNavigate } from '#hooks/useNavigate';
 
-import { Title } from './common';
+import { bodyTextStyle, errorTextStyle, Title } from './common';
 import { ConfirmPasswordForm } from './ConfirmPasswordForm';
 
 export function ChangePassword() {
@@ -66,15 +66,9 @@ export function ChangePassword() {
   }
 
   return (
-    <View style={{ maxWidth: 500, marginTop: -30 }}>
+    <ManagerCard style={{ maxWidth: 500 }}>
       <Title text={t('Change server password')} />
-      <Text
-        style={{
-          fontSize: 16,
-          color: theme.pageTextDark,
-          lineHeight: 1.4,
-        }}
-      >
+      <Text style={bodyTextStyle}>
         <Trans>
           This will change the password for this server instance. All existing
           sessions will be signed out.
@@ -82,26 +76,14 @@ export function ChangePassword() {
       </Text>
 
       {error && (
-        <Text
-          size="large"
-          style={{
-            marginTop: 20,
-            color: theme.errorText,
-            borderRadius: 4,
-          }}
-        >
+        <Text style={{ ...errorTextStyle, marginTop: 16 }}>
           {getErrorMessage(error)}
         </Text>
       )}
 
       {msg && (
         <Text
-          size="large"
-          style={{
-            marginTop: 20,
-            color: theme.noticeTextLight,
-            borderRadius: 4,
-          }}
+          style={{ ...errorTextStyle, color: theme.noticeText, marginTop: 16 }}
         >
           {msg}
         </Text>
@@ -121,7 +103,7 @@ export function ChangePassword() {
         buttons={
           <Button
             variant="bare"
-            style={{ fontSize: 15, marginRight: 10 }}
+            style={{ marginRight: 10 }}
             onPress={() => navigate('/')}
           >
             <Trans>Cancel</Trans>
@@ -130,6 +112,6 @@ export function ChangePassword() {
         onSetPassword={onSetPassword}
         onError={setError}
       />
-    </View>
+    </ManagerCard>
   );
 }

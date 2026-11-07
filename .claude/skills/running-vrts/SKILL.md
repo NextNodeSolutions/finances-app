@@ -1,6 +1,6 @@
 ---
 name: running-vrts
-description: Use whenever adding, updating, regenerating, running, or debugging visual regression tests (VRTs) / screenshot tests in the Actual Budget repo — including phrases like "add a VRT", "add a screenshot test", "update the snapshots", "regenerate the VRT screenshots", "the VRT is failing", "yarn vrt", "vrt:docker", or "/update-vrt", and any time a UI change needs screenshot coverage. VRT snapshots must be generated inside the Linux docker image (never on the host) and snapshot updates must be scoped to the changed test only — getting either wrong produces snapshots CI ignores or rewrites every screenshot in the repo.
+description: Use whenever adding, updating, regenerating, running, or debugging visual regression tests (VRTs) / screenshot tests in the Actual Budget repo — including phrases like "add a VRT", "add a screenshot test", "update the snapshots", "regenerate the VRT screenshots", "the VRT is failing", "pnpm vrt", "vrt:docker", or "/update-vrt", and any time a UI change needs screenshot coverage. VRT snapshots must be generated inside the Linux docker image (never on the host) and snapshot updates must be scoped to the changed test only — getting either wrong produces snapshots CI ignores or rewrites every screenshot in the repo.
 ---
 
 # Running VRTs (Visual Regression Tests) in actualbudget/actual
@@ -19,7 +19,7 @@ reduce noise from charts and data.
 ## Key mechanics
 
 - **No-op without `VRT=true`.** In a plain e2e run the matcher passes
-  immediately, so `yarn workspace @actual-app/web run playwright test <file> -g "<name>"`
+  immediately, so `pnpm --filter @actual-app/web run playwright test <file> -g "<name>"`
   verifies the interaction flow cheaply without needing snapshots — always do
   this first.
 - **With `VRT=true`, each call captures three themes** (`auto` i.e. light,
@@ -54,14 +54,14 @@ Patterns to copy:
 
 ## Generating snapshots locally (docker)
 
-Run all yarn commands from the repo root.
+Run all pnpm commands from the repo root.
 
 1. Start the dev server with HTTPS (background it; ready when
    `https://localhost:3001` returns 200 — `ignoreHTTPSErrors` is already set in
    the Playwright config):
 
    ```sh
-   HTTPS=true yarn start
+   HTTPS=true pnpm start
    ```
 
 2. The container runs with `--network host`. On Linux it can reach
@@ -76,13 +76,13 @@ Run all yarn commands from the repo root.
    ```sh
    docker run --rm --network host -v "$(pwd)":/work/ -w /work/ \
      mcr.microsoft.com/playwright:v1.61.1-jammy /bin/bash -c \
-     "E2E_START_URL=https://<HOST>:3001 yarn vrt --update-snapshots -g '<test name>' <file>.test.ts"
+     "E2E_START_URL=https://<HOST>:3001 pnpm vrt --update-snapshots -g '<test name>' <file>.test.ts"
    ```
 
    Pin the image tag to the repo's Playwright version (`@playwright/test` in
    `packages/desktop-client/package.json` — currently 1.61.1 →
    `v1.61.1-jammy`). The equivalent user-facing wrapper is
-   `yarn vrt:docker --e2e-start-url https://<HOST>:3001 --update-snapshots`.
+   `pnpm vrt:docker --e2e-start-url https://<HOST>:3001 --update-snapshots`.
 
 4. **Always scope `--update-snapshots`** with `-g`/file args to the new or
    changed test only — an unscoped update rewrites every screenshot in the

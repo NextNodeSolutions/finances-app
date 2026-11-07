@@ -11,6 +11,10 @@ import { send } from '@actual-app/core/platform/client/connection';
 import * as monthUtils from '@actual-app/core/shared/months';
 import type { CustomReportEntity } from '@actual-app/core/types/models';
 
+import {
+  cardHeaderStyle,
+  cardSupportingStyle,
+} from '#components/reports/chart-theme';
 import { DateRange } from '#components/reports/DateRange';
 import { ReportCard } from '#components/reports/ReportCard';
 import { ReportCardName } from '#components/reports/ReportCardName';
@@ -141,13 +145,8 @@ function CustomReportListCardsInner({
       to={`/reports/custom/${report.id}`}
       onRename={() => setNameMenuOpen(true)}
     >
-      <View style={{ flex: 1, padding: 10 }}>
-        <View
-          style={{
-            flexShrink: 0,
-            paddingBottom: 5,
-          }}
-        >
+      <View style={{ flex: 1 }}>
+        <View style={{ ...cardHeaderStyle, flexShrink: 0 }}>
           <View style={{ flex: 1 }}>
             <ReportCardName
               name={report.name}
@@ -158,9 +157,7 @@ function CustomReportListCardsInner({
             {report.isDateStatic ? (
               <DateRange start={report.startDate} end={report.endDate} />
             ) : (
-              <Text style={{ color: theme.pageTextSubdued }}>
-                {t(report.dateRange)}
-              </Text>
+              <Text style={cardSupportingStyle}>{t(report.dateRange)}</Text>
             )}
           </View>
         </View>
@@ -177,7 +174,7 @@ function CustomReportListCardsInner({
         />
       </View>
       {hasWarning && (
-        <View style={{ padding: 5, position: 'absolute', bottom: 0 }}>
+        <View style={{ padding: 10, position: 'absolute', bottom: 0 }}>
           <Tooltip
             content={t(
               'The widget is configured to use a non-existing filter or tag value. Edit this report to remove the warning.',
@@ -186,9 +183,9 @@ function CustomReportListCardsInner({
             style={{ ...styles.tooltip, maxWidth: 300 }}
           >
             <SvgExclamationSolid
-              width={20}
-              height={20}
-              style={{ color: theme.warningText }}
+              width={14}
+              height={14}
+              style={{ color: theme.signal }}
             />
           </Tooltip>
         </View>

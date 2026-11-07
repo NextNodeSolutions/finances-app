@@ -17,7 +17,19 @@ export function ConditionsOpMenu({
   conditions: RuleConditionEntity[];
 }) {
   return conditions.length > 1 ? (
-    <Text style={{ color: theme.pageText, marginTop: 11, marginRight: 5 }}>
+    <View
+      style={{
+        flexDirection: 'row',
+        alignItems: 'center',
+        // Same height and offset as the filter pills, so the label sits on
+        // their centre line.
+        height: 24,
+        marginTop: 10,
+        marginRight: 8,
+        color: theme.pageTextLight,
+        fontSize: 12.5,
+      }}
+    >
       <FieldSelect
         style={{ display: 'inline-flex' }}
         fields={[
@@ -27,8 +39,8 @@ export function ConditionsOpMenu({
         value={conditionsOp}
         onChange={onChange}
       />
-      of:
-    </Text>
+      <Text>of:</Text>
+    </View>
   ) : (
     <View />
   );

@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { useParams, useSearchParams } from 'react-router';
 
 import { Button } from '@actual-app/components/button';
+import { SvgCheveronDown } from '@actual-app/components/icons/v1';
 import { styles } from '@actual-app/components/styles';
 import type { CSSProperties } from '@actual-app/components/styles';
 import { Text } from '@actual-app/components/text';
@@ -15,8 +16,14 @@ import { useReopenAccountMutation, useUpdateAccountMutation } from '#accounts';
 import { isAccountFailedSync } from '#accounts/syncStatus';
 import { MobileBackButton } from '#components/mobile/MobileBackButton';
 import { AddTransactionButton } from '#components/mobile/transactions/AddTransactionButton';
+import {
+  MOBILE_HEADER_TITLE_CHEVRON_SIZE,
+  mobileHeaderTitleChevronStyle,
+  mobileHeaderTitleStyle,
+} from '#components/mobile/utils';
 import { MobilePageHeader, Page } from '#components/Page';
 import { useAccount } from '#hooks/useAccount';
+import { useOptionalFeature } from '#hooks/useOptionalFeature';
 import { useSyncedPref } from '#hooks/useSyncedPref';
 import {
   collapseModals,
@@ -96,6 +103,8 @@ function AccountHeader({ account }: { readonly account: AccountEntity }) {
   const syncingAccountIds = useSelector(state => state.account.accountsSyncing);
   const pending = syncingAccountIds.includes(account.id);
   const failed = isAccountFailedSync(account);
+  // With bank sync off, the header shows no connection or sync state.
+  const [isBankSyncOn] = useOptionalFeature('bankSync');
 
   const dispatch = useDispatch();
   const { mutate: updateAccount } = useUpdateAccountMutation();
@@ -195,16 +204,16 @@ function AccountHeader({ account }: { readonly account: AccountEntity }) {
     <View
       style={{
         flexDirection: 'row',
+        alignItems: 'center',
       }}
     >
-      {account.bank && (
+      {isBankSyncOn && account.bank && (
         <View
           style={{
-            margin: 'auto',
-            marginRight: 5,
-            width: 8,
-            height: 8,
-            borderRadius: 8,
+            marginRight: 2,
+            width: 6,
+            height: 6,
+            borderRadius: 6,
             flexShrink: 0,
             backgroundColor: pending
               ? theme.sidebarItemBackgroundPending
@@ -215,19 +224,26 @@ function AccountHeader({ account }: { readonly account: AccountEntity }) {
           }}
         />
       )}
-      <Button variant="bare" onPress={onClick}>
+      <Button
+        variant="bare"
+        onPress={onClick}
+        style={{ padding: '4px 8px', borderRadius: 8 }}
+      >
         <Text
-          size="extra-large"
           style={{
-            fontWeight: 500,
-            ...styles.underlinedText,
-            ...(styles.lineClamp(2) as CSSProperties),
+            ...mobileHeaderTitleStyle,
+            ...(styles.lineClamp(1) as CSSProperties),
           }}
         >
           {account.closed
             ? t('Closed: {{accountName}}', { accountName: account.name })
             : account.name}
         </Text>
+        <SvgCheveronDown
+          width={MOBILE_HEADER_TITLE_CHEVRON_SIZE}
+          height={MOBILE_HEADER_TITLE_CHEVRON_SIZE}
+          style={mobileHeaderTitleChevronStyle}
+        />
       </Button>
     </View>
   );
@@ -240,7 +256,14 @@ function NameOnlyHeader({ name }: { readonly name: string }) {
         flexDirection: 'row',
       }}
     >
-      <Text style={{ ...(styles.lineClamp(2) as CSSProperties) }}>{name}</Text>
+      <Text
+        style={{
+          ...mobileHeaderTitleStyle,
+          ...(styles.lineClamp(1) as CSSProperties),
+        }}
+      >
+        {name}
+      </Text>
     </View>
   );
 }

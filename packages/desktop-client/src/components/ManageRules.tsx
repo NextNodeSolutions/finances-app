@@ -4,10 +4,10 @@ import type { Dispatch, SetStateAction } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 
 import { Button } from '@actual-app/components/button';
-import { SpaceBetween } from '@actual-app/components/space-between';
 import { styles } from '@actual-app/components/styles';
 import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
+import { spacing } from '@actual-app/components/tokens';
 import { View } from '@actual-app/components/view';
 import { send } from '@actual-app/core/platform/client/connection';
 import * as undo from '@actual-app/core/platform/client/undo';
@@ -32,6 +32,8 @@ import { describeSchedule } from '#util/schedule';
 import { InfiniteScrollWrapper } from './common/InfiniteScrollWrapper';
 import { Link } from './common/Link';
 import { Search } from './common/Search';
+import { SelectionBar } from './common/SelectionBar';
+import { RulesEmptyMessage } from './rules/RulesEmptyMessage';
 import { RulesHeader } from './rules/RulesHeader';
 import { RulesList } from './rules/RulesList';
 
@@ -122,6 +124,7 @@ export function ManageRules({
   const { t } = useTranslation();
 
   const [allRules, setAllRules] = useState<RuleEntity[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
   const [page, setPage] = useState(0);
   const [filter, setFilter] = useState('');
   const dispatch = useDispatch();
@@ -180,6 +183,7 @@ export function ManageRules({
     }
 
     setAllRules(loadedRules);
+    setIsLoading(false);
     return loadedRules;
   }
 
@@ -293,48 +297,51 @@ export function ManageRules({
 
   return (
     <SelectedProvider instance={selectedInst}>
-      <View>
+      <View style={{ height: '100%' }}>
         <View
           style={{
             flexDirection: 'row',
             alignItems: 'center',
+            gap: spacing.md,
             padding: isModal ? '0 13px 15px' : '0 0 15px',
             flexShrink: 0,
           }}
         >
-          <View
-            style={{
-              color: theme.pageTextLight,
-              flexDirection: 'row',
-              alignItems: 'center',
-              width: '50%',
-            }}
-          >
-            <Text>
-              <Trans>
-                Rules are always run in the order that you see them.
-              </Trans>{' '}
-              <Link
-                variant="external"
-                to="https://actualbudget.org/docs/budgeting/rules/"
-                linkColor="muted"
-              >
-                <Trans>Learn more</Trans>
-              </Link>
-            </Text>
-          </View>
-          <View style={{ flex: 1 }} />
           <Search
             placeholder={t('Filter rules...')}
             value={filter}
             onChange={onSearchChange}
           />
+          <Text
+            style={{
+              flex: 1,
+              minWidth: 0,
+              fontSize: 12.5,
+              color: theme.pageTextLight,
+            }}
+          >
+            <Trans>Rules are always run in the order that you see them.</Trans>{' '}
+            <Link
+              variant="external"
+              to="https://actualbudget.org/docs/budgeting/rules/"
+              linkColor="muted"
+            >
+              <Trans>Learn more</Trans>
+            </Link>
+          </Text>
+          <Button variant="primary" onPress={onCreateRule}>
+            <Trans>Create new rule</Trans>
+          </Button>
         </View>
         <View style={styles.tableContainer}>
           <RulesHeader />
           <InfiniteScrollWrapper loadMore={loadMore}>
             {filteredRules.length === 0 ? (
-              <EmptyMessage text={t('No rules')} style={{ marginTop: 15 }} />
+              <RulesEmptyMessage
+                isLoading={isLoading}
+                hasRules={allRules.length > 0}
+                onCreateRule={onCreateRule}
+              />
             ) : (
               <RulesList
                 rules={filteredRules}
@@ -347,45 +354,19 @@ export function ManageRules({
             )}
           </InfiniteScrollWrapper>
         </View>
-        <View
-          style={{
-            paddingBlock: 15,
-            paddingInline: isModal ? 13 : 0,
-            borderTop: isModal && '1px solid ' + theme.pillBorder,
-            flexShrink: 0,
-          }}
-        >
-          <SpaceBetween gap={10} style={{ justifyContent: 'flex-end' }}>
-            {selectedInst.items.size > 0 && (
-              <Button onPress={onDeleteSelected}>
-                <Trans count={selectedInst.items.size}>
-                  Delete {{ count: selectedInst.items.size }} rules
-                </Trans>
-              </Button>
-            )}
-            <Button variant="primary" onPress={onCreateRule}>
-              <Trans>Create new rule</Trans>
+        {selectedInst.items.size > 0 && (
+          <SelectionBar
+            ariaLabel={t('Selected rules')}
+            summary={t('{{count}} selected', {
+              count: selectedInst.items.size,
+            })}
+          >
+            <Button onPress={onDeleteSelected}>
+              <Trans>Delete</Trans>
             </Button>
-          </SpaceBetween>
-        </View>
+          </SelectionBar>
+        )}
       </View>
     </SelectedProvider>
-  );
-}
-
-function EmptyMessage({ text, style }) {
-  return (
-    <View
-      style={{
-        textAlign: 'center',
-        color: theme.pageTextSubdued,
-        fontStyle: 'italic',
-        fontSize: 13,
-        marginTop: 5,
-        style,
-      }}
-    >
-      {text}
-    </View>
   );
 }

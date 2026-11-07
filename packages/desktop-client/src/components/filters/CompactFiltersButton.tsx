@@ -5,12 +5,12 @@ import { SvgFilter } from '@actual-app/components/icons/v1';
 
 export function CompactFiltersButton({ onPress }: { onPress: () => void }) {
   return (
-    <Button variant="bare" onPress={onPress} style={{ minWidth: 20 }}>
-      <SvgFilter
-        width={15}
-        height={15}
-        style={{ width: 15, height: 15, flexShrink: 0 }}
-      />
+    <Button
+      variant="bare"
+      onPress={onPress}
+      style={{ minWidth: 30, height: 30, padding: 0 }}
+    >
+      <SvgFilter style={{ width: 13, height: 13, flexShrink: 0 }} />
     </Button>
   );
 }

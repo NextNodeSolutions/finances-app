@@ -39,7 +39,9 @@ export function NavRow({
       >
         <SvgCheveronLeft width={16} height={16} />
       </Button>
-      <Text style={{ fontWeight: 'bold' }}>{label}</Text>
+      <Text style={{ fontWeight: 600, fontVariantNumeric: 'tabular-nums' }}>
+        {label}
+      </Text>
       <Button
         aria-label={nextLabel}
         variant="bare"

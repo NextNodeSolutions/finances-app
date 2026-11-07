@@ -9,6 +9,7 @@ import { Popover } from '@actual-app/components/popover';
 import { styles } from '@actual-app/components/styles';
 import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
+import { radius } from '@actual-app/components/tokens';
 import { Tooltip } from '@actual-app/components/tooltip';
 import { View } from '@actual-app/components/view';
 import { listen } from '@actual-app/core/platform/client/connection';
@@ -131,6 +132,7 @@ export function LoggedInUser({ hideIfNoServer, style }: LoggedInUserProps) {
   function getServerStatus() {
     if (!serverUrl) {
       return {
+        dotStyle: { border: `1px solid ${theme.pageTextSubdued}` },
         message: t('No server'),
         tooltip: (
           <Trans>
@@ -145,6 +147,7 @@ export function LoggedInUser({ hideIfNoServer, style }: LoggedInUserProps) {
 
     if (userData?.offline) {
       return {
+        dotStyle: { backgroundColor: theme.signal },
         message: t('Server offline'),
         tooltip: (
           <Trans>
@@ -157,6 +160,7 @@ export function LoggedInUser({ hideIfNoServer, style }: LoggedInUserProps) {
     }
 
     return {
+      dotStyle: { backgroundColor: theme.noticeTextLight },
       message: t('Server online'),
       tooltip: (
         <Trans>Connected to your server — your budget is syncing.</Trans>
@@ -170,8 +174,9 @@ export function LoggedInUser({ hideIfNoServer, style }: LoggedInUserProps) {
     return (
       <Text
         style={{
-          color: theme.pageTextLight,
-          fontStyle: 'italic',
+          padding: '0 10px',
+          fontSize: 12.5,
+          color: theme.pageTextSubdued,
           ...styles.delayedFadeIn,
           ...style,
         }}
@@ -241,6 +246,7 @@ export function LoggedInUser({ hideIfNoServer, style }: LoggedInUserProps) {
   };
 
   const serverStatus = getServerStatus();
+  const loggedInAsStyle = { fontSize: 12, color: theme.pageTextSubdued };
 
   return (
     <View style={{ flexDirection: 'row', alignItems: 'center', ...style }}>
@@ -253,7 +259,26 @@ export function LoggedInUser({ hideIfNoServer, style }: LoggedInUserProps) {
           ref={triggerRef}
           variant="bare"
           onPress={() => setMenuOpen(true)}
+          style={{
+            gap: 7,
+            height: 30,
+            padding: '0 10px',
+            borderRadius: radius.md,
+            fontSize: 12.5,
+            fontWeight: 500,
+            color: theme.pageTextLight,
+          }}
         >
+          <View
+            aria-hidden
+            style={{
+              width: 6,
+              height: 6,
+              borderRadius: radius.pill,
+              flexShrink: 0,
+              ...serverStatus.dotStyle,
+            }}
+          />
           {serverStatus.message}
         </Button>
       </Tooltip>
@@ -262,7 +287,7 @@ export function LoggedInUser({ hideIfNoServer, style }: LoggedInUserProps) {
         userData &&
         userData?.displayName &&
         !hasSyncedPrefs && (
-          <small>
+          <small style={loggedInAsStyle}>
             (
             <Trans>
               logged in as:{' '}
@@ -278,7 +303,7 @@ export function LoggedInUser({ hideIfNoServer, style }: LoggedInUserProps) {
         userData &&
         userData?.displayName &&
         hasSyncedPrefs && (
-          <small>
+          <small style={loggedInAsStyle}>
             (
             <Trans>
               logged in as:{' '}
@@ -293,7 +318,7 @@ export function LoggedInUser({ hideIfNoServer, style }: LoggedInUserProps) {
         )}
 
       <Popover
-        offset={8}
+        offset={12}
         triggerRef={triggerRef}
         isOpen={menuOpen}
         onOpenChange={() => setMenuOpen(false)}

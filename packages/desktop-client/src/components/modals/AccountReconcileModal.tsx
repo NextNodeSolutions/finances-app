@@ -22,6 +22,7 @@ import { useDateFormat } from '#hooks/useDateFormat';
 import { useFeatureFlag } from '#hooks/useFeatureFlag';
 import { useFormat } from '#hooks/useFormat';
 import { useLocale } from '#hooks/useLocale';
+import { useOptionalFeature } from '#hooks/useOptionalFeature';
 import { useSheetValue } from '#hooks/useSheetValue';
 import type { Modal as ModalType } from '#modals/modalsSlice';
 import * as bindings from '#spreadsheet/bindings';
@@ -38,6 +39,7 @@ export function AccountReconcileModal({
   const { t } = useTranslation();
   const account = useAccount(accountId);
   const mobileCalculatorEnabled = useFeatureFlag('mobileCalculator');
+  const [isBankSyncOn] = useOptionalFeature('bankSync');
   const clearedBalance = useSheetValue<'account', 'balanceCleared'>(
     bindings.accountBalanceCleared(accountId),
   );
@@ -54,7 +56,8 @@ export function AccountReconcileModal({
     }
   }, [amount, clearedBalance]);
 
-  const lastSyncedBalance = account?.balance_current;
+  // The bank's reported balance only means something while bank sync is on.
+  const lastSyncedBalance = isBankSyncOn ? account?.balance_current : null;
 
   if (!account) {
     return null;

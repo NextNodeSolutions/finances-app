@@ -1,23 +1,89 @@
-import React from 'react';
+import type { ReactElement } from 'react';
 import { useTranslation } from 'react-i18next';
 
-import { SvgCalendar } from '@actual-app/components/icons/v2';
+import { Button } from '@actual-app/components/button';
 import { theme } from '@actual-app/components/theme';
+import { elevation, motion, radius } from '@actual-app/components/tokens';
 import { View } from '@actual-app/components/view';
 
 import { useBudgetMonthCount } from './BudgetMonthCountContext';
 
-type CalendarProps = {
-  color: string;
+const GLYPH_WIDTH = 16;
+const GLYPH_HEIGHT = 12;
+// Half the 1px stroke, so the frame sits inside the glyph box.
+const STROKE_INSET = 0.5;
+
+// The budget table in miniature: a frame split into as many columns as
+// the option shows months, drawn in a 1px stroke.
+function MonthColumnsGlyph({ count }: { count: number }) {
+  const innerWidth = GLYPH_WIDTH - 2 * STROKE_INSET;
+  const dividers = Array.from(
+    { length: count - 1 },
+    (_, index) => STROKE_INSET + (innerWidth * (index + 1)) / count,
+  );
+
+  return (
+    <svg
+      width={GLYPH_WIDTH}
+      height={GLYPH_HEIGHT}
+      viewBox={`0 0 ${GLYPH_WIDTH} ${GLYPH_HEIGHT}`}
+      fill="none"
+      stroke="currentColor"
+      strokeWidth={1}
+      aria-hidden="true"
+    >
+      <rect
+        x={STROKE_INSET}
+        y={STROKE_INSET}
+        width={innerWidth}
+        height={GLYPH_HEIGHT - 2 * STROKE_INSET}
+        rx={1.5}
+      />
+      {dividers.map(x => (
+        <line
+          key={x}
+          x1={x}
+          x2={x}
+          y1={STROKE_INSET}
+          y2={GLYPH_HEIGHT - STROKE_INSET}
+        />
+      ))}
+    </svg>
+  );
+}
+
+type MonthCountOptionProps = {
+  count: number;
+  isChosen: boolean;
   onClick: () => void;
 };
 
-function Calendar({ color, onClick }: CalendarProps) {
+// One segment of the tray: the chosen count sits on a white pill in ink,
+// the others recede.
+function MonthCountOption({ count, isChosen, onClick }: MonthCountOptionProps) {
+  const { t } = useTranslation();
+
   return (
-    <SvgCalendar
-      style={{ width: 13, height: 13, color, marginRight: 5 }}
-      onClick={onClick}
-    />
+    <Button
+      variant="bare"
+      aria-pressed={isChosen}
+      aria-label={t('{{count}} months', { count })}
+      onPress={onClick}
+      style={{
+        width: 28,
+        height: 22,
+        padding: 0,
+        borderRadius: radius.sm,
+        color: isChosen ? theme.pageText : theme.pageTextSubdued,
+        backgroundColor: isChosen
+          ? theme.buttonNormalBackground
+          : 'transparent',
+        boxShadow: isChosen ? elevation.xs : 'none',
+        transition: `background-color ${motion.base} ${motion.ease}, color ${motion.base} ${motion.ease}`,
+      }}
+    >
+      <MonthColumnsGlyph count={count} />
+    </Button>
   );
 }
 
@@ -40,13 +106,14 @@ export function MonthCountSelector({
     return null;
   }
 
-  const calendars = [];
-  for (let i = 1; i <= displayMax; i++) {
-    calendars.push(
-      <Calendar
-        key={i}
-        color={maxMonths >= i ? theme.pageTextLight : theme.pageTextSubdued}
-        onClick={() => onChange(i)}
+  const options: ReactElement[] = [];
+  for (let count = 1; count <= displayMax; count++) {
+    options.push(
+      <MonthCountOption
+        key={count}
+        count={count}
+        isChosen={maxMonths === count}
+        onClick={() => onChange(count)}
       />,
     );
   }
@@ -55,19 +122,19 @@ export function MonthCountSelector({
     <View
       style={{
         flexDirection: 'row',
-        marginRight: 20,
-        marginTop: -1,
+        alignItems: 'center',
+        gap: 2,
+        padding: 2,
+        backgroundColor: theme.trayBackground,
+        border: '1px solid ' + theme.trayBorder,
+        borderRadius: radius.md,
         WebkitAppRegion: 'no-drag',
-        '& svg': {
-          transition: 'transform .15s',
-        },
-        '& svg:hover': {
-          transform: 'scale(1.2)',
-        },
       }}
+      role="group"
+      aria-label={t('Choose the number of months shown at a time')}
       title={t('Choose the number of months shown at a time')}
     >
-      {calendars}
+      {options}
     </View>
   );
 }

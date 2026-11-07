@@ -6,6 +6,7 @@ import { Button } from '@actual-app/components/button';
 import { SvgExclamationOutline } from '@actual-app/components/icons/v1';
 import { Popover } from '@actual-app/components/popover';
 import { theme } from '@actual-app/components/theme';
+import { radius } from '@actual-app/components/tokens';
 import { View } from '@actual-app/components/view';
 import type { AccountEntity } from '@actual-app/core/types/models';
 
@@ -17,6 +18,7 @@ import { authorizeBank as authorizeGoCardless } from '#gocardless';
 import { useAccounts } from '#hooks/useAccounts';
 import { useCurrentAccess } from '#hooks/useCurrentAccess';
 import { useFailedAccounts } from '#hooks/useFailedAccounts';
+import { useOptionalFeature } from '#hooks/useOptionalFeature';
 import { pushModal } from '#modals/modalsSlice';
 import { useDispatch } from '#redux';
 
@@ -107,6 +109,7 @@ export function AccountSyncCheck() {
   const [open, setOpen] = useState(false);
   const triggerRef = useRef(null);
   const { getErrorMessage } = useErrorMessage();
+  const [isBankSyncOn] = useOptionalFeature('bankSync');
 
   const reauth = useCallback(
     (acc: AccountEntity) => {
@@ -151,7 +154,7 @@ export function AccountSyncCheck() {
     );
   }, [dispatch]);
 
-  if (!id) {
+  if (!id || !isBankSyncOn) {
     return null;
   }
 
@@ -178,16 +181,18 @@ export function AccountSyncCheck() {
         style={{
           flexDirection: 'row',
           alignItems: 'center',
-          color: theme.errorText,
-          backgroundColor: theme.errorBackground,
-          padding: '4px 8px',
-          borderRadius: 4,
+          gap: 7,
+          color: theme.signalText,
+          backgroundColor: theme.signalSubtle,
+          padding: '4px 10px',
+          borderRadius: radius.md,
+          fontWeight: 500,
         }}
         onPress={() => setOpen(true)}
       >
         <SvgExclamationOutline
-          style={{ width: 14, height: 14, marginRight: 5 }}
-        />{' '}
+          style={{ width: 13, height: 13, flexShrink: 0 }}
+        />
         <Trans>
           This account is experiencing connection problems. Let's fix it.
         </Trans>
@@ -198,17 +203,19 @@ export function AccountSyncCheck() {
         placement="bottom start"
         isOpen={open}
         onOpenChange={() => setOpen(false)}
-        style={{ fontSize: 14, padding: 15, maxWidth: 400 }}
+        style={{ padding: 16, maxWidth: 400, lineHeight: '19px' }}
       >
-        <div style={{ marginBottom: '1.15em' }}>
+        <div style={{ marginBottom: 8, color: theme.pageTextLight }}>
           <Trans>The server returned the following error:</Trans>
         </div>
 
-        <div style={{ marginBottom: '1.25em', color: theme.errorText }}>
+        <div style={{ marginBottom: 16, color: theme.signalText }}>
           {getErrorMessage(error.type, error.code)}
         </div>
 
-        <View style={{ justifyContent: 'flex-end', flexDirection: 'row' }}>
+        <View
+          style={{ justifyContent: 'flex-end', flexDirection: 'row', gap: 8 }}
+        >
           {showAuth ? (
             <>
               <Button onPress={() => unlink(account)}>
@@ -218,7 +225,6 @@ export function AccountSyncCheck() {
                 variant="primary"
                 autoFocus
                 onPress={() => reauth(account)}
-                style={{ marginLeft: 5 }}
               >
                 <Trans>Reauthorize</Trans>
               </Button>
@@ -232,7 +238,6 @@ export function AccountSyncCheck() {
                 variant="primary"
                 autoFocus
                 onPress={onConfigureGoCardless}
-                style={{ marginLeft: 5 }}
               >
                 <Trans>Configure</Trans>
               </Button>

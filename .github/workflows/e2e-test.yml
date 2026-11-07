@@ -5,7 +5,7 @@ on:
     paths:
       - 'packages/**'
       - 'package.json'
-      - 'yarn.lock'
+      - 'pnpm-lock.yaml'
       - '.github/workflows/e2e-test.yml'
       - '!packages/sync-server/**' # Sync server changes don't affect E2E tests
       - '!packages/api/**' # API changes don't affect E2E tests
@@ -47,7 +47,7 @@ jobs:
         # drift between snapshot capture and test runs).
         env:
           REACT_APP_NETLIFY: 'true'
-        run: yarn build:browser --skip-translations
+        run: pnpm build:browser --skip-translations
       - name: Upload build artifact
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
@@ -90,7 +90,7 @@ jobs:
         if: ${{ matrix.shard <= fromJson(vars.E2E_SHARD_TOTAL || '3') }}
         env:
           SHARD_TOTAL: ${{ vars.E2E_SHARD_TOTAL || '3' }}
-        run: yarn e2e --shard=${{ matrix.shard }}/$SHARD_TOTAL
+        run: pnpm e2e --shard=${{ matrix.shard }}/$SHARD_TOTAL
       - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         if: ${{ failure() && matrix.shard <= fromJson(vars.E2E_SHARD_TOTAL || '3') }}
         with:
@@ -154,8 +154,8 @@ jobs:
 
       - name: Run Desktop app E2E Tests
         run: |
-          yarn rebuild-electron
-          xvfb-run --auto-servernum --server-args="-screen 0 1920x1080x24" -- yarn e2e:desktop
+          pnpm rebuild-electron
+          xvfb-run --auto-servernum --server-args="-screen 0 1920x1080x24" -- pnpm e2e:desktop
       - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         if: always()
         with:
@@ -203,7 +203,7 @@ jobs:
         if: ${{ matrix.shard <= fromJson(vars.E2E_SHARD_TOTAL || '3') }}
         env:
           SHARD_TOTAL: ${{ vars.E2E_SHARD_TOTAL || '3' }}
-        run: yarn vrt --shard=${{ matrix.shard }}/$SHARD_TOTAL
+        run: pnpm vrt --shard=${{ matrix.shard }}/$SHARD_TOTAL
       - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         if: ${{ always() && matrix.shard <= fromJson(vars.E2E_SHARD_TOTAL || '3') }}
         with:
@@ -252,7 +252,7 @@ jobs:
           path: vrt-junit
       - name: Merge reports
         id: merge-reports
-        run: yarn workspace @actual-app/web run playwright merge-reports --reporter html ./all-blob-reports
+        run: pnpm --filter @actual-app/web run playwright merge-reports --reporter html ./all-blob-reports
       - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         id: playwright-report-vrt
         with:

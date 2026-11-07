@@ -48,10 +48,11 @@ export function SidebarSettings() {
         target={target}
         className={css({
           '&[data-drop-target]': {
-            height: 4,
-            backgroundColor: theme.tableBorderSeparator,
+            height: 2,
+            marginBlock: 1,
+            backgroundColor: theme.accent,
             opacity: 1,
-            borderRadius: 4,
+            borderRadius: 1,
           },
         })}
       />

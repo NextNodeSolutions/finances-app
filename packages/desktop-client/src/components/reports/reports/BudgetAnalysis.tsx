@@ -24,13 +24,18 @@ import * as d from 'date-fns';
 
 import { EditablePageHeaderTitle } from '#components/EditablePageHeaderTitle';
 import { FinancialText } from '#components/FinancialText';
-import { MobileBackButton } from '#components/mobile/MobileBackButton';
 import { MobilePageHeader, Page, PageHeader } from '#components/Page';
 import { PrivacyFilter } from '#components/PrivacyFilter';
 import { Change } from '#components/reports/Change';
+import {
+  explainerStyle,
+  reportPanelStyle,
+} from '#components/reports/chart-theme';
 import { BudgetAnalysisGraph } from '#components/reports/graphs/BudgetAnalysisGraph';
 import { Header } from '#components/reports/Header';
 import { LoadingIndicator } from '#components/reports/LoadingIndicator';
+import { ReportBackButton } from '#components/reports/ReportBackButton';
+import { ReportMobileBackButton } from '#components/reports/ReportMobileBackButton';
 import { calculateTimeRange } from '#components/reports/reportRanges';
 import { buildBudgetAnalysisCsv } from '#components/reports/spreadsheets/budget-analysis-export';
 import {
@@ -42,7 +47,6 @@ import { fromDateRepr } from '#components/reports/util';
 import { useDashboardWidget } from '#hooks/useDashboardWidget';
 import { useFormat } from '#hooks/useFormat';
 import { useLocale } from '#hooks/useLocale';
-import { useNavigate } from '#hooks/useNavigate';
 import { useRuleConditionFilters } from '#hooks/useRuleConditionFilters';
 import { useSyncedPref } from '#hooks/useSyncedPref';
 import { addNotification } from '#notifications/notificationsSlice';
@@ -284,7 +288,6 @@ function BudgetAnalysisInternal({ widget }: BudgetAnalysisInternalProps) {
   );
 
   const data = useReport('default', getGraphData);
-  const navigate = useNavigate();
   const { isNarrowWidth } = useResponsive();
 
   const onChangeDates = (
@@ -386,12 +389,11 @@ function BudgetAnalysisInternal({ widget }: BudgetAnalysisInternalProps) {
         isNarrowWidth ? (
           <MobilePageHeader
             title={title}
-            leftContent={
-              <MobileBackButton onPress={() => navigate('/reports')} />
-            }
+            leftContent={<ReportMobileBackButton />}
           />
         ) : (
           <PageHeader
+            leading={<ReportBackButton />}
             title={
               widget ? (
                 <EditablePageHeaderTitle
@@ -469,7 +471,7 @@ function BudgetAnalysisInternal({ widget }: BudgetAnalysisInternalProps) {
         >
           <View
             style={{
-              backgroundColor: theme.tableBackground,
+              ...reportPanelStyle,
               padding: 20,
               paddingTop: 0,
               flex: '1 0 auto',
@@ -576,7 +578,7 @@ function BudgetAnalysisInternal({ widget }: BudgetAnalysisInternalProps) {
                 balanceOnly={!showCategories}
                 isConcise={isConcise}
               />
-              <View style={{ marginTop: 30 }}>
+              <View style={explainerStyle}>
                 <Trans>
                   <Paragraph>
                     <strong>Understanding the Chart</strong>

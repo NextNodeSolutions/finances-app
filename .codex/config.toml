@@ -31,7 +31,7 @@
 [features]
 lifecycle_hooks = true
 
-# Enforce the repo's shell-command policy (git safety, gh, yarn-from-a-workspace)
+# Enforce the repo's shell-command policy (git safety, gh, pnpm-from-a-workspace)
 # — the header of scripts/agent-hooks/git-guard.sh is the single list of rules.
 [[hooks.PreToolUse]]
 matcher = "^Bash$"

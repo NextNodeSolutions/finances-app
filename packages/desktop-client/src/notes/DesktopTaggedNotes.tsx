@@ -3,6 +3,7 @@ import React from 'react';
 import { Button } from '@actual-app/components/button';
 import { View } from '@actual-app/components/view';
 
+import { useOptionalFeature } from '#hooks/useOptionalFeature';
 import { useTagCSS } from '#hooks/useTagCSS';
 
 type DesktopTaggedNotesProps = {
@@ -19,6 +20,18 @@ export function DesktopTaggedNotes({
   separator,
 }: DesktopTaggedNotesProps) {
   const getTagCSS = useTagCSS();
+  const [isTagsOn] = useOptionalFeature('tags');
+
+  // With tags turned off, a #word is just text.
+  if (!isTagsOn) {
+    return (
+      <>
+        {content}
+        {separator}
+      </>
+    );
+  }
+
   return (
     <View style={{ display: 'inline' }}>
       <Button

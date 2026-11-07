@@ -2,6 +2,7 @@ import { Button } from '@actual-app/components/button';
 import { styles } from '@actual-app/components/styles';
 import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
+import { radius } from '@actual-app/components/tokens';
 
 type MobileSheetPickerFieldProps = {
   label: string;
@@ -25,7 +26,8 @@ export function MobileSheetPickerField({
       style={{
         ...styles.mediumText,
         width: '100%',
-        height: styles.mobileMinHeight,
+        height: 44,
+        borderRadius: radius.md,
         justifyContent: 'flex-start',
         fontWeight: 400,
         color: valueName ? theme.formInputText : theme.formInputTextPlaceholder,

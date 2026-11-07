@@ -1,12 +1,18 @@
-import { Navigate } from 'react-router';
-
-import { useResponsive } from '@actual-app/components/hooks/useResponsive';
+import { Navigate, useLocation } from 'react-router';
 
 import { useSidebarMenu } from '#hooks/useSidebarMenu';
 
 export function StartPageRedirect() {
-  const { isNarrowWidth } = useResponsive();
-  const { startPath } = useSidebarMenu();
+  const location = useLocation();
+  const { startPath, isAvailabilityResolved } = useSidebarMenu();
 
-  return <Navigate to={isNarrowWidth ? '/budget' : startPath} replace />;
+  // A saved start page may be one whose availability is still loading.
+  if (!isAvailabilityResolved) {
+    return null;
+  }
+
+  // Keyed by the location: a second visit to this route before the first
+  // redirect rendered (an import navigating to '/' as the opened file lands
+  // here) must redirect again instead of reusing the Navigate that ran.
+  return <Navigate key={location.key} to={startPath} replace />;
 }

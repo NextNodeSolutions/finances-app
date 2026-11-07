@@ -32,12 +32,12 @@ cmd=$(printf '%s' "$input" | jq -re '.command // empty') ||
 cwd=$(printf '%s' "$input" | jq -r '.cwd // ""')
 
 # Cursor passes cwd rather than a literal `cd packages/...`, so catch
-# yarn-run-from-a-workspace here before delegating.
+# pnpm-run-from-a-workspace here before delegating.
 case "$cwd" in
   "$ROOT"/packages | "$ROOT"/packages/*)
     case "$cmd" in
-      yarn* | *" yarn "*)
-        deny "Run yarn from the repo root, not a child workspace (AGENTS.md). Use 'yarn workspace <name> <cmd>' from $ROOT." ;;
+      pnpm* | *" pnpm "*)
+        deny "Run pnpm from the repo root, not a child workspace (AGENTS.md). Use 'pnpm --filter <name> <cmd>' from $ROOT." ;;
     esac ;;
 esac
 

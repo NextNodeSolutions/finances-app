@@ -24,7 +24,7 @@ import type { Binding } from '#spreadsheet';
 
 import { makeBalanceAmountStyle } from './util';
 
-type CarryoverIndicatorProps = {
+export type CarryoverIndicatorProps = {
   style?: CSSProperties;
 };
 
@@ -154,7 +154,7 @@ export function BalanceWithCarryover({
     (balanceValue, type) => {
       return (
         <>
-          <span style={{ fontWeight: 'bold' }}>
+          <span style={{ fontWeight: 600 }}>
             {getDifferenceToGoal(balanceValue) === 0 ? (
               <span style={{ color: theme.templateNumberFunded }}>
                 <Trans>Fully funded</Trans>
@@ -248,11 +248,11 @@ export function BalanceWithCarryover({
         <>
           <Tooltip
             content={
-              <View style={{ padding: 10 }}>
+              <View style={{ gap: 4 }}>
                 {GoalStatusDisplay(balanceValue, type)}
               </View>
             }
-            style={{ ...styles.tooltip, borderRadius: '0px 5px 5px 0px' }}
+            style={styles.tooltip}
             placement="bottom"
             triggerProps={{
               delay: 750,

@@ -7,8 +7,10 @@ import { SvgMenu } from '@actual-app/components/icons/v1';
 import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import { Toggle } from '@actual-app/components/toggle';
+import { motion, spacing } from '@actual-app/components/tokens';
 import { css } from '@emotion/css';
 
+import { pillStyle } from '#components/schedules/StatusBadge';
 import { isSidebarMenuItemLocked } from '#components/sidebar/sidebarMenu';
 import type {
   SidebarMenuItem,
@@ -43,12 +45,13 @@ export function SidebarMenuListItem({
         flexDirection: 'row',
         alignItems: 'center',
         gap: 10,
-        padding: '8px 10px',
-        marginBottom: 4,
-        borderRadius: 6,
-        border: '1px solid ' + theme.tableBorder,
+        minHeight: 40,
+        padding: `0 ${spacing.xs}px`,
+        // Ruled rows inside the settings card, not boxes within it.
+        borderTop: '1px solid ' + theme.hairlineSubtle,
         backgroundColor: theme.tableBackground,
         outline: 'none',
+        transition: `background-color ${motion.base} ${motion.ease}`,
         '&[data-hovered]': {
           backgroundColor: theme.tableRowBackgroundHover,
         },
@@ -56,7 +59,8 @@ export function SidebarMenuListItem({
           opacity: 0.5,
         },
         '&[data-focus-visible]': {
-          boxShadow: '0 0 0 2px ' + theme.formInputBorderSelected,
+          outline: `2px solid ${theme.focusRing}`,
+          outlineOffset: -2,
         },
       })}
     >
@@ -67,37 +71,43 @@ export function SidebarMenuListItem({
         style={{
           cursor: 'grab',
           color: theme.pageTextSubdued,
-          padding: 4,
+          width: 26,
+          height: 26,
+          padding: 0,
         }}
       >
-        <SvgMenu width={12} height={12} />
+        <SvgMenu width={11} height={11} />
       </Button>
       <Icon
         width={14}
         height={14}
         style={{
           flexShrink: 0,
-          color: item.hidden ? theme.pageTextSubdued : theme.tableText,
+          color: item.hidden ? theme.pageTextSubdued : theme.pageTextLight,
         }}
       />
       <Text
         style={{
           flex: 1,
+          fontWeight: 500,
           color: item.hidden ? theme.pageTextSubdued : theme.tableText,
         }}
       >
         {label}
       </Text>
       {isStartPage && (
-        <Text size="small" style={{ color: theme.pageTextSubdued }}>
+        <Text
+          style={{
+            ...pillStyle,
+            color: theme.pillText,
+            backgroundColor: theme.pillBackground,
+          }}
+        >
           <Trans>Start page</Trans>
         </Text>
       )}
       {isSidebarMenuItemLocked(item.id) ? (
-        <Text
-          size="small"
-          style={{ color: theme.pageTextSubdued, fontStyle: 'italic' }}
-        >
+        <Text size="small" style={{ color: theme.pageTextSubdued }}>
           <Trans>Always shown</Trans>
         </Text>
       ) : (

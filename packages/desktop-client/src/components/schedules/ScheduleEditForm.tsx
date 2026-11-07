@@ -12,6 +12,7 @@ import { SpaceBetween } from '@actual-app/components/space-between';
 import { styles } from '@actual-app/components/styles';
 import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
+import { spacing } from '@actual-app/components/tokens';
 import { View } from '@actual-app/components/view';
 import * as monthUtils from '@actual-app/core/shared/months';
 import { UPCOMING_LENGTH_PRESET_OPTIONS } from '@actual-app/core/shared/schedules';
@@ -23,6 +24,8 @@ import type {
 
 import { Checkbox, FormField, FormLabel } from '#components/forms';
 import { OpSelect } from '#components/rules/RuleEditor';
+import { SegmentedControl } from '#components/rules/SegmentedControl';
+import { SegmentedControlItem } from '#components/rules/SegmentedControlItem';
 import { CustomUpcomingLength } from '#components/schedules/CustomUpcomingLength';
 import { DateSelect } from '#components/select/DateSelect';
 import { RecurringSchedulePicker } from '#components/select/RecurringSchedulePicker';
@@ -254,7 +257,9 @@ export function ScheduleEditForm({
             justifyContent: 'space-between',
           }}
         >
-          <View style={{ width: '13.44rem' }}>
+          {/* Wide enough to keep a monthly rule on one line in Inter, and
+              matching the Payee column above. */}
+          <View style={{ width: '16rem' }}>
             {repeats ? (
               <RecurringSchedulePicker
                 // @ts-expect-error fix me
@@ -276,13 +281,15 @@ export function ScheduleEditForm({
 
             {upcomingDates && (
               <View style={{ fontSize: 13, marginTop: 20 }}>
-                <Text style={{ color: theme.pageTextLight, fontWeight: 600 }}>
+                <Text style={{ color: theme.pageText, fontWeight: 500 }}>
                   <Trans>Upcoming dates</Trans>
                 </Text>
                 <SpaceBetween
                   direction="vertical"
                   gap={5}
                   style={{
+                    ...styles.tnum,
+                    fontSize: 12,
                     marginTop: 10,
                     color: theme.pageTextLight,
                     alignItems: 'flex-start',
@@ -480,7 +487,7 @@ export function ScheduleEditForm({
         style={{
           padding: 10,
           minHeight: '30vh',
-          borderTop: `1px solid ${theme.tableBorder}`,
+          borderTop: `1px solid ${theme.hairline}`,
         }}
       >
         <SelectedProvider instance={selectedInst}>
@@ -496,33 +503,20 @@ export function ScheduleEditForm({
             </View>
           ) : (
             <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-              <Button
-                variant="bare"
-                style={{
-                  color:
-                    transactionsMode === 'linked'
-                      ? theme.pageTextLink
-                      : theme.pageTextSubdued,
-                  marginRight: 10,
-                  fontSize: 14,
-                }}
-                onPress={() => onSwitchTransactions('linked')}
-              >
-                <Trans>Linked transactions</Trans>
-              </Button>{' '}
-              <Button
-                variant="bare"
-                style={{
-                  color:
-                    transactionsMode === 'matched'
-                      ? theme.pageTextLink
-                      : theme.pageTextSubdued,
-                  fontSize: 14,
-                }}
-                onPress={() => onSwitchTransactions('matched')}
-              >
-                <Trans>Find matching transactions</Trans>
-              </Button>
+              <SegmentedControl>
+                <SegmentedControlItem
+                  isSelected={transactionsMode === 'linked'}
+                  onPress={() => onSwitchTransactions('linked')}
+                >
+                  <Trans>Linked transactions</Trans>
+                </SegmentedControlItem>
+                <SegmentedControlItem
+                  isSelected={transactionsMode === 'matched'}
+                  onPress={() => onSwitchTransactions('matched')}
+                >
+                  <Trans>Find matching transactions</Trans>
+                </SegmentedControlItem>
+              </SegmentedControl>
               <View style={{ flex: 1 }} />
               <SelectedItemsButton
                 id="transactions"
@@ -558,7 +552,7 @@ export function ScheduleEditForm({
             fields={['date', 'payee', 'notes', 'amount']}
             style={{
               ...styles.tableContainer,
-              marginTop: 5,
+              marginTop: spacing.sm,
               maxHeight: 200,
             }}
           />

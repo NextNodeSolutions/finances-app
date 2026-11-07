@@ -1,7 +1,6 @@
 import { useTranslation } from 'react-i18next';
 
 import type { CSSProperties } from '@actual-app/components/styles';
-import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 import {
   Area,
@@ -12,7 +11,13 @@ import {
   YAxis,
 } from 'recharts';
 
-import { useRechartsAnimation } from '#components/reports/chart-theme';
+import {
+  chartEndMargin,
+  chartGrid,
+  chartXAxis,
+  chartYAxis,
+  useRechartsAnimation,
+} from '#components/reports/chart-theme';
 import { Container } from '#components/reports/Container';
 import { MonteCarloCashflowGraphTooltip } from '#components/reports/graphs/MonteCarloCashflowGraphTooltip';
 import { MonteCarloCashflowLegendGroup } from '#components/reports/graphs/MonteCarloCashflowLegendGroup';
@@ -66,25 +71,16 @@ export function MonteCarloPotBalancesGraph({
             data={data}
             margin={{
               top: 15,
-              right: 0,
+              right: chartEndMargin,
               left: computePadding(totals, value =>
                 format(value, 'financial-no-decimals'),
               ),
               bottom: 10,
             }}
           >
-            <CartesianGrid strokeDasharray="3 3" vertical={false} />
-            <XAxis
-              dataKey="age"
-              tick={{ fill: theme.pageText }}
-              tickLine={{ stroke: theme.pageText }}
-              minTickGap={30}
-            />
-            <YAxis
-              tickFormatter={tickFormatter}
-              tick={{ fill: theme.pageText }}
-              tickLine={{ stroke: theme.pageText }}
-            />
+            <CartesianGrid {...chartGrid} />
+            <XAxis {...chartXAxis} dataKey="age" minTickGap={30} />
+            <YAxis {...chartYAxis} tickFormatter={tickFormatter} />
             <Tooltip
               content={
                 <MonteCarloCashflowGraphTooltip

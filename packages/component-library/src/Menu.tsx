@@ -9,9 +9,11 @@ import type {
 } from 'react';
 
 import { Button } from './Button';
+import { styles } from './styles';
 import { Text } from './Text';
 import { theme } from './theme';
 import { Toggle } from './Toggle';
+import { radius } from './tokens';
 import { View } from './View';
 
 const MenuLine: unique symbol = Symbol('menu-line');
@@ -25,7 +27,14 @@ type KeybindingProps = {
 
 function Keybinding({ keyName }: KeybindingProps) {
   return (
-    <Text style={{ fontSize: 10, color: theme.menuKeybindingText }}>
+    <Text
+      style={{
+        ...styles.tnum,
+        fontSize: 11,
+        color: theme.menuKeybindingText,
+        marginLeft: 12,
+      }}
+    >
       {keyName}
     </Text>
   );
@@ -160,7 +169,13 @@ export function Menu<const NameType = string>({
     <View
       role="menu"
       className={className}
-      style={{ outline: 'none', borderRadius: 4, overflow: 'hidden', ...style }}
+      style={{
+        outline: 'none',
+        padding: 4,
+        borderRadius: radius.sm,
+        overflow: 'hidden',
+        ...style,
+      }}
       tabIndex={0}
       onKeyDown={onKeyDown}
       innerRef={elRef}
@@ -169,7 +184,7 @@ export function Menu<const NameType = string>({
       {items.map((item, idx) => {
         if (item === Menu.line) {
           return (
-            <View key={idx} style={{ margin: '3px 0px' }}>
+            <View key={idx} style={{ margin: '4px 6px' }}>
               <View style={{ borderTop: '1px solid ' + theme.menuBorder }} />
             </View>
           );
@@ -179,11 +194,10 @@ export function Menu<const NameType = string>({
               key={idx}
               style={{
                 color: theme.menuItemTextHeader,
-                fontSize: 11,
-                lineHeight: '1em',
-                textTransform: 'uppercase',
-                margin: '3px 9px',
-                marginTop: 5,
+                fontSize: 11.5,
+                fontWeight: 500,
+                lineHeight: '14px',
+                margin: '8px 10px 4px',
               }}
             >
               {item.name}
@@ -201,7 +215,9 @@ export function Menu<const NameType = string>({
             slot={slot}
             style={{
               cursor: 'default',
-              padding: 10,
+              padding: '6px 10px',
+              borderRadius: radius.sm,
+              lineHeight: '18px',
               flexDirection: 'row',
               justifyContent: 'center',
               alignItems: 'center',
@@ -233,7 +249,7 @@ export function Menu<const NameType = string>({
                   <Icon
                     width={item.iconSize || 10}
                     height={item.iconSize || 10}
-                    style={{ marginRight: 7, width: item.iconSize || 10 }}
+                    style={{ marginRight: 8, width: item.iconSize || 10 }}
                   />
                 )}
                 <Text title={item.tooltip}>{item.text}</Text>
@@ -254,7 +270,7 @@ export function Menu<const NameType = string>({
                 <Toggle
                   id={String(item.name)}
                   isOn={item.toggle}
-                  style={{ marginLeft: 5 }}
+                  style={{ marginLeft: 12 }}
                   onToggle={() =>
                     !item.disabled &&
                     !isLabel(item) &&

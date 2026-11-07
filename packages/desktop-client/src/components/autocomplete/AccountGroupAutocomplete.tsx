@@ -11,6 +11,7 @@ import { useResponsive } from '@actual-app/components/hooks/useResponsive';
 import { styles } from '@actual-app/components/styles';
 import { TextOneLine } from '@actual-app/components/text-one-line';
 import { theme } from '@actual-app/components/theme';
+import { radius } from '@actual-app/components/tokens';
 import { View } from '@actual-app/components/view';
 import type { AccountGroupEntity } from '@actual-app/core/types/models';
 import { css, cx } from '@emotion/css';
@@ -63,7 +64,7 @@ function AccountGroupList({
         style={{
           overflowY: 'auto',
           willChange: 'transform',
-          padding: '5px 0',
+          padding: 4,
           ...(!embedded && { maxHeight: 175 }),
         }}
       >
@@ -135,7 +136,8 @@ function AccountGroupItem({
   className,
   style,
   highlighted,
-  embedded,
+  // Kept out of the DOM props; items look the same embedded or not.
+  embedded: _embedded,
   ...props
 }: AccountGroupItemProps) {
   const { t } = useTranslation();
@@ -159,17 +161,18 @@ function AccountGroupItem({
           backgroundColor: highlighted
             ? theme.menuAutoCompleteBackgroundHover
             : 'transparent',
-          color: highlighted
-            ? theme.menuAutoCompleteItemTextHover
-            : isCreateRow
-              ? theme.noticeTextMenu
+          color: isCreateRow
+            ? theme.accentText
+            : highlighted
+              ? theme.menuAutoCompleteItemTextHover
               : theme.menuAutoCompleteItemText,
-          fontWeight: isCreateRow ? 500 : undefined,
-          padding: 4,
+          padding: '5px 10px',
           paddingLeft: 20,
-          borderRadius: embedded ? 4 : 0,
+          borderRadius: radius.sm,
           border: 'none',
           font: 'inherit',
+          // After the `font` shorthand, which would reset it.
+          fontWeight: isCreateRow ? 500 : undefined,
           ...narrowStyle,
         }),
       )}

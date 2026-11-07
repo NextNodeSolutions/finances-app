@@ -17,6 +17,11 @@ import { useSelectedItems } from '#hooks/useSelected';
 import { pushModal } from '#modals/modalsSlice';
 import { useDispatch } from '#redux';
 
+import {
+  getDetailTransactionId,
+  hasTransactionDetails,
+} from './TransactionDetailsButton';
+
 type TransactionRowContextMenuProps = {
   rowRef: RefObject<HTMLElement | null>;
   transaction: TransactionEntity;
@@ -31,6 +36,8 @@ type TransactionRowContextMenuProps = {
     ids: TransactionEntity['id'][],
   ) => void;
   onMakeAsNonSplitTransactions: (ids: string[]) => void;
+  /** Offers `Details` when given. */
+  onOpenDetails?: (id: TransactionEntity['id']) => void;
 };
 
 export function useTransactionRowContextActions({
@@ -44,6 +51,7 @@ export function useTransactionRowContextActions({
   onCreateRule,
   onScheduleAction,
   onMakeAsNonSplitTransactions,
+  onOpenDetails,
 }: TransactionRowContextMenuProps) {
   const { t } = useTranslation();
   const dispatch = useDispatch();
@@ -186,6 +194,16 @@ export function useTransactionRowContextActions({
   ];
 
   const transactionActions: ContextMenuItem[] = [
+    {
+      name: 'details',
+      text: t('Details'),
+      onClick: () => onOpenDetails?.(getDetailTransactionId(transaction)),
+      hidden:
+        !onOpenDetails ||
+        selectedIds.length !== 1 ||
+        selectedIds[0] !== transaction.id ||
+        !hasTransactionDetails(transaction),
+    },
     {
       name: 'duplicate',
       text: t('Duplicate'),

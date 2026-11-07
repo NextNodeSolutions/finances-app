@@ -14,8 +14,6 @@ import { SvgCalendar, SvgChart } from '@actual-app/components/icons/v1';
 import { Menu } from '@actual-app/components/menu';
 import { Paragraph } from '@actual-app/components/paragraph';
 import { Popover } from '@actual-app/components/popover';
-import { styles } from '@actual-app/components/styles';
-import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 import { send } from '@actual-app/core/platform/client/connection';
 import * as monthUtils from '@actual-app/core/shared/months';
@@ -24,13 +22,19 @@ import * as d from 'date-fns';
 
 import { EditablePageHeaderTitle } from '#components/EditablePageHeaderTitle';
 import { FinancialText } from '#components/FinancialText';
-import { MobileBackButton } from '#components/mobile/MobileBackButton';
 import { MobilePageHeader, Page, PageHeader } from '#components/Page';
 import { PrivacyFilter } from '#components/PrivacyFilter';
 import { Change } from '#components/reports/Change';
+import {
+  explainerStyle,
+  reportHeadlineStyle,
+  reportPanelStyle,
+} from '#components/reports/chart-theme';
 import { NetWorthGraph } from '#components/reports/graphs/NetWorthGraph';
 import { Header } from '#components/reports/Header';
 import { LoadingIndicator } from '#components/reports/LoadingIndicator';
+import { ReportBackButton } from '#components/reports/ReportBackButton';
+import { ReportMobileBackButton } from '#components/reports/ReportMobileBackButton';
 import { ReportOptions } from '#components/reports/ReportOptions';
 import { calculateTimeRange } from '#components/reports/reportRanges';
 import { createSpreadsheet as netWorthSpreadsheet } from '#components/reports/spreadsheets/net-worth-spreadsheet';
@@ -41,7 +45,6 @@ import { useDashboardWidget } from '#hooks/useDashboardWidget';
 import { useDateFormat } from '#hooks/useDateFormat';
 import { useFormat } from '#hooks/useFormat';
 import { useLocale } from '#hooks/useLocale';
-import { useNavigate } from '#hooks/useNavigate';
 import { useRuleConditionFilters } from '#hooks/useRuleConditionFilters';
 import { useSyncedPref } from '#hooks/useSyncedPref';
 import { addNotification } from '#notifications/notificationsSlice';
@@ -266,7 +269,6 @@ function NetWorthInner({ widget }: NetWorthInnerProps) {
     );
   }
 
-  const navigate = useNavigate();
   const { isNarrowWidth } = useResponsive();
 
   const title = widget?.meta?.name || t('Net Worth');
@@ -297,12 +299,11 @@ function NetWorthInner({ widget }: NetWorthInnerProps) {
         isNarrowWidth ? (
           <MobilePageHeader
             title={title}
-            leftContent={
-              <MobileBackButton onPress={() => navigate('/reports')} />
-            }
+            leftContent={<ReportMobileBackButton />}
           />
         ) : (
           <PageHeader
+            leading={<ReportBackButton />}
             title={
               widget ? (
                 <EditablePageHeaderTitle
@@ -350,7 +351,7 @@ function NetWorthInner({ widget }: NetWorthInnerProps) {
 
       <View
         style={{
-          backgroundColor: theme.tableBackground,
+          ...reportPanelStyle,
           padding: 20,
           paddingTop: 0,
           flex: '1 0 auto',
@@ -364,11 +365,9 @@ function NetWorthInner({ widget }: NetWorthInnerProps) {
             paddingTop: 20,
           }}
         >
-          <View
-            style={{ ...styles.largeText, fontWeight: 400, marginBottom: 5 }}
-          >
+          <View style={{ marginBottom: 2 }}>
             <PrivacyFilter>
-              <FinancialText>
+              <FinancialText style={reportHeadlineStyle}>
                 {format(data.netWorth, 'financial')}
               </FinancialText>
             </PrivacyFilter>
@@ -386,7 +385,7 @@ function NetWorthInner({ widget }: NetWorthInnerProps) {
           mode={graphMode}
         />
 
-        <View style={{ marginTop: 30, userSelect: 'none' }}>
+        <View style={explainerStyle}>
           <Paragraph>
             <strong>
               <Trans>How is net worth calculated?</Trans>

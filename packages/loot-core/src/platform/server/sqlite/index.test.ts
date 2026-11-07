@@ -4,7 +4,7 @@ import { patchFetchForSqlJS } from '#mocks/util';
 import { execQuery, init, openDatabase, runQuery, transaction } from './index';
 
 beforeAll(async () => {
-  const baseURL = `${__dirname}/../../../../../../node_modules/@jlongster/sql.js/dist/`;
+  const baseURL = `${__dirname}/../../../../node_modules/@jlongster/sql.js/dist/`;
   patchFetchForSqlJS(baseURL);
 
   return init({ baseURL });

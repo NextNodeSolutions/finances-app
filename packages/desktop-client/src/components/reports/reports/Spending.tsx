@@ -6,7 +6,10 @@ import { AlignedText } from '@actual-app/components/aligned-text';
 import { Block } from '@actual-app/components/block';
 import { Button } from '@actual-app/components/button';
 import { useResponsive } from '@actual-app/components/hooks/useResponsive';
-import { ModeButton } from '@actual-app/components/mode-button';
+import {
+  ModeButton,
+  ModeButtonGroup,
+} from '@actual-app/components/mode-button';
 import { Paragraph } from '@actual-app/components/paragraph';
 import { Select } from '@actual-app/components/select';
 import { SpaceBetween } from '@actual-app/components/space-between';
@@ -26,12 +29,18 @@ import * as d from 'date-fns';
 import { EditablePageHeaderTitle } from '#components/EditablePageHeaderTitle';
 import { AppliedFilters } from '#components/filters/AppliedFilters';
 import { FilterButton } from '#components/filters/FiltersMenu';
-import { MobileBackButton } from '#components/mobile/MobileBackButton';
+import { FinancialText } from '#components/FinancialText';
 import { MobilePageHeader, Page, PageHeader } from '#components/Page';
 import { PrivacyFilter } from '#components/PrivacyFilter';
+import {
+  explainerStyle,
+  reportPanelStyle,
+} from '#components/reports/chart-theme';
 import { SpendingGraph } from '#components/reports/graphs/SpendingGraph';
 import { LegendItem } from '#components/reports/LegendItem';
 import { LoadingIndicator } from '#components/reports/LoadingIndicator';
+import { ReportBackButton } from '#components/reports/ReportBackButton';
+import { ReportMobileBackButton } from '#components/reports/ReportMobileBackButton';
 import { calculateSpendingReportTimeRange } from '#components/reports/reportRanges';
 import {
   getSpendingAverageRangeLabel,
@@ -47,7 +56,6 @@ import { fromDateRepr } from '#components/reports/util';
 import { useDashboardWidget } from '#hooks/useDashboardWidget';
 import { useFormat } from '#hooks/useFormat';
 import { useLocale } from '#hooks/useLocale';
-import { useNavigate } from '#hooks/useNavigate';
 import { useRuleConditionFilters } from '#hooks/useRuleConditionFilters';
 import { useSyncedPref } from '#hooks/useSyncedPref';
 import { addNotification } from '#notifications/notificationsSlice';
@@ -162,7 +170,6 @@ function SpendingInternal({ widget }: SpendingInternalProps) {
   );
 
   const data = useReport('default', getGraphData);
-  const navigate = useNavigate();
   const { isNarrowWidth } = useResponsive();
 
   const updateDashboardWidgetMutation = useUpdateDashboardWidgetMutation();
@@ -292,12 +299,11 @@ function SpendingInternal({ widget }: SpendingInternalProps) {
         isNarrowWidth ? (
           <MobilePageHeader
             title={title}
-            leftContent={
-              <MobileBackButton onPress={() => navigate('/reports')} />
-            }
+            leftContent={<ReportMobileBackButton />}
           />
         ) : (
           <PageHeader
+            leading={<ReportBackButton />}
             title={
               widget ? (
                 <EditablePageHeaderTitle
@@ -317,32 +323,40 @@ function SpendingInternal({ widget }: SpendingInternalProps) {
         style={{
           paddingLeft: 20,
           paddingRight: 20,
-          paddingTop: 15,
-          paddingBottom: 20,
+          paddingTop: 12,
+          paddingBottom: 16,
           flexShrink: 0,
         }}
       >
         {!isNarrowWidth && (
           <SpaceBetween gap={0}>
-            <Button
-              variant={isLive ? 'primary' : 'normal'}
-              onPress={onToggleIsLive}
-            >
-              {isLive ? t('Live') : t('Static')}
-            </Button>
+            <ModeButtonGroup>
+              <ModeButton
+                selected={!isLive}
+                onSelect={() => isLive && onToggleIsLive()}
+              >
+                <Trans>Static</Trans>
+              </ModeButton>
+              <ModeButton
+                selected={isLive}
+                onSelect={() => !isLive && onToggleIsLive()}
+              >
+                <Trans>Live</Trans>
+              </ModeButton>
+            </ModeButtonGroup>
 
             <View
               style={{
                 width: 1,
-                height: 28,
-                backgroundColor: theme.pillBorderDark,
-                marginRight: 10,
-                marginLeft: 10,
+                height: 20,
+                backgroundColor: theme.hairlineStrong,
+                marginRight: 12,
+                marginLeft: 12,
               }}
             />
 
-            <SpaceBetween gap={5}>
-              <Text>
+            <SpaceBetween gap={8}>
+              <Text style={{ color: theme.pageTextLight }}>
                 <Trans>Compare</Trans>
               </Text>
               <Select
@@ -354,7 +368,7 @@ function SpendingInternal({ widget }: SpendingInternalProps) {
                 style={{ width: 150 }}
                 popoverStyle={{ width: 150 }}
               />
-              <Text>
+              <Text style={{ color: theme.pageTextLight }}>
                 <Trans>to</Trans>
               </Text>
               <Select
@@ -370,19 +384,16 @@ function SpendingInternal({ widget }: SpendingInternalProps) {
             <View
               style={{
                 width: 1,
-                height: 28,
-                backgroundColor: theme.pillBorderDark,
-                marginRight: 15,
-                marginLeft: 15,
+                height: 20,
+                backgroundColor: theme.hairlineStrong,
+                marginRight: 12,
+                marginLeft: 12,
               }}
             />
 
-            <SpaceBetween gap={5}>
+            <ModeButtonGroup>
               <ModeButton
                 selected={reportMode === 'single-month'}
-                style={{
-                  backgroundColor: 'inherit',
-                }}
                 onSelect={() => {
                   setReportMode('single-month');
                 }}
@@ -394,9 +405,6 @@ function SpendingInternal({ widget }: SpendingInternalProps) {
                 onSelect={() => {
                   setReportMode('budget');
                 }}
-                style={{
-                  backgroundColor: 'inherit',
-                }}
               >
                 <Trans>Budgeted</Trans>
               </ModeButton>
@@ -405,21 +413,18 @@ function SpendingInternal({ widget }: SpendingInternalProps) {
                 onSelect={() => {
                   setReportMode('average');
                 }}
-                style={{
-                  backgroundColor: 'inherit',
-                }}
               >
                 <Trans>Average</Trans>
               </ModeButton>
-            </SpaceBetween>
+            </ModeButtonGroup>
 
             <View
               style={{
                 width: 1,
-                height: 28,
-                backgroundColor: theme.pillBorderDark,
-                marginRight: 10,
-                marginLeft: 10,
+                height: 20,
+                backgroundColor: theme.hairlineStrong,
+                marginRight: 12,
+                marginLeft: 12,
               }}
             />
 
@@ -502,7 +507,7 @@ function SpendingInternal({ widget }: SpendingInternalProps) {
         >
           <View
             style={{
-              backgroundColor: theme.tableBackground,
+              ...reportPanelStyle,
               padding: 20,
               paddingTop: 0,
               flex: '1 0 auto',
@@ -525,12 +530,12 @@ function SpendingInternal({ widget }: SpendingInternalProps) {
               >
                 <View>
                   <LegendItem
-                    color={theme.reportsGreen}
+                    color={theme.reportsChartFill}
                     label={monthUtils.format(compare, 'MMM yyyy', locale)}
                     style={{ padding: 0, paddingBottom: 10 }}
                   />
                   <LegendItem
-                    color={theme.reportsGray}
+                    color={theme.pageTextSubdued}
                     label={
                       reportMode === 'single-month'
                         ? monthUtils.format(compareTo, 'MMM yyyy', locale)
@@ -551,7 +556,11 @@ function SpendingInternal({ widget }: SpendingInternalProps) {
                   <View>
                     {showCompare && (
                       <AlignedText
-                        style={{ marginBottom: 5, minWidth: 210 }}
+                        style={{
+                          marginBottom: 2,
+                          minWidth: 220,
+                          fontSize: 12.5,
+                        }}
                         left={
                           <Block>
                             {compare === monthUtils.currentMonth()
@@ -573,20 +582,24 @@ function SpendingInternal({ widget }: SpendingInternalProps) {
                           </Block>
                         }
                         right={
-                          <Text style={{ fontWeight: 600 }}>
+                          <FinancialText style={{ fontWeight: 500 }}>
                             <PrivacyFilter>
                               {format(
                                 Math.abs(data.intervalData[todayDay].compare),
                                 'financial',
                               )}
                             </PrivacyFilter>
-                          </Text>
+                          </FinancialText>
                         }
                       />
                     )}
                     {reportMode === 'single-month' && showCompareTo && (
                       <AlignedText
-                        style={{ marginBottom: 5, minWidth: 210 }}
+                        style={{
+                          marginBottom: 2,
+                          minWidth: 220,
+                          fontSize: 12.5,
+                        }}
                         left={
                           <Block>
                             {compareTo === monthUtils.currentMonth()
@@ -607,21 +620,21 @@ function SpendingInternal({ widget }: SpendingInternalProps) {
                           </Block>
                         }
                         right={
-                          <Text style={{ fontWeight: 600 }}>
+                          <FinancialText style={{ fontWeight: 500 }}>
                             <PrivacyFilter>
                               {format(
                                 Math.abs(data.intervalData[todayDay].compareTo),
                                 'financial',
                               )}
                             </PrivacyFilter>
-                          </Text>
+                          </FinancialText>
                         }
                       />
                     )}
                   </View>
                   {Math.abs(data.intervalData[todayDay].budget) > 0 && (
                     <AlignedText
-                      style={{ marginBottom: 5, minWidth: 210 }}
+                      style={{ marginBottom: 2, minWidth: 220, fontSize: 12.5 }}
                       left={
                         <Block>
                           {compare === monthUtils.currentMonth() ? (
@@ -632,7 +645,7 @@ function SpendingInternal({ widget }: SpendingInternalProps) {
                         </Block>
                       }
                       right={
-                        <Text style={{ fontWeight: 600 }}>
+                        <FinancialText style={{ fontWeight: 500 }}>
                           <PrivacyFilter>
                             {format(
                               Math.round(
@@ -641,13 +654,13 @@ function SpendingInternal({ widget }: SpendingInternalProps) {
                               'financial',
                             )}
                           </PrivacyFilter>
-                        </Text>
+                        </FinancialText>
                       }
                     />
                   )}
                   {showAverage && (
                     <AlignedText
-                      style={{ marginBottom: 5, minWidth: 210 }}
+                      style={{ marginBottom: 2, minWidth: 220, fontSize: 12.5 }}
                       left={
                         <Block>
                           {getSpendingAverageSummaryLabel({
@@ -659,14 +672,14 @@ function SpendingInternal({ widget }: SpendingInternalProps) {
                         </Block>
                       }
                       right={
-                        <Text style={{ fontWeight: 600 }}>
+                        <FinancialText style={{ fontWeight: 500 }}>
                           <PrivacyFilter>
                             {format(
                               Math.abs(data.intervalData[todayDay].average),
                               'financial',
                             )}
                           </PrivacyFilter>
-                        </Text>
+                        </FinancialText>
                       }
                     />
                   )}
@@ -685,7 +698,7 @@ function SpendingInternal({ widget }: SpendingInternalProps) {
                 <LoadingIndicator message={t('Loading report...')} />
               )}
               {showAverage && (
-                <View style={{ marginTop: 30 }}>
+                <View style={explainerStyle}>
                   <Trans>
                     <Paragraph>
                       <strong>

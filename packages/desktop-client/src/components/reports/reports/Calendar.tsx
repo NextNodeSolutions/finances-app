@@ -14,6 +14,7 @@ import {
 } from '@actual-app/components/icons/v1';
 import { styles } from '@actual-app/components/styles';
 import { theme } from '@actual-app/components/theme';
+import { elevation, radius } from '@actual-app/components/tokens';
 import { View } from '@actual-app/components/view';
 import { send } from '@actual-app/core/platform/client/connection';
 import * as monthUtils from '@actual-app/core/shared/months';
@@ -32,7 +33,6 @@ import { format as formatDate, parseISO } from 'date-fns';
 
 import { EditablePageHeaderTitle } from '#components/EditablePageHeaderTitle';
 import { FinancialText } from '#components/FinancialText';
-import { MobileBackButton } from '#components/mobile/MobileBackButton';
 import { TransactionList as TransactionListMobile } from '#components/mobile/transactions/TransactionList';
 import { MobilePageHeader, Page, PageHeader } from '#components/Page';
 import { PrivacyFilter } from '#components/PrivacyFilter';
@@ -40,6 +40,8 @@ import { DateRange } from '#components/reports/DateRange';
 import { CalendarGraph } from '#components/reports/graphs/CalendarGraph';
 import { Header } from '#components/reports/Header';
 import { LoadingIndicator } from '#components/reports/LoadingIndicator';
+import { ReportBackButton } from '#components/reports/ReportBackButton';
+import { ReportMobileBackButton } from '#components/reports/ReportMobileBackButton';
 import { calculateTimeRange } from '#components/reports/reportRanges';
 import { calendarSpreadsheet } from '#components/reports/spreadsheets/calendar-spreadsheet';
 import type { CalendarDataType } from '#components/reports/spreadsheets/calendar-spreadsheet';
@@ -522,12 +524,11 @@ function CalendarInner({ widget, parameters }: CalendarInnerProps) {
         isNarrowWidth ? (
           <MobilePageHeader
             title={title}
-            leftContent={
-              <MobileBackButton onPress={() => navigate('/reports')} />
-            }
+            leftContent={<ReportMobileBackButton />}
           />
         ) : (
           <PageHeader
+            leading={<ReportBackButton />}
             title={
               widget ? (
                 <EditablePageHeaderTitle
@@ -585,6 +586,8 @@ function CalendarInner({ widget, parameters }: CalendarInnerProps) {
               gap: 16,
               position: 'relative',
               marginBottom: 16,
+              paddingLeft: 20,
+              paddingRight: 20,
             }}
           >
             {data && (
@@ -593,9 +596,10 @@ function CalendarInner({ widget, parameters }: CalendarInnerProps) {
                 style={{
                   flexGrow: 1,
                   flexDirection: 'row',
-                  gap: '20px',
+                  gap: '16px',
                   overflow: 'auto',
                   height: '100%',
+                  paddingBottom: 4,
                   justifyContent: flexAlignment,
                   display: 'flex',
                   ...styles.horizontalScrollbar,
@@ -808,9 +812,11 @@ function CalendarWithHeader({
       style={{
         minWidth: '300px',
         maxWidth: '300px',
-        padding: 10,
-        borderRadius: 4,
-        backgroundColor: theme.tableBackground,
+        padding: 14,
+        backgroundColor: theme.cardBackground,
+        border: `1px solid ${theme.hairline}`,
+        borderRadius: radius.lg,
+        boxShadow: elevation.card,
       }}
       onClick={() =>
         onApplyFilter({
@@ -831,9 +837,9 @@ function CalendarWithHeader({
         <Button
           variant="bare"
           style={{
-            color: theme.pageTextSubdued,
-            fontWeight: 'bold',
-            fontSize: '14px',
+            color: theme.pageText,
+            fontWeight: 600,
+            fontSize: 13,
             margin: 0,
             padding: 0,
             display: 'inline-block',
@@ -969,43 +975,40 @@ function CalendarCardHeader({
       <View
         style={{
           width: '200px',
-          borderRadius: 4,
-          backgroundColor: theme.tableBackground,
-          padding: 10,
+          padding: 14,
+          backgroundColor: theme.cardBackground,
+          border: `1px solid ${theme.hairline}`,
+          borderRadius: radius.lg,
+          boxShadow: elevation.card,
         }}
       >
         <DateRange start={start} end={end} />
-        <View style={{ lineHeight: 1.5 }}>
+        <View style={{ lineHeight: 1.5, marginTop: 6, fontSize: 12.5 }}>
           <View
             style={{
               display: 'grid',
-              gridTemplateColumns: '70px 1fr',
+              gridTemplateColumns: 'auto 1fr',
               gridAutoRows: '1fr',
+              columnGap: 12,
             }}
           >
-            <View
-              style={{
-                textAlign: 'right',
-                marginRight: 4,
-              }}
-            >
+            <View style={{ color: theme.pageTextLight }}>
               <Trans>Income:</Trans>
             </View>
-            <View style={{ color: theme.reportsNumberPositive }}>
-              <PrivacyFilter>{format(totalIncome, 'financial')}</PrivacyFilter>
-            </View>
-
-            <View
-              style={{
-                textAlign: 'right',
-                marginRight: 4,
-              }}
+            <FinancialText
+              style={{ color: theme.reportsNumberPositive, textAlign: 'right' }}
             >
+              <PrivacyFilter>{format(totalIncome, 'financial')}</PrivacyFilter>
+            </FinancialText>
+
+            <View style={{ color: theme.pageTextLight }}>
               <Trans>Expenses:</Trans>
             </View>
-            <View style={{ color: theme.reportsNumberNegative }}>
+            <FinancialText
+              style={{ color: theme.reportsNumberNegative, textAlign: 'right' }}
+            >
               <PrivacyFilter>{format(totalExpense, 'financial')}</PrivacyFilter>
-            </View>
+            </FinancialText>
           </View>
         </View>
       </View>

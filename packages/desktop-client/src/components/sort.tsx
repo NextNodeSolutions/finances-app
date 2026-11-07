@@ -11,6 +11,7 @@ import type { DropPosition as AriaDropPosition } from 'react-aria';
 import { useDrag, useDrop } from 'react-dnd';
 
 import { theme } from '@actual-app/components/theme';
+import { radius } from '@actual-app/components/tokens';
 import { View } from '@actual-app/components/view';
 
 import { useDragRef } from '#hooks/useDragRef';
@@ -197,9 +198,9 @@ export function DropHighlight({ pos, offset }: DropHighlightProps) {
         position: 'absolute',
         left: 2,
         right: 2,
-        borderRadius: 3,
-        height: 3,
-        background: theme.pageTextLink,
+        borderRadius: radius.pill,
+        height: 2,
+        background: theme.accent,
         zIndex: 10000,
         pointerEvents: 'none',
         ...posStyle,

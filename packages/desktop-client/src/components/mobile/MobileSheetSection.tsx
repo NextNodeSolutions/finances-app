@@ -1,7 +1,6 @@
 import { useId } from 'react';
 import type { ReactNode } from 'react';
 
-import { styles } from '@actual-app/components/styles';
 import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import { spacing } from '@actual-app/components/tokens';
@@ -28,15 +27,16 @@ export function MobileSheetSection({
       {title && (
         <View
           style={{
-            padding: `${spacing.md}px ${spacing.lg}px ${spacing.xs}px`,
+            padding: `${spacing.md}px ${spacing.lg + 4}px ${spacing.sm}px`,
           }}
         >
           <Text
             id={titleId}
             style={{
-              ...styles.smallText,
-              fontWeight: 600,
-              color: theme.pageTextLight,
+              fontSize: 12,
+              lineHeight: '16px',
+              fontWeight: 500,
+              color: theme.menuItemTextHeader,
             }}
           >
             {title}

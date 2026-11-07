@@ -17,6 +17,7 @@ import type {
 } from '@actual-app/core/types/models';
 import type { SyncedPrefs } from '@actual-app/core/types/prefs';
 
+import { cardChartInset } from '#components/reports/chart-theme';
 import { ChooseGraph } from '#components/reports/ChooseGraph';
 import { getLiveRange } from '#components/reports/getLiveRange';
 import { LoadingIndicator } from '#components/reports/LoadingIndicator';
@@ -200,7 +201,7 @@ export function GetCardData({
         groupBy={report.groupBy}
         interval={report.interval}
         compact
-        style={{ height: 'auto', flex: 1 }}
+        style={{ height: 'auto', flex: 1, ...cardChartInset }}
         intervalsCount={intervals.length}
         showTrendLines={report.showTrendLines}
         showTooltip={!isNarrowWidth && showTooltip}

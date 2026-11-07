@@ -12,11 +12,13 @@ import { SvgAdd } from '@actual-app/components/icons/v0';
 import { Input } from '@actual-app/components/input';
 import { styles } from '@actual-app/components/styles';
 import { theme } from '@actual-app/components/theme';
+import { radius } from '@actual-app/components/tokens';
 import { send } from '@actual-app/core/platform/client/connection';
 import { css } from '@emotion/css';
 
 import { useCurrentWordRange } from '#hooks/useCurrentWordRange';
 import { useCursorPosition } from '#hooks/useCursorPosition';
+import { useOptionalFeature } from '#hooks/useOptionalFeature';
 import { useTagCSS } from '#hooks/useTagCSS';
 import { useFilteredTags } from '#hooks/useTags';
 
@@ -71,7 +73,8 @@ export function TagAutocomplete({
   }, [filteredTags, currentWord]);
 
   const [isOpen, setIsOpen] = useState(false);
-  const showPopup = isOpen && filteredItems.length > 0;
+  const [isTagsOn] = useOptionalFeature('tags');
+  const showPopup = isOpen && filteredItems.length > 0 && isTagsOn;
 
   const [highlightedIdx, setHighlightedIdx] = useState(0);
   const highlightedId =
@@ -175,10 +178,9 @@ export function TagAutocomplete({
       <Popover
         isNonModal
         placement="bottom start"
-        className={css(styles.darkScrollbar, {
+        className={css(styles.lightScrollbar, styles.popover, {
           background: theme.menuAutoCompleteBackground,
-          borderRadius: 6,
-          boxShadow: '0 4px 6px rgba(0,0,0,0.1)',
+          padding: 4,
           width: inputRef.current?.offsetWidth ?? 100,
         })}
         offset={1}
@@ -194,7 +196,7 @@ export function TagAutocomplete({
           dependencies={[highlightedId]}
           onPointerDown={e => e.preventDefault()}
           style={{
-            borderRadius: 4,
+            borderRadius: radius.sm,
             maxHeight: '150px',
             overflowY: 'auto',
           }}
@@ -216,7 +218,8 @@ export function TagAutocomplete({
                   highlightedId === item.id
                     ? theme.menuAutoCompleteItemTextHover
                     : theme.menuAutoCompleteItemText,
-                padding: '4px 6px 1px 6px',
+                padding: '4px 8px 1px',
+                borderRadius: radius.sm,
               })}
               onMouseMove={() => {
                 const idx = filteredItems.findIndex(
@@ -235,7 +238,7 @@ export function TagAutocomplete({
                     display: 'flex',
                     alignItems: 'center',
                     gap: 5,
-                    color: theme.noticeTextMenu,
+                    color: theme.accentText,
                     paddingBottom: 3,
                   }}
                 >
@@ -243,7 +246,7 @@ export function TagAutocomplete({
                   <span
                     style={{
                       textWrap: 'nowrap',
-                      fontSize: 11,
+                      fontSize: 12,
                     }}
                   >
                     <Trans>Create tag</Trans>

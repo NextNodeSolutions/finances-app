@@ -126,15 +126,15 @@ describe('ComponentName', () => {
 
 - **Use `Trans` component**: Prefer `Trans` component instead of `t()` function when possible
 - **Translate all user-facing strings**: All user-facing strings must be translated
-- **Generate i18n files**: Run `yarn generate:i18n` to generate translation files
+- **Generate i18n files**: Run `pnpm generate:i18n` to generate translation files
 - **ESLint enforcement**: Custom ESLint rules enforce translation usage
 
 ## Code Quality Checklist
 
 Before committing changes, ensure:
 
-- [ ] `yarn typecheck` passes
-- [ ] `yarn lint:fix` has been run
+- [ ] `pnpm typecheck` passes
+- [ ] `pnpm lint:fix` has been run
 - [ ] Relevant tests pass
 - [ ] User-facing strings are translated
 - [ ] Prefer `type` over `interface`

@@ -17,5 +17,7 @@ export function FinancialText<T extends ElementType = typeof Text>({
 }: FinancialTextProps<T>) {
   const Component = as ?? Text;
 
-  return <Component {...props} style={{ ...style, ...styles.tnum }} />;
+  // Callers may swap the face (e.g. the display serif for headline
+  // balances); tabular figures stay on either way.
+  return <Component {...props} style={{ ...styles.tnum, ...style }} />;
 }

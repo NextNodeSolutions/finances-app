@@ -6,4 +6,4 @@ cd "$ROOT/.."
 export PORT=3001
 export REACT_APP_BACKEND_WORKER_HASH="dev"
 
-yarn start --mode=browser
+pnpm start --mode=browser

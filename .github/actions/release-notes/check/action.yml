@@ -7,9 +7,12 @@ runs:
     - uses: actions/setup-node@53b83947a5a98c8d113130e565377fae1a50d02f # v6.3.0
       with:
         node-version: 24
+    - name: Install pnpm
+      shell: bash
+      run: npm install -g "$(node -p "require('./package.json').packageManager")"
     - name: Install dependencies
       shell: bash
-      run: yarn workspaces focus @actual-app/ci-actions
+      run: pnpm install --frozen-lockfile --filter @actual-app/ci-actions
     - name: Check release notes
       env:
         BASE_REF: ${{ github.event.pull_request.base.ref }}

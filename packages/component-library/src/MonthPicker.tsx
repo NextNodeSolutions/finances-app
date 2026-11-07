@@ -82,7 +82,7 @@ export function MonthPicker({
         isOpen={isOpen}
         onOpenChange={setIsOpen}
       >
-        <View style={{ padding: 15, minWidth: 180 }}>
+        <View style={{ padding: 16, minWidth: 180 }}>
           <NavRow
             label={viewYear}
             previousLabel={labels.previous}

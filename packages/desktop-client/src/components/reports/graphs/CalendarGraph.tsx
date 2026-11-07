@@ -5,6 +5,7 @@ import { Trans } from 'react-i18next';
 import { Button } from '@actual-app/components/button';
 import { styles } from '@actual-app/components/styles';
 import { theme } from '@actual-app/components/theme';
+import { radius } from '@actual-app/components/tokens';
 import { Tooltip } from '@actual-app/components/tooltip';
 import { View } from '@actual-app/components/view';
 import type { SyncedPrefs } from '@actual-app/core/types/prefs';
@@ -21,6 +22,8 @@ import { FinancialText } from '#components/FinancialText';
 import { PrivacyFilter } from '#components/PrivacyFilter';
 import { useFormat } from '#hooks/useFormat';
 import { useResizeObserver } from '#hooks/useResizeObserver';
+
+const MAX_DAY_FONT_SIZE = 12;
 
 type CalendarGraphProps = {
   data: {
@@ -53,12 +56,12 @@ export function CalendarGraph({
         ? (parseInt(firstDayOfWeekIdx) as 0 | 1 | 2 | 3 | 4 | 5 | 6)
         : 0,
   });
-  const [fontSize, setFontSize] = useState(14);
+  const [fontSize, setFontSize] = useState(MAX_DAY_FONT_SIZE);
 
   const buttonRef = useResizeObserver(rect => {
     const newValue = Math.floor(rect.height / 2);
-    if (newValue > 14) {
-      setFontSize(14);
+    if (newValue > MAX_DAY_FONT_SIZE) {
+      setFontSize(MAX_DAY_FONT_SIZE);
     } else {
       setFontSize(newValue);
     }
@@ -80,9 +83,8 @@ export function CalendarGraph({
           <View
             key={index}
             style={{
+              ...styles.monoLabel,
               textAlign: 'center',
-              fontSize: 14,
-              fontWeight: 500,
               padding: '3px 0',
               height: '100%',
               width: '100%',
@@ -116,8 +118,8 @@ export function CalendarGraph({
               key={day.date.getTime()}
               content={
                 <View>
-                  <View style={{ marginBottom: 10 }}>
-                    <strong>{formatDate(day.date, 'MMM dd')}</strong>
+                  <View style={{ marginBottom: 6, fontWeight: 600 }}>
+                    {formatDate(day.date, 'MMM dd')}
                   </View>
                   <View style={{ lineHeight: 1.5 }}>
                     <View
@@ -196,8 +198,8 @@ export function CalendarGraph({
               placement="bottom end"
               style={{
                 ...styles.tooltip,
-                lineHeight: 1.5,
-                padding: '6px 10px',
+                fontSize: 12,
+                lineHeight: '18px',
               }}
             >
               <DayButton
@@ -248,6 +250,8 @@ function DayButton({ day, onPress, fontSize, resizeRef }: DayButtonProps) {
       aria-label={formatDate(day.date, 'MMMM d, yyyy')}
       style={{
         borderColor: 'transparent',
+        borderRadius: radius.sm,
+        overflow: 'hidden',
         backgroundColor: theme.calendarCellBackground,
         position: 'relative',
         padding: 'unset',
@@ -264,8 +268,8 @@ function DayButton({ day, onPress, fontSize, resizeRef }: DayButtonProps) {
             position: 'absolute',
             width: '50%',
             height: '100%',
-            background: theme.reportsNumberNegative,
-            opacity: 0.2,
+            background: theme.reportsRed,
+            opacity: 0.12,
             right: 0,
           }}
         />
@@ -276,8 +280,8 @@ function DayButton({ day, onPress, fontSize, resizeRef }: DayButtonProps) {
             position: 'absolute',
             width: '50%',
             height: '100%',
-            background: theme.reportsNumberPositive,
-            opacity: 0.2,
+            background: theme.reportsGreen,
+            opacity: 0.12,
             left: 0,
           }}
         />
@@ -287,11 +291,9 @@ function DayButton({ day, onPress, fontSize, resizeRef }: DayButtonProps) {
           position: 'absolute',
           left: 0,
           bottom: 0,
-          opacity: 0.9,
           height: `${Math.ceil(day.incomeSize)}%`,
-          backgroundColor: theme.reportsNumberPositive,
+          backgroundColor: theme.reportsGreen,
           width: '50%',
-          transition: 'height 0.5s ease-out',
         }}
       />
 
@@ -300,17 +302,17 @@ function DayButton({ day, onPress, fontSize, resizeRef }: DayButtonProps) {
           position: 'absolute',
           right: 0,
           bottom: 0,
-          opacity: 0.9,
           height: `${Math.ceil(day.expenseSize)}%`,
-          backgroundColor: theme.reportsNumberNegative,
+          backgroundColor: theme.reportsRed,
           width: '50%',
-          transition: 'height 0.5s ease-out',
         }}
       />
       <span
         style={{
+          ...styles.tnum,
           fontSize: `${fontSize}px`,
           fontWeight: 500,
+          color: theme.pageText,
           position: 'relative',
         }}
       >

@@ -3,6 +3,7 @@ import type { ComponentProps } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { theme } from '@actual-app/components/theme';
+import { radius } from '@actual-app/components/tokens';
 import { View } from '@actual-app/components/view';
 
 import { ItemHeader } from './ItemHeader';
@@ -24,7 +25,7 @@ export function ReportList<T extends { id: string; name: string }>({
       <View
         style={{
           overflow: 'auto',
-          padding: '5px 0',
+          padding: 4,
           ...(!embedded && { maxHeight: 175 }),
         }}
       >
@@ -39,9 +40,9 @@ export function ReportList<T extends { id: string; name: string }>({
                   highlightedIndex === idx
                     ? theme.menuAutoCompleteBackgroundHover
                     : 'transparent',
-                padding: 4,
+                padding: '5px 10px',
                 paddingLeft: 20,
-                borderRadius: embedded ? 4 : 0,
+                borderRadius: radius.sm,
               }}
               data-highlighted={highlightedIndex === idx || undefined}
             >

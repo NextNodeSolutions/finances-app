@@ -2,6 +2,7 @@ import React from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 
 import { styles } from '@actual-app/components/styles';
+import type { CSSProperties } from '@actual-app/components/styles';
 import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
@@ -26,6 +27,25 @@ type ReportSummaryProps = {
   balanceTypeOp: balanceTypeOpType;
   interval: string;
   intervalsCount: number;
+};
+
+const summaryBlockStyle: CSSProperties = {
+  paddingTop: 14,
+  paddingBottom: 14,
+  borderTop: `1px solid ${theme.hairlineSubtle}`,
+};
+
+const summaryLabelStyle: CSSProperties = {
+  ...styles.monoLabel,
+  color: theme.pageTextSubdued,
+  marginBottom: 6,
+};
+
+const summaryCaptionStyle: CSSProperties = {
+  fontSize: 12,
+  lineHeight: '16px',
+  color: theme.pageTextSubdued,
+  marginTop: 2,
 };
 
 export function ReportSummary({
@@ -55,23 +75,16 @@ export function ReportSummary({
     <View
       style={{
         flexDirection: 'column',
-        marginBottom: 10,
+        marginBottom: 16,
       }}
     >
-      <View
-        style={{
-          backgroundColor: theme.pageBackground,
-          padding: 15,
-          alignItems: 'center',
-          justifyContent: 'center',
-        }}
-      >
+      <View style={{ paddingBottom: 14 }}>
         <Text
           style={{
-            ...styles.largeText,
-            alignItems: 'center',
-            marginBottom: 2,
+            fontSize: 13,
+            lineHeight: '18px',
             fontWeight: 600,
+            color: theme.pageText,
           }}
         >
           {monthUtils.format(startDate, intervalFormat, locale)}
@@ -80,23 +93,8 @@ export function ReportSummary({
             ` ${t('to')} ` + monthUtils.format(endDate, intervalFormat, locale)}
         </Text>
       </View>
-      <View
-        style={{
-          backgroundColor: theme.pageBackground,
-          padding: 15,
-          justifyContent: 'center',
-          alignItems: 'center',
-          marginTop: 10,
-        }}
-      >
-        <Text
-          style={{
-            ...styles.mediumText,
-            alignItems: 'center',
-            marginBottom: 2,
-            fontWeight: 400,
-          }}
-        >
+      <View style={summaryBlockStyle}>
+        <Text style={summaryLabelStyle}>
           {balanceTypeOp === 'totalDebts'
             ? t('TOTAL SPENDING')
             : balanceTypeOp === 'totalAssets'
@@ -107,37 +105,23 @@ export function ReportSummary({
         </Text>
         <FinancialText
           style={{
-            ...styles.veryLargeText,
-            alignItems: 'center',
-            marginBottom: 2,
-            fontWeight: 800,
+            ...styles.display,
+            fontSize: 30,
+            lineHeight: '36px',
+            fontWeight: 300,
+            letterSpacing: '-0.015em',
           }}
         >
           <PrivacyFilter>
             {format(data[balanceTypeOp], 'financial')}
           </PrivacyFilter>
         </FinancialText>
-        <Text style={{ fontWeight: 600 }}>
+        <Text style={summaryCaptionStyle}>
           <Trans>For this time period</Trans>
         </Text>
       </View>
-      <View
-        style={{
-          backgroundColor: theme.pageBackground,
-          padding: 15,
-          justifyContent: 'center',
-          alignItems: 'center',
-          marginTop: 10,
-        }}
-      >
-        <Text
-          style={{
-            ...styles.mediumText,
-            alignItems: 'center',
-            marginBottom: 2,
-            fontWeight: 400,
-          }}
-        >
+      <View style={summaryBlockStyle}>
+        <Text style={summaryLabelStyle}>
           {balanceTypeOp === 'totalDebts'
             ? t('AVERAGE SPENDING')
             : balanceTypeOp === 'totalAssets'
@@ -147,18 +131,13 @@ export function ReportSummary({
                 : t('AVERAGE NET')}
         </Text>
         <FinancialText
-          style={{
-            ...styles.veryLargeText,
-            alignItems: 'center',
-            marginBottom: 2,
-            fontWeight: 800,
-          }}
+          style={{ fontSize: 18, lineHeight: '26px', fontWeight: 500 }}
         >
           <PrivacyFilter>
             {!isNaN(average) && format(average, 'financial')}
           </PrivacyFilter>
         </FinancialText>
-        <Text style={{ fontWeight: 600 }}>
+        <Text style={summaryCaptionStyle}>
           <Trans>
             Per{' '}
             {{

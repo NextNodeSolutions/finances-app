@@ -23,12 +23,14 @@ import {
 } from '#accounts';
 import { markAccountRead } from '#accounts/accountsSlice';
 import * as reconciliation from '#accounts/reconciliation';
+import { sync } from '#app/appSlice';
 import { ReconcilingBanner } from '#components/mobile/accounts/ReconcilingBanner';
 import { TransactionListWithBalances } from '#components/mobile/transactions/TransactionListWithBalances';
 import { useAccountPreviewTransactions } from '#hooks/useAccountPreviewTransactions';
 import { SchedulesProvider } from '#hooks/useCachedSchedules';
 import { useDateFormat } from '#hooks/useDateFormat';
 import { useNavigate } from '#hooks/useNavigate';
+import { useOptionalFeature } from '#hooks/useOptionalFeature';
 import { getSchedulesQuery } from '#hooks/useSchedules';
 import { useSheetValue } from '#hooks/useSheetValue';
 import { useSyncedPref } from '#hooks/useSyncedPref';
@@ -156,12 +158,19 @@ function TransactionListWithPreviews({
     accountId: account?.id,
   });
 
+  // Pull to refresh downloads bank transactions only with bank sync on;
+  // otherwise it just syncs the budget.
+  const [isBankSyncOn] = useOptionalFeature('bankSync');
   const syncAndDownload = useSyncAndDownloadMutation();
   const onRefresh = useCallback(() => {
+    if (!isBankSyncOn) {
+      void dispatch(sync());
+      return;
+    }
     if (account.id) {
       syncAndDownload.mutate({ id: account.id });
     }
-  }, [account.id, syncAndDownload]);
+  }, [account.id, dispatch, isBankSyncOn, syncAndDownload]);
 
   const allBalances = useMemo(
     () =>
@@ -233,6 +242,16 @@ function TransactionListWithPreviews({
   const { mutate: updateAccount } = useUpdateAccountMutation();
   const { onBatchEdit } = useTransactionBatchActions();
 
+  const onExitReconciling = useCallback(() => {
+    setSearchParams(
+      prev => {
+        prev.delete('reconcile');
+        return prev;
+      },
+      { replace: true },
+    );
+  }, [setSearchParams]);
+
   const onDoneReconciling = useCallback(async () => {
     await reconciliation.finishReconciliation(account.id, reconcileAmount);
 
@@ -243,14 +262,8 @@ function TransactionListWithPreviews({
       },
     });
 
-    setSearchParams(
-      prev => {
-        prev.delete('reconcile');
-        return prev;
-      },
-      { replace: true },
-    );
-  }, [account, reconcileAmount, setSearchParams, updateAccount]);
+    onExitReconciling();
+  }, [account, onExitReconciling, reconcileAmount, updateAccount]);
 
   const onCreateReconciliationTransaction = useCallback(
     async (targetDiff: number) => {
@@ -312,6 +325,7 @@ function TransactionListWithPreviews({
           account={account}
           targetBalance={reconcileAmount}
           onDone={onDoneReconciling}
+          onExit={onExitReconciling}
           onCreateTransaction={onCreateReconciliationTransaction}
         />
       )}

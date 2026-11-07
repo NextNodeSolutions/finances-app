@@ -6,6 +6,8 @@ import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import { spacing } from '@actual-app/components/tokens';
 
+const ROW_MIN_HEIGHT = 48;
+
 type MobileSheetRowProps = {
   label: ReactNode;
   onPress: () => void;
@@ -23,12 +25,13 @@ export function MobileSheetRow({
       onPress={onPress}
       style={{
         ...styles.mediumText,
+        fontWeight: 400,
         width: '100%',
-        minHeight: styles.mobileMinHeight,
+        minHeight: ROW_MIN_HEIGHT,
         justifyContent: 'flex-start',
-        padding: `${spacing.sm}px ${spacing.lg}px`,
+        padding: `${spacing.sm}px ${spacing.lg + 4}px`,
         borderRadius: 0,
-        borderTop: `1px solid ${theme.tooltipBorder}`,
+        borderTop: `1px solid ${theme.hairlineSubtle}`,
         color: isDestructive ? theme.errorText : theme.pageText,
       }}
     >

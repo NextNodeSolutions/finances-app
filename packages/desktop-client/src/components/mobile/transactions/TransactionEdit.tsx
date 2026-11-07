@@ -32,6 +32,7 @@ import {
 import { styles } from '@actual-app/components/styles';
 import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
+import { elevation, radius } from '@actual-app/components/tokens';
 import { View } from '@actual-app/components/view';
 import { send } from '@actual-app/core/platform/client/connection';
 import { DEFAULT_MAX_DISTANCE_METERS } from '@actual-app/core/shared/constants';
@@ -80,7 +81,11 @@ import {
   TapField,
   ToggleField,
 } from '#components/mobile/MobileForms';
-import { getPrettyPayee } from '#components/mobile/utils';
+import {
+  getPrettyPayee,
+  mobileFooterButtonStyle,
+  mobileFormFooterStyle,
+} from '#components/mobile/utils';
 import { MobilePageHeader, Page } from '#components/Page';
 import {
   propagateRuleChangeToSubtransactions,
@@ -98,6 +103,7 @@ import { useLocalPref } from '#hooks/useLocalPref';
 import { useLocationPermission } from '#hooks/useLocationPermission';
 import { useNavigate } from '#hooks/useNavigate';
 import { useNearbyPayees } from '#hooks/useNearbyPayees';
+import { useOptionalFeature } from '#hooks/useOptionalFeature';
 import { usePayees } from '#hooks/usePayees';
 import {
   SingleActiveEditFormProvider,
@@ -184,6 +190,18 @@ export function lookupName(items: CategoryEntity[], id?: CategoryEntity['id']) {
   return items.find(item => item.id === id)?.name;
 }
 
+const locationButtonStyle = {
+  backgroundColor: theme.buttonNormalBackground,
+  border: `1px solid ${theme.buttonNormalBorder}`,
+  color: theme.buttonNormalText,
+  fontSize: 11.5,
+  fontWeight: 500,
+  padding: '3px 8px',
+  borderRadius: radius.sm,
+  height: 'auto',
+  minHeight: 'auto',
+};
+
 const dropdownChevron = (
   <SvgCheveronDown
     width={14}
@@ -191,6 +209,25 @@ const dropdownChevron = (
     style={{ color: theme.pageTextSubdued, marginRight: 8 }}
   />
 );
+
+// Schedule status of a previewed transaction, set as a soft tinted pill.
+const STATUS_TONES = new Map<
+  string,
+  { color: string; backgroundColor: string }
+>([
+  [
+    'missed',
+    { color: theme.errorText, backgroundColor: theme.errorBackground },
+  ],
+  [
+    'due',
+    { color: theme.warningText, backgroundColor: theme.warningBackground },
+  ],
+  [
+    'upcoming',
+    { color: theme.upcomingText, backgroundColor: theme.upcomingBackground },
+  ],
+]);
 
 export function Status({
   status,
@@ -201,28 +238,22 @@ export function Status({
 }) {
   const { t } = useTranslation();
 
-  let color: string | undefined;
-
-  switch (status) {
-    case 'missed':
-      color = theme.errorText;
-      break;
-    case 'due':
-      color = theme.warningText;
-      break;
-    case 'upcoming':
-      color = theme.tableHeaderText;
-      break;
-    default:
-      return null;
+  const tone = status === undefined ? undefined : STATUS_TONES.get(status);
+  if (status === undefined || !tone) {
+    return null;
   }
 
   return (
     <Text
       style={{
+        ...tone,
+        alignSelf: 'flex-start',
+        marginTop: 3,
+        padding: '0 6px',
+        borderRadius: radius.sm,
         fontSize: 11,
-        color,
-        fontStyle: 'italic',
+        lineHeight: '16px',
+        fontWeight: 500,
         textAlign: 'left',
       }}
     >
@@ -282,21 +313,12 @@ function Footer({
   return (
     <View
       data-testid="transaction-form-footer"
-      style={{
-        paddingLeft: styles.mobileEditingPadding,
-        paddingRight: styles.mobileEditingPadding,
-        paddingTop: 10,
-        paddingBottom: 'calc(10px + env(safe-area-inset-bottom))',
-        backgroundColor: theme.tableHeaderBackground,
-        borderTopWidth: 1,
-        borderColor: theme.tableBorder,
-        gap: 8,
-      }}
+      style={{ ...mobileFormFooterStyle, gap: 8 }}
     >
       {isFuture && (
         <Button
           variant="normal"
-          style={{ height: styles.mobileMinHeight }}
+          style={mobileFooterButtonStyle}
           isDisabled={!!editingField}
           onPress={onSchedule}
         >
@@ -314,7 +336,7 @@ function Footer({
       {transaction.error?.type === 'SplitTransactionError' ? (
         <Button
           variant="primary"
-          style={{ height: styles.mobileMinHeight }}
+          style={mobileFooterButtonStyle}
           isDisabled={!!editingField}
           onPress={onClickRemainingSplit}
         >
@@ -354,7 +376,7 @@ function Footer({
       ) : !transaction.account ? (
         <Button
           variant="primary"
-          style={{ height: styles.mobileMinHeight }}
+          style={mobileFooterButtonStyle}
           isDisabled={!!editingField}
           onPress={() => onEditField(transaction.id, 'account')}
         >
@@ -371,7 +393,7 @@ function Footer({
       ) : isAdding ? (
         <Button
           variant="primary"
-          style={{ height: styles.mobileMinHeight }}
+          style={mobileFooterButtonStyle}
           isDisabled={!!editingField}
           onPress={onAdd}
         >
@@ -388,7 +410,7 @@ function Footer({
       ) : (
         <Button
           variant="primary"
-          style={{ height: styles.mobileMinHeight }}
+          style={mobileFooterButtonStyle}
           isDisabled={!!editingField}
           onPress={onSave}
         >
@@ -456,6 +478,8 @@ const ChildTransactionEdit = forwardRef<
     const { editingField, onRequestActiveEdit, onClearActiveEdit } =
       useSingleActiveEditForm()!;
     const noteRef = useRef<HTMLInputElement | null>(null);
+    // Tag entry (the # button and its suggestions) exists only with tags on.
+    const [isTagsOn] = useOptionalFeature('tags');
 
     const prettyPayee = getPrettyPayee({
       t,
@@ -467,15 +491,17 @@ const ChildTransactionEdit = forwardRef<
       <View
         innerRef={ref}
         style={{
-          backgroundColor: theme.tableBackground,
+          backgroundColor: theme.cardBackground,
           borderColor:
             transaction.amount === 0
               ? theme.tableBorderSelected
-              : theme.tableBorder,
+              : theme.hairline,
           borderWidth: '1px',
-          borderRadius: '5px',
-          padding: '5px',
-          margin: '10px',
+          borderStyle: 'solid',
+          borderRadius: radius.lg,
+          boxShadow: elevation.card,
+          padding: '0 0 4px',
+          margin: '16px 12px 0',
         }}
       >
         <View style={{ flexDirection: 'row' }}>
@@ -500,7 +526,7 @@ const ChildTransactionEdit = forwardRef<
           </View>
           <View
             style={{
-              flexBasis: '25%',
+              flexBasis: '32%',
             }}
           >
             <FieldLabel title={t('Amount')} style={{ padding: 0 }} />
@@ -557,7 +583,9 @@ const ChildTransactionEdit = forwardRef<
           <InputField
             ref={noteRef}
             iconStart={<SvgNotesPaper width={17} height={17} />}
-            iconEnd={<NoteInsertHashButton inputRef={noteRef} />}
+            iconEnd={
+              isTagsOn ? <NoteInsertHashButton inputRef={noteRef} /> : undefined
+            }
             placeholder={t('Add a note (optional)')}
             disabled={
               !!editingField &&
@@ -569,7 +597,7 @@ const ChildTransactionEdit = forwardRef<
             }
             onUpdate={value => onUpdate(transaction, 'notes', value)}
           />
-          <NoteTagAutocomplete inputRef={noteRef} />
+          {isTagsOn && <NoteTagAutocomplete inputRef={noteRef} />}
         </View>
 
         <View style={{ alignItems: 'center' }}>
@@ -667,6 +695,8 @@ const TransactionEditInner = memo<TransactionEditInnerProps>(
     const { data: { grouped: categoryGroups } = { grouped: [] } } =
       useCategories();
     const noteRef = useRef<HTMLInputElement | null>(null);
+    // Tag entry (the # button and its suggestions) exists only with tags on.
+    const [isTagsOn] = useOptionalFeature('tags');
 
     useEffect(() => {
       if (window.history.length === 1) {
@@ -1236,14 +1266,14 @@ const TransactionEditInner = memo<TransactionEditInnerProps>(
       >
         <View
           data-testid="transaction-form"
-          style={{ flexShrink: 0, marginTop: 20, marginBottom: 20 }}
+          style={{ flexShrink: 0, marginTop: 28, marginBottom: 24 }}
         >
           <View
             style={{
               alignItems: 'center',
             }}
           >
-            <FieldLabel title={t('Amount')} flush style={{ marginBottom: 0 }} />
+            <FieldLabel title={t('Amount')} flush style={{ marginBottom: 6 }} />
             <AmountInput
               value={transaction.amount}
               negate
@@ -1259,6 +1289,54 @@ const TransactionEditInner = memo<TransactionEditInnerProps>(
               onBlur={() => onClearActiveEdit()}
               onChange={onTotalAmountUpdate}
               variant="large"
+            />
+          </View>
+
+          {/* Desktop order under the amount headline: account, date,
+              payee, category, notes, cleared, then the split editor. */}
+          <View>
+            <FieldLabel title={t('Account')} />
+            <TapField
+              icon={<SvgWallet width={17} height={17} />}
+              placeholder={t('Select an account')}
+              rightContent={dropdownChevron}
+              isDisabled={
+                !!editingField &&
+                editingField !== getFieldName(transaction.id, 'account')
+              }
+              value={account?.name}
+              onPress={() => onEditFieldInner(transaction.id, 'account')}
+              data-testid="account-field"
+            />
+          </View>
+
+          <View>
+            <FieldLabel title={t('Date')} />
+            <InputField
+              type="date"
+              iconStart={<SvgCalendar width={17} height={17} />}
+              disabled={
+                !!editingField &&
+                editingField !== getFieldName(transaction.id, 'date')
+              }
+              required
+              style={{
+                color: theme.tableText,
+                minWidth: '150px',
+                appearance: 'none',
+              }}
+              defaultValue={dateDefaultValue}
+              onBlur={() => onClearActiveEdit()}
+              onFocus={() =>
+                onRequestActiveEdit(getFieldName(transaction.id, 'date'))
+              }
+              onChange={event =>
+                onUpdateInner(
+                  transaction,
+                  'date',
+                  formatDate(parseISO(event.target.value), dateFormat),
+                )
+              }
             />
           </View>
 
@@ -1294,16 +1372,7 @@ const TransactionEditInner = memo<TransactionEditInnerProps>(
                   <Button
                     variant="bare"
                     onPress={onSaveLocation}
-                    style={{
-                      backgroundColor: theme.buttonNormalBackground,
-                      border: `1px solid ${theme.buttonNormalBorder}`,
-                      color: theme.buttonNormalText,
-                      fontSize: '11px',
-                      padding: '4px 8px',
-                      borderRadius: 3,
-                      height: 'auto',
-                      minHeight: 'auto',
-                    }}
+                    style={locationButtonStyle}
                   >
                     <Trans>Save</Trans>
                     <SvgLocation
@@ -1316,16 +1385,7 @@ const TransactionEditInner = memo<TransactionEditInnerProps>(
                   <Button
                     variant="bare"
                     onPress={onSelectNearestPayee}
-                    style={{
-                      backgroundColor: theme.buttonNormalBackground,
-                      border: `1px solid ${theme.buttonNormalBorder}`,
-                      color: theme.buttonNormalText,
-                      fontSize: '11px',
-                      padding: '4px 8px',
-                      borderRadius: 3,
-                      height: 'auto',
-                      minHeight: 'auto',
-                    }}
+                    style={locationButtonStyle}
                   >
                     <Trans>Nearby</Trans>
                     <SvgLocation
@@ -1338,16 +1398,7 @@ const TransactionEditInner = memo<TransactionEditInnerProps>(
                   <Button
                     variant="bare"
                     onPress={onRequestLocation}
-                    style={{
-                      backgroundColor: theme.buttonNormalBackground,
-                      border: `1px solid ${theme.buttonNormalBorder}`,
-                      color: theme.buttonNormalText,
-                      fontSize: '11px',
-                      padding: '4px 8px',
-                      borderRadius: 3,
-                      height: 'auto',
-                      minHeight: 'auto',
-                    }}
+                    style={locationButtonStyle}
                   >
                     <Trans>Request Location</Trans>
                     <SvgLocation
@@ -1390,6 +1441,71 @@ const TransactionEditInner = memo<TransactionEditInnerProps>(
               />
             </View>
           )}
+
+          <View>
+            <FieldLabel title={t('Notes')} />
+            <InputField
+              ref={noteRef}
+              iconStart={<SvgNotesPaper width={17} height={17} />}
+              iconEnd={
+                isTagsOn ? (
+                  <NoteInsertHashButton inputRef={noteRef} />
+                ) : undefined
+              }
+              placeholder={t('Add a note (optional)')}
+              disabled={
+                !!editingField &&
+                editingField !== getFieldName(transaction.id, 'notes')
+              }
+              defaultValue={transaction.notes}
+              onFocus={() => {
+                onRequestActiveEdit(getFieldName(transaction.id, 'notes'));
+              }}
+              onBlur={() => onClearActiveEdit()}
+              onChange={event =>
+                onUpdateInner(transaction, 'notes', event.target.value)
+              }
+            />
+            {isTagsOn && <NoteTagAutocomplete inputRef={noteRef} />}
+          </View>
+
+          <View
+            style={{
+              flexDirection: 'row',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              marginTop: 20,
+              paddingRight: styles.mobileEditingPadding,
+            }}
+          >
+            {transaction.reconciled ? (
+              <>
+                <FieldLabel
+                  title={t('Reconciled')}
+                  flush
+                  style={{ marginBottom: 0 }}
+                />
+                <ToggleField
+                  id="reconciled"
+                  isOn
+                  onToggle={() => onUnlockReconciledInner(transaction)}
+                />
+              </>
+            ) : (
+              <>
+                <FieldLabel
+                  title={t('Cleared')}
+                  flush
+                  style={{ marginBottom: 0 }}
+                />
+                <ToggleField
+                  id="cleared"
+                  isOn={!!transaction.cleared}
+                  onToggle={on => onUpdateInner(transaction, 'cleared', on)}
+                />
+              </>
+            )}
+          </View>
 
           {childTransactions.map((childTrans, i, arr) => (
             <ChildTransactionEdit
@@ -1458,96 +1574,6 @@ const TransactionEditInner = memo<TransactionEditInnerProps>(
               </Button>
             </View>
           )}
-
-          <View>
-            <FieldLabel title={t('Account')} />
-            <TapField
-              icon={<SvgWallet width={17} height={17} />}
-              placeholder={t('Select an account')}
-              rightContent={dropdownChevron}
-              isDisabled={
-                !!editingField &&
-                editingField !== getFieldName(transaction.id, 'account')
-              }
-              value={account?.name}
-              onPress={() => onEditFieldInner(transaction.id, 'account')}
-              data-testid="account-field"
-            />
-          </View>
-
-          <View style={{ flexDirection: 'row' }}>
-            <View style={{ flex: 1 }}>
-              <FieldLabel title={t('Date')} />
-              <InputField
-                type="date"
-                iconStart={<SvgCalendar width={17} height={17} />}
-                disabled={
-                  !!editingField &&
-                  editingField !== getFieldName(transaction.id, 'date')
-                }
-                required
-                style={{
-                  color: theme.tableText,
-                  minWidth: '150px',
-                  appearance: 'none',
-                }}
-                defaultValue={dateDefaultValue}
-                onBlur={() => onClearActiveEdit()}
-                onFocus={() =>
-                  onRequestActiveEdit(getFieldName(transaction.id, 'date'))
-                }
-                onChange={event =>
-                  onUpdateInner(
-                    transaction,
-                    'date',
-                    formatDate(parseISO(event.target.value), dateFormat),
-                  )
-                }
-              />
-            </View>
-            {transaction.reconciled ? (
-              <View style={{ alignItems: 'center' }}>
-                <FieldLabel title={t('Reconciled')} />
-                <ToggleField
-                  id="reconciled"
-                  isOn
-                  onToggle={() => onUnlockReconciledInner(transaction)}
-                />
-              </View>
-            ) : (
-              <View style={{ alignItems: 'center' }}>
-                <FieldLabel title={t('Cleared')} />
-                <ToggleField
-                  id="cleared"
-                  isOn={!!transaction.cleared}
-                  onToggle={on => onUpdateInner(transaction, 'cleared', on)}
-                />
-              </View>
-            )}
-          </View>
-
-          <View>
-            <FieldLabel title={t('Notes')} />
-            <InputField
-              ref={noteRef}
-              iconStart={<SvgNotesPaper width={17} height={17} />}
-              iconEnd={<NoteInsertHashButton inputRef={noteRef} />}
-              placeholder={t('Add a note (optional)')}
-              disabled={
-                !!editingField &&
-                editingField !== getFieldName(transaction.id, 'notes')
-              }
-              defaultValue={transaction.notes}
-              onFocus={() => {
-                onRequestActiveEdit(getFieldName(transaction.id, 'notes'));
-              }}
-              onBlur={() => onClearActiveEdit()}
-              onChange={event =>
-                onUpdateInner(transaction, 'notes', event.target.value)
-              }
-            />
-            <NoteTagAutocomplete inputRef={noteRef} />
-          </View>
 
           {!isAdding && (
             <View style={{ alignItems: 'center' }}>
@@ -2178,7 +2204,7 @@ function FillRemainingButton({
   return (
     <Button
       variant="primary"
-      style={{ height: styles.mobileMinHeight }}
+      style={mobileFooterButtonStyle}
       onPress={onPress}
       isDisabled={remaining === 0}
     >

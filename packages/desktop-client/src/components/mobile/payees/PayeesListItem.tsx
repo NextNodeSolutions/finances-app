@@ -6,6 +6,7 @@ import { Button } from '@actual-app/components/button';
 import { SvgBookmark } from '@actual-app/components/icons/v1';
 import { SpaceBetween } from '@actual-app/components/space-between';
 import { theme } from '@actual-app/components/theme';
+import { radius } from '@actual-app/components/tokens';
 import { View } from '@actual-app/components/view';
 import type { PayeeEntity } from '@actual-app/core/types/models';
 import type { WithRequired } from '@actual-app/core/types/util';
@@ -99,6 +100,7 @@ export function PayeesListItem({
             style={{
               fontSize: 15,
               fontWeight: 500,
+              lineHeight: '20px',
               color: payee.transfer_acct
                 ? theme.pageTextSubdued
                 : theme.pageText,
@@ -115,19 +117,20 @@ export function PayeesListItem({
 
           <span
             style={{
-              borderRadius: 4,
-              padding: '3px 6px',
-              backgroundColor: theme.noticeBackground,
-              border: '1px solid ' + theme.noticeBackground,
-              color: theme.noticeTextDark,
-              fontSize: 12,
+              borderRadius: radius.sm,
+              padding: '2px 8px',
+              backgroundColor: theme.trayBackground,
+              color: ruleCount > 0 ? theme.pageText : theme.pageTextLight,
+              fontSize: 11.5,
+              fontWeight: 500,
+              lineHeight: '16px',
               flexShrink: 0,
             }}
           >
             <PayeeRuleCountLabel
               count={ruleCount}
               isLoading={isRuleCountLoading}
-              style={{ fontSize: 12 }}
+              style={{ fontSize: 11.5 }}
             />
           </span>
         </SpaceBetween>

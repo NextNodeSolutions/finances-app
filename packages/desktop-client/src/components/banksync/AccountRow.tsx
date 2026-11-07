@@ -1,7 +1,6 @@
 import React, { memo } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 
-import { Button } from '@actual-app/components/button';
 import { styles } from '@actual-app/components/styles';
 import { theme } from '@actual-app/components/theme';
 import { Tooltip } from '@actual-app/components/tooltip';
@@ -10,6 +9,7 @@ import type { AccountEntity } from '@actual-app/core/types/models';
 import { format as formatDate } from 'date-fns';
 import type { Locale } from 'date-fns';
 
+import { QuietRowActionButton } from '#components/settings/QuietRowActionButton';
 import { Cell, Row } from '#components/table';
 
 type AccountRowProps = {
@@ -54,6 +54,7 @@ export const AccountRow = memo(
             : theme.tableBackground,
         }}
         collapsed
+        data-quiet-actions
         onMouseEnter={() => onHover && onHover(account.id)}
         onMouseLeave={() => onHover && onHover(null)}
       >
@@ -61,7 +62,7 @@ export const AccountRow = memo(
           name="accountName"
           width={250}
           plain
-          style={{ color: theme.tableText, padding: '10px' }}
+          style={{ color: theme.tableText, padding: '10px 15px' }}
         >
           {potentiallyTruncatedAccountName}
         </Cell>
@@ -70,7 +71,7 @@ export const AccountRow = memo(
           name="bankName"
           width="flex"
           plain
-          style={{ color: theme.tableText, padding: '10px' }}
+          style={{ color: theme.tableText, padding: '10px 15px' }}
         >
           {bankName}
         </Cell>
@@ -89,7 +90,7 @@ export const AccountRow = memo(
               plain
               style={{
                 color: theme.tableText,
-                padding: '11px',
+                padding: '11px 15px',
                 textDecoration: 'underline',
                 textDecorationStyle: 'dashed',
                 textDecorationColor: theme.pageTextSubdued,
@@ -106,15 +107,15 @@ export const AccountRow = memo(
 
         {account.account_sync_source ? (
           <Cell name="edit" plain style={{ paddingRight: '10px' }}>
-            <Button onPress={() => onAction(account, 'edit')}>
+            <QuietRowActionButton onPress={() => onAction(account, 'edit')}>
               <Trans>Edit</Trans>
-            </Button>
+            </QuietRowActionButton>
           </Cell>
         ) : (
           <Cell name="link" plain style={{ paddingRight: '10px' }}>
-            <Button onPress={() => onAction(account, 'link')}>
+            <QuietRowActionButton onPress={() => onAction(account, 'link')}>
               <Trans>Link account</Trans>
-            </Button>
+            </QuietRowActionButton>
           </Cell>
         )}
       </Row>

@@ -1,9 +1,12 @@
 import { useTranslation } from 'react-i18next';
 
+import { styles } from '@actual-app/components/styles';
 import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import { radius, spacing } from '@actual-app/components/tokens';
 import { View } from '@actual-app/components/view';
+
+import { useOptionalFeature } from '#hooks/useOptionalFeature';
 
 type SyncErrorRollupProps = {
   count: number;
@@ -11,8 +14,9 @@ type SyncErrorRollupProps = {
 
 export function SyncErrorRollup({ count }: SyncErrorRollupProps) {
   const { t } = useTranslation();
+  const [isBankSyncOn] = useOptionalFeature('bankSync');
 
-  if (count === 0) {
+  if (count === 0 || !isBankSyncOn) {
     return null;
   }
 
@@ -27,9 +31,10 @@ export function SyncErrorRollup({ count }: SyncErrorRollupProps) {
         flexDirection: 'row',
         alignItems: 'center',
         gap: spacing.xs,
-        paddingInline: spacing.xs,
+        height: 16,
+        paddingInline: 6,
         borderRadius: radius.pill,
-        backgroundColor: theme.sidebarBackgroundFailedSubtle,
+        backgroundColor: theme.signalSubtle,
         flexShrink: 0,
       }}
     >
@@ -38,14 +43,15 @@ export function SyncErrorRollup({ count }: SyncErrorRollupProps) {
           width: 5,
           height: 5,
           borderRadius: radius.pill,
-          backgroundColor: theme.sidebarItemBackgroundFailed,
+          backgroundColor: theme.signal,
         }}
       />
       <Text
         style={{
-          fontSize: 10,
-          fontWeight: 700,
-          color: theme.sidebarTextFailed,
+          ...styles.tnum,
+          fontSize: 10.5,
+          fontWeight: 500,
+          color: theme.signalText,
         }}
       >
         {count}

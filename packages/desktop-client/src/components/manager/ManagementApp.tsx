@@ -4,7 +4,7 @@ import { Navigate, Route, Routes } from 'react-router';
 
 import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
-import { tokens } from '@actual-app/components/tokens';
+import { motion, tokens } from '@actual-app/components/tokens';
 import { View } from '@actual-app/components/view';
 
 import { setAppState } from '#app/appSlice';
@@ -41,16 +41,18 @@ function Version() {
   return (
     <Text
       style={{
-        color: theme.pageTextSubdued,
+        fontSize: 11.5,
+        color: theme.pageTextLight,
+        transition: `color ${motion.base} ${motion.ease}`,
         ':hover': { color: theme.pageText },
-        margin: 15,
-        marginLeft: 17,
+        margin: 16,
+        marginLeft: 20,
         [`@media (min-width: ${tokens.breakpoint_small})`]: {
           position: 'absolute',
           bottom: 0,
           right: 0,
-          marginLeft: 15,
-          marginRight: 17,
+          marginLeft: 16,
+          marginRight: 20,
           zIndex: 5001,
         },
       }}
@@ -64,7 +66,8 @@ function Version() {
 }
 
 export function ManagementApp() {
-  useMetaThemeColor(theme.mobileConfigServerViewTheme);
+  // The browser chrome matches the porcelain canvas the screens sit on.
+  useMetaThemeColor(theme.pageBackground);
 
   const files = useSelector(state => state.budgetfiles.allFiles);
   const isLoading = useSelector(state => state.app.loadingText !== null);
@@ -123,7 +126,8 @@ export function ManagementApp() {
             bottom: 0,
             justifyContent: 'center',
             left: 0,
-            padding: 20,
+            // Clear the account control above and the server line below.
+            padding: '56px 20px',
             position: 'absolute',
             right: 0,
             top: 0,
@@ -165,21 +169,13 @@ export function ManagementApp() {
                   position: 'absolute',
                   top: 0,
                   right: 0,
-                  padding: '6px 10px',
+                  padding: '10px 14px',
                   zIndex: 4000,
                 }}
               >
                 <Routes>
                   <Route path="/config-server" element={null} />
-                  <Route
-                    path="/*"
-                    element={
-                      <LoggedInUser
-                        hideIfNoServer
-                        style={{ padding: '4px 7px' }}
-                      />
-                    }
-                  />
+                  <Route path="/*" element={<LoggedInUser hideIfNoServer />} />
                 </Routes>
               </View>
             </>

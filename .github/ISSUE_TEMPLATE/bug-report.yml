@@ -79,7 +79,7 @@ body:
       label: Where are you hosting Actual?
       description: Where are you running your instance of Actual from?
       options:
-        - Locally via Yarn
+        - Locally via pnpm
         - Docker
         - Fly.io
         - Pikapods

@@ -1,7 +1,11 @@
 import React, { memo, useMemo, useState } from 'react';
+import { Trans } from 'react-i18next';
 
+import { Button } from '@actual-app/components/button';
 import { styles } from '@actual-app/components/styles';
+import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
+import { elevation, radius } from '@actual-app/components/tokens';
 import { View } from '@actual-app/components/view';
 import type {
   CategoryEntity,
@@ -22,7 +26,14 @@ import { SidebarCategory } from './SidebarCategory';
 import { SidebarGroup } from './SidebarGroup';
 import { separateGroups } from './util';
 
+/** The inline row for a group or category being added, if any. */
+export type NewBudgetItem =
+  | { type: 'group' }
+  | { type: 'category'; groupId: CategoryGroupEntity['id'] }
+  | null;
+
 type BudgetItem =
+  | { type: 'empty' }
   | { type: 'new-group' }
   | { type: 'new-category' }
   | { type: 'expense-group'; value: CategoryGroupEntity }
@@ -34,6 +45,27 @@ type BudgetItem =
   | { type: 'income-separator' }
   | { type: 'income-group'; value: CategoryGroupEntity }
   | { type: 'income-category'; value: CategoryEntity };
+
+// Category rows take a translucent wash on hover so the tint reads over
+// the current and other-month columns alike. It steps aside while a cell
+// is being edited.
+const rowHoverTintStyle = {
+  '&:hover:not(:focus-within)::after': {
+    content: '""',
+    position: 'absolute',
+    top: 0,
+    right: 0,
+    bottom: 0,
+    left: 0,
+    zIndex: 1,
+    pointerEvents: 'none',
+    backgroundColor: theme.buttonBareBackgroundHover,
+  },
+};
+
+function isHoverTintedRow(type: BudgetItem['type']) {
+  return type === 'expense-category' || type === 'income-category';
+}
 
 type LocalDragState =
   | DragState<CategoryEntity>
@@ -58,6 +90,11 @@ type BudgetCategoriesProps = {
   ) => void;
   onReorderCategory: OnDropCallback;
   onReorderGroup: OnDropCallback;
+  newItem: NewBudgetItem;
+  onNewItemChange: (item: NewBudgetItem) => void;
+  /** Only these categories show (the Over budget filter); all when null. */
+  visibleCategoryIds: ReadonlySet<CategoryEntity['id']> | null;
+  onOpenDetails: (id: CategoryEntity['id']) => void;
 };
 
 export const BudgetCategories = memo<BudgetCategoriesProps>(
@@ -76,6 +113,10 @@ export const BudgetCategories = memo<BudgetCategoriesProps>(
     onSortCategories,
     onReorderCategory,
     onReorderGroup,
+    newItem,
+    onNewItemChange,
+    visibleCategoryIds,
+    onOpenDetails,
   }) => {
     const [collapsedGroupIds = [], setCollapsedGroupIdsPref] =
       useLocalPref('budget.collapsed');
@@ -84,12 +125,19 @@ export const BudgetCategories = memo<BudgetCategoriesProps>(
       setCollapsedGroupIdsPref(value);
     }
 
-    const [isAddingGroup, setIsAddingGroup] = useState(false);
-    const [newCategoryForGroup, setNewCategoryForGroup] = useState<
-      string | null
-    >(null);
+    const isAddingGroup = newItem?.type === 'group';
+    const newCategoryForGroup =
+      newItem?.type === 'category' ? newItem.groupId : null;
     const items: BudgetItem[] = useMemo(() => {
       const [expenseGroups, incomeGroup] = separateGroups(categoryGroups);
+
+      if (visibleCategoryIds) {
+        return getFilteredItems(
+          expenseGroups,
+          visibleCategoryIds,
+          showHiddenCategories,
+        );
+      }
 
       let items: BudgetItem[] = Array.prototype.concat.apply(
         [],
@@ -126,6 +174,8 @@ export const BudgetCategories = memo<BudgetCategoriesProps>(
 
       if (isAddingGroup) {
         items.push({ type: 'new-group' });
+      } else if (expenseGroups.length === 0) {
+        items.push({ type: 'empty' });
       }
 
       if (incomeGroup) {
@@ -160,6 +210,7 @@ export const BudgetCategories = memo<BudgetCategoriesProps>(
       newCategoryForGroup,
       isAddingGroup,
       showHiddenCategories,
+      visibleCategoryIds,
     ]);
 
     const [dragState, setDragState] = useState<LocalDragState>(null);
@@ -204,11 +255,11 @@ export const BudgetCategories = memo<BudgetCategoriesProps>(
     }
 
     function onShowNewGroup() {
-      setIsAddingGroup(true);
+      onNewItemChange({ type: 'group' });
     }
 
     function onHideNewGroup() {
-      setIsAddingGroup(false);
+      onNewItemChange(null);
     }
 
     function _onSaveGroup(group: CategoryGroupEntity) {
@@ -220,11 +271,11 @@ export const BudgetCategories = memo<BudgetCategoriesProps>(
 
     function onShowNewCategory(groupId: CategoryGroupEntity['id']) {
       onCollapse(collapsedGroupIds.filter(c => c !== groupId));
-      setNewCategoryForGroup(groupId);
+      onNewItemChange({ type: 'category', groupId });
     }
 
     function onHideNewCategory() {
-      setNewCategoryForGroup(null);
+      onNewItemChange(null);
     }
 
     function _onSaveCategory(category: CategoryEntity) {
@@ -237,17 +288,46 @@ export const BudgetCategories = memo<BudgetCategoriesProps>(
     return (
       <View
         style={{
-          marginBottom: 10,
+          marginBottom: 16,
           backgroundColor: theme.budgetCurrentMonth, // match budget colors, not generic table colors.
           overflow: 'hidden',
-          boxShadow: styles.cardShadow,
-          borderRadius: '0 0 4px 4px',
+          boxShadow: elevation.card,
+          border: '1px solid ' + theme.hairline,
+          borderTopWidth: 0,
+          borderRadius: `0 0 ${radius.lg}px ${radius.lg}px`,
           flex: 1,
         }}
       >
         {items.map((item, idx) => {
           let content;
           switch (item.type) {
+            case 'empty':
+              content = (
+                <View
+                  style={{
+                    flexDirection: 'row',
+                    alignItems: 'center',
+                    gap: 12,
+                    padding: '20px 22px',
+                  }}
+                >
+                  <Text style={{ color: theme.pageTextLight }}>
+                    {visibleCategoryIds ? (
+                      <Trans>Nothing is over budget.</Trans>
+                    ) : (
+                      <Trans>Create a group to start budgeting.</Trans>
+                    )}
+                  </Text>
+                  {!visibleCategoryIds && (
+                    // Named apart from the toolbar's Add group, which
+                    // stays the page's only button of that name.
+                    <Button onPress={onShowNewGroup}>
+                      <Trans>Add your first group</Trans>
+                    </Button>
+                  )}
+                </View>
+              );
+              break;
             case 'new-group':
               content = (
                 <Row
@@ -321,6 +401,7 @@ export const BudgetCategories = memo<BudgetCategoriesProps>(
                   onReorder={onReorderCategory}
                   onBudgetAction={onBudgetAction}
                   onShowActivity={onShowActivity}
+                  onOpenDetails={onOpenDetails}
                 />
               );
               break;
@@ -332,7 +413,7 @@ export const BudgetCategories = memo<BudgetCategoriesProps>(
                     backgroundColor: theme.budgetCurrentMonth,
                   }}
                 >
-                  <IncomeHeader onShowNewGroup={onShowNewGroup} />
+                  <IncomeHeader />
                 </View>
               );
               break;
@@ -364,6 +445,7 @@ export const BudgetCategories = memo<BudgetCategoriesProps>(
                   onReorder={onReorderCategory}
                   onBudgetAction={onBudgetAction}
                   onShowActivity={onShowActivity}
+                  onOpenDetails={onOpenDetails}
                 />
               );
               break;
@@ -388,11 +470,9 @@ export const BudgetCategories = memo<BudgetCategoriesProps>(
             >
               <View
                 style={
-                  dragState
-                    ? {}
-                    : {
-                        ':hover': { backgroundColor: theme.budgetCurrentMonth },
-                      }
+                  !dragState && isHoverTintedRow(item.type)
+                    ? rowHoverTintStyle
+                    : undefined
                 }
               >
                 {content}
@@ -406,3 +486,34 @@ export const BudgetCategories = memo<BudgetCategoriesProps>(
 );
 
 BudgetCategories.displayName = 'BudgetCategories';
+
+/**
+ * The Over budget filter: expense groups holding a listed category, each
+ * with only those categories, whether or not the group is collapsed.
+ * Hidden categories stay out unless hidden ones are shown.
+ */
+function getFilteredItems(
+  expenseGroups: CategoryGroupEntity[],
+  visibleCategoryIds: ReadonlySet<CategoryEntity['id']>,
+  showHiddenCategories: boolean | undefined,
+): BudgetItem[] {
+  const items = expenseGroups.flatMap((group): BudgetItem[] => {
+    const categories = (group.categories ?? []).filter(
+      category =>
+        visibleCategoryIds.has(category.id) &&
+        (showHiddenCategories || !(category.hidden || group.hidden)),
+    );
+    if (categories.length === 0) {
+      return [];
+    }
+    return [
+      { type: 'expense-group', value: { ...group } },
+      ...categories.map((category): BudgetItem => ({
+        type: 'expense-category',
+        value: category,
+        group,
+      })),
+    ];
+  });
+  return items.length > 0 ? items : [{ type: 'empty' }];
+}

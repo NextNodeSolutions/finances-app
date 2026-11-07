@@ -3,6 +3,7 @@ import type { CSSProperties, ReactNode } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 
 import { SvgArrowsSynchronize } from '@actual-app/components/icons/v2';
+import { styles } from '@actual-app/components/styles';
 import { theme } from '@actual-app/components/theme';
 import * as monthUtils from '@actual-app/core/shared/months';
 import type { TransactionEntity } from '@actual-app/core/types/models';
@@ -87,7 +88,11 @@ function TransactionRow({
         switch (field) {
           case 'date':
             return (
-              <Field key={i} width={100}>
+              <Field
+                key={i}
+                width={100}
+                style={{ ...styles.tnum, color: theme.tableTextLight }}
+              >
                 {transaction.date}
               </Field>
             );

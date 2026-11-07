@@ -3,8 +3,8 @@ import type { ReactNode, RefObject } from 'react';
 import { Trans } from 'react-i18next';
 
 import { Button } from '@actual-app/components/button';
-import { styles } from '@actual-app/components/styles';
 import { theme } from '@actual-app/components/theme';
+import { elevation, radius } from '@actual-app/components/tokens';
 import { View } from '@actual-app/components/view';
 
 import { CalculatorButtons } from '#components/common/CalculatorButtons';
@@ -56,9 +56,11 @@ export const CalculatorKeyboard = memo(function CalculatorAmountInput({
   return (
     <View
       style={{
-        background: theme.modalBackground,
-        borderColor: theme.tooltipBorder,
+        background: theme.trayBackground,
+        borderColor: theme.trayBorder,
         borderTopWidth: 1,
+        borderTopLeftRadius: radius.xl,
+        borderTopRightRadius: radius.xl,
         bottom: 0,
         display: 'flex',
         gap: 6,
@@ -75,7 +77,7 @@ export const CalculatorKeyboard = memo(function CalculatorAmountInput({
         transitionProperty: 'transform',
         transitionDuration: '100ms',
         zIndex: 10,
-        ...styles.shadowLarge,
+        boxShadow: elevation.modal,
       }}
     >
       {header}
@@ -149,7 +151,9 @@ function NonFocusableButton({
       variant={variant}
       style={{
         flex: 1,
-        height: styles.mobileMinHeight,
+        height: 44,
+        borderRadius: radius.md,
+        fontWeight: 500,
       }}
       onPointerDown={e => {
         e.preventDefault();

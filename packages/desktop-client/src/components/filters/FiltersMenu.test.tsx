@@ -3,9 +3,18 @@ import type { ComponentProps } from 'react';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 
+import { useOptionalFeature } from '#hooks/useOptionalFeature';
 import { TestProviders } from '#mocks';
 
 import { FilterEditor } from './FiltersMenu';
+
+vi.mock('#hooks/useOptionalFeature', () => ({
+  useOptionalFeature: vi.fn(),
+}));
+
+beforeEach(() => {
+  vi.mocked(useOptionalFeature).mockReturnValue([true, vi.fn()]);
+});
 
 describe('FilterEditor amount sign', () => {
   const renderEditor = (
@@ -53,5 +62,58 @@ describe('FilterEditor amount sign', () => {
     expect(onSave).toHaveBeenCalledWith(
       expect.objectContaining({ field: 'amount', op: 'gt', value: -15000 }),
     );
+  });
+});
+
+describe('FilterEditor tag operators', () => {
+  const renderNotesEditor = (op: 'contains' | 'hasTags' = 'contains') =>
+    render(
+      <FilterEditor
+        field="notes"
+        op={op}
+        value=""
+        options={undefined}
+        onSave={vi.fn()}
+        onClose={vi.fn()}
+      />,
+      { wrapper: TestProviders },
+    );
+
+  it('offers the tag operators when tags are on', () => {
+    renderNotesEditor();
+
+    expect(
+      screen.getByRole('button', { name: 'has all tags' }),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole('button', { name: 'has any tag' }),
+    ).toBeInTheDocument();
+  });
+
+  it('hides the tag operators when tags are off', () => {
+    vi.mocked(useOptionalFeature).mockReturnValue([false, vi.fn()]);
+    renderNotesEditor();
+
+    expect(
+      screen.getByRole('button', { name: 'contains' }),
+    ).toBeInTheDocument();
+    expect(
+      screen.queryByRole('button', { name: 'has all tags' }),
+    ).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole('button', { name: 'has any tag' }),
+    ).not.toBeInTheDocument();
+  });
+
+  it('keeps the tag operator an existing filter already uses', () => {
+    vi.mocked(useOptionalFeature).mockReturnValue([false, vi.fn()]);
+    renderNotesEditor('hasTags');
+
+    expect(
+      screen.getByRole('button', { name: 'has all tags' }),
+    ).toBeInTheDocument();
+    expect(
+      screen.queryByRole('button', { name: 'has any tag' }),
+    ).not.toBeInTheDocument();
   });
 });

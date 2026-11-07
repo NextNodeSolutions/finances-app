@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 
+import { useResponsive } from '@actual-app/components/hooks/useResponsive';
 import { SvgInformationCircle } from '@actual-app/components/icons/v2';
 import { Input } from '@actual-app/components/input';
 import { Select } from '@actual-app/components/select';
@@ -19,6 +20,7 @@ import type { Action } from '#components/budget/goals/actions';
 import { TWO_UP_FIELD_FLEX } from '#components/budget/goals/editor/fieldLayout';
 import { FormField, FormLabel } from '#components/forms';
 import { LabeledCheckbox } from '#components/forms/LabeledCheckbox';
+import { MOBILE_FIELD_HEIGHT } from '#components/mobile/MobileForms';
 import { AmountInput } from '#components/util/AmountInput';
 import { MonthInput } from '#components/util/MonthInput';
 import { useFormat } from '#hooks/useFormat';
@@ -34,6 +36,7 @@ export const BySaveAutomation = ({
 }: BySaveAutomationProps) => {
   const { t } = useTranslation();
   const format = useFormat();
+  const { isNarrowWidth } = useResponsive();
 
   const amount = amountToInteger(
     template.amount,
@@ -77,6 +80,10 @@ export const BySaveAutomation = ({
           <AmountInput
             id="by-amount-field"
             value={amount}
+            // Matches the 44 px month field beside it on narrow screens.
+            style={
+              isNarrowWidth ? { minHeight: MOBILE_FIELD_HEIGHT } : undefined
+            }
             zeroSign="+"
             onUpdate={(value: number) =>
               dispatch(

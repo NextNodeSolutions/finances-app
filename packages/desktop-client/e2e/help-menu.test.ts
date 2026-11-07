@@ -28,6 +28,8 @@ test.describe('Help menu', () => {
     await page.getByRole('button', { name: 'Help' }).click();
     await expect(page.locator('[data-popover]')).toBeVisible();
     await expect(page.getByText('Keyboard shortcuts')).toBeVisible();
+    // Release news lives in the Help menu instead of its own titlebar button.
+    await expect(page.getByText("What's new")).toBeVisible();
     await expect(page).toMatchThemeScreenshots();
     await page.keyboard.press('Escape');
   });

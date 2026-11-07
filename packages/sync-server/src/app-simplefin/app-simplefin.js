@@ -11,6 +11,7 @@ import { assertUrlAllowed } from '#util/ssrf';
 
 const debugSensitive = createDebug('actual-sensitive:simplefin');
 
+/** @type {express.Express} */
 const app = express();
 export { app as handlers };
 app.use(requestLoggerMiddleware);

@@ -1,10 +1,12 @@
 import type { ReactNode } from 'react';
 
-import { styles } from '@actual-app/components/styles';
-import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
-import { spacing } from '@actual-app/components/tokens';
+import { elevation, radius, spacing } from '@actual-app/components/tokens';
 import { View } from '@actual-app/components/view';
+
+import { SettingsGroupHeading } from './SettingsGroupHeading';
+
+export { sectionHeadingStyle } from './SettingsGroupHeading';
 
 type SettingsGroupProps = {
   title: ReactNode;
@@ -18,31 +20,17 @@ export function SettingsGroup({
   children,
 }: SettingsGroupProps) {
   return (
-    <View style={{ flexShrink: 0, gap: spacing.sm }}>
-      <View style={{ gap: spacing.xxs }}>
-        <h2 style={{ ...styles.mediumText, fontWeight: 600, margin: 0 }}>
-          {title}
-        </h2>
-        {description && (
-          <Text
-            style={{
-              ...styles.smallText,
-              lineHeight: 1.5,
-              color: theme.settingsCardTextSubdued,
-            }}
-          >
-            {description}
-          </Text>
-        )}
-      </View>
+    <View style={{ flexShrink: 0, gap: spacing.md }}>
+      <SettingsGroupHeading title={title} description={description} />
       <View
         style={{
           color: theme.settingsCardText,
           backgroundColor: theme.settingsCardBackground,
           border: `1px solid ${theme.settingsCardBorder}`,
-          borderRadius: 6,
+          borderRadius: radius.lg,
+          boxShadow: elevation.card,
           '&& > * + *': {
-            borderTop: `1px solid ${theme.settingsCardBorder}`,
+            borderTop: `1px solid ${theme.hairlineSubtle}`,
           },
         }}
       >

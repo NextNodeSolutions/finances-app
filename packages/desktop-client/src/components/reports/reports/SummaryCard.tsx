@@ -9,6 +9,7 @@ import type {
   SummaryWidget,
 } from '@actual-app/core/types/models';
 
+import { cardHeaderStyle } from '#components/reports/chart-theme';
 import { DateRange } from '#components/reports/DateRange';
 import { ReportCard } from '#components/reports/ReportCard';
 import { ReportCardName } from '#components/reports/ReportCardName';
@@ -96,7 +97,7 @@ export function SummaryCard({
       onRename={() => setNameMenuOpen(true)}
     >
       <View style={{ flex: 1, overflow: 'hidden' }}>
-        <View style={{ flexGrow: 0, flexShrink: 0, padding: 20 }}>
+        <View style={{ ...cardHeaderStyle, flexDirection: 'column', gap: 0 }}>
           <ReportCardName
             name={meta?.name || t('Summary')}
             isEditing={nameMenuOpen}
@@ -114,10 +115,11 @@ export function SummaryCard({
         </View>
         <View
           style={{
-            justifyContent: 'center',
-            alignItems: 'center',
+            justifyContent: 'flex-end',
+            alignItems: 'flex-start',
             flexGrow: 1,
             flexShrink: 1,
+            padding: '0 20px 12px',
           }}
         >
           {data ? (

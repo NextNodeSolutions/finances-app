@@ -36,7 +36,7 @@ Platform resolution happens at build time via `package.json` exports. Don't dire
 
 - **Vite**: Used for bundling the web app and desktop client
 - **TypeScript**: All code is written in TypeScript with strict type checking
-- **Yarn Workspaces**: Monorepo structure managed with Yarn 4
+- **pnpm Workspaces**: Monorepo structure managed with pnpm
 
 ## Data Storage
 

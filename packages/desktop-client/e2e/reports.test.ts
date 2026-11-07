@@ -76,6 +76,25 @@ test.describe('Reports', () => {
     await expect(menu.getByRole('button', { name: 'Rename' })).toBeVisible();
   });
 
+  test('lists monthly statements, newest first', async () => {
+    const statements = await reportsPage.goToStatementsPage();
+    const rows = statements.locator('[data-testid^="statement-row-"]');
+
+    await expect(rows.first()).toHaveAttribute(
+      'data-testid',
+      'statement-row-2017-01',
+    );
+    await expect(rows.first()).toContainText('January 2017');
+    await expect(rows.first()).toContainText('In progress');
+    expect(await rows.count()).toBeLessThanOrEqual(12);
+
+    await rows
+      .nth(1)
+      .getByRole('button', { name: 'December 2016', exact: true })
+      .click();
+    await page.waitForURL(/\/budget/);
+  });
+
   test('loads net worth graph and checks visuals', async () => {
     await reportsPage.goToNetWorthPage();
     await expect(page).toMatchThemeScreenshots();

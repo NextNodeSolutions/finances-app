@@ -3,6 +3,7 @@ import React from 'react';
 import { styles } from '@actual-app/components/styles';
 import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
+import { radius } from '@actual-app/components/tokens';
 import { View } from '@actual-app/components/view';
 
 type DirectoryDisplayProps = {
@@ -19,9 +20,10 @@ export function DirectoryDisplay({ directory }: DirectoryDisplayProps) {
       <Text
         title={directory}
         style={{
-          backgroundColor: theme.pageBackground,
+          backgroundColor: theme.formInputBackground,
+          border: '1px solid ' + theme.hairline,
           padding: '5px 10px',
-          borderRadius: 4,
+          borderRadius: radius.sm,
           overflow: 'auto',
           whiteSpace: 'nowrap',
           width: '100%',

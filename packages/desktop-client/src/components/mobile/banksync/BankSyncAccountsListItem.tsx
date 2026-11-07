@@ -3,7 +3,7 @@ import { Trans, useTranslation } from 'react-i18next';
 import { SpaceBetween } from '@actual-app/components/space-between';
 import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
-import { spacing } from '@actual-app/components/tokens';
+import { elevation, radius, spacing } from '@actual-app/components/tokens';
 import { View } from '@actual-app/components/view';
 import { tsToRelativeTime } from '@actual-app/core/shared/util';
 import type { AccountEntity } from '@actual-app/core/types/models';
@@ -84,11 +84,12 @@ export function BankSyncAccountsListItem({
 
         <span
           style={{
-            borderRadius: 4,
-            padding: '5px 10px',
-            backgroundColor: theme.noticeBackground,
-            border: '1px solid ' + theme.noticeBackground,
-            color: theme.noticeTextDark,
+            borderRadius: radius.md,
+            padding: '6px 12px',
+            backgroundColor: theme.buttonNormalBackground,
+            border: `1px solid ${theme.buttonNormalBorder}`,
+            boxShadow: elevation.xs,
+            color: theme.buttonNormalText,
             fontSize: 13,
             fontWeight: 500,
             flexShrink: 0,

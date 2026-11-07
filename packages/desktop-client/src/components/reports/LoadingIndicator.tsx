@@ -15,17 +15,26 @@ export const LoadingIndicator = ({ message }: LoadingIndicatorProps) => {
     <View
       style={{
         flex: 1,
-        gap: 20,
+        gap: 16,
         justifyContent: 'center',
         alignItems: 'center',
         ...styles.delayedFadeIn,
       }}
     >
       {message && (
-        <Block style={{ marginBottom: 20, fontSize: 18 }}>{message}</Block>
+        <Block
+          style={{
+            ...styles.display,
+            fontSize: 20,
+            fontWeight: 300,
+            color: theme.pageTextLight,
+          }}
+        >
+          {message}
+        </Block>
       )}
       <AnimatedLoading
-        style={{ width: 25, height: 25, color: theme.pageTextDark }}
+        style={{ width: 18, height: 18, color: theme.pageTextSubdued }}
       />
     </View>
   );

@@ -19,14 +19,22 @@ import type {
 import { css } from '@emotion/css';
 import { AutoTextSize } from 'auto-text-size';
 
+import { AMOUNT_CHIP_INSET, mobileCardStyle } from '#components/mobile/utils';
 import { PrivacyFilter } from '#components/PrivacyFilter';
 import { CellValue } from '#components/spreadsheet/CellValue';
 import { useFormat } from '#hooks/useFormat';
 import { useSyncedPref } from '#hooks/useSyncedPref';
 import { envelopeBudget, trackingBudget } from '#spreadsheet/bindings';
 
-import { getColumnWidth, ROW_HEIGHT } from './BudgetTable';
+import {
+  getColumnWidth,
+  GROUP_NAME_BUTTON_LEFT_INSET,
+  ROW_HEIGHT,
+} from './BudgetTable';
 import { ExpenseCategoryList } from './ExpenseCategoryList';
+
+// Right inset of the row holding a group's column totals.
+const CELLS_ROW_INSET = 5;
 
 type ExpenseGroupListItemProps = ComponentPropsWithoutRef<
   typeof GridListItem<CategoryGroupEntity>
@@ -83,8 +91,11 @@ export function ExpenseGroupListItem({
     <GridListItem textValue={categoryGroup.name} {...props}>
       <Card
         style={{
-          marginTop: 4,
-          marginBottom: 4,
+          ...mobileCardStyle,
+          marginTop: 0,
+          marginBottom: 10,
+          marginLeft: 8,
+          marginRight: 8,
         }}
       >
         <ExpenseGroupHeader
@@ -142,11 +153,11 @@ export function ExpenseGroupHeader({
         cursor: 'pointer',
         height: ROW_HEIGHT,
         borderBottomWidth: 1,
-        borderColor: theme.tableBorder,
+        borderColor: theme.hairline,
         flexDirection: 'row',
         alignItems: 'center',
-        paddingLeft: 5,
-        paddingRight: 5,
+        paddingLeft: 6,
+        paddingRight: 6,
         opacity: isHidden ? 0.5 : undefined,
         backgroundColor: monthUtils.isCurrentMonth(month)
           ? theme.budgetHeaderCurrentMonth
@@ -235,6 +246,7 @@ function ExpenseGroupName({
         variant="bare"
         style={{
           maxWidth: sidebarColumnWidth,
+          paddingLeft: GROUP_NAME_BUTTON_LEFT_INSET,
         }}
         onPress={() => onEditCategoryGroup(group.id)}
       >
@@ -251,7 +263,8 @@ function ExpenseGroupName({
               width: sidebarColumnWidth,
               textAlign: 'left',
               ...styles.smallText,
-              fontWeight: '500',
+              fontWeight: 500,
+              color: theme.tableRowHeaderText,
             }}
             data-testid="category-group-name"
           >
@@ -259,8 +272,8 @@ function ExpenseGroupName({
           </Text>
           <SvgCheveronRight
             style={{ flexShrink: 0, color: theme.tableTextSubdued }}
-            width={14}
-            height={14}
+            width={12}
+            height={12}
           />
         </View>
       </Button>
@@ -287,9 +300,12 @@ function ExpenseGroupCells({
   const amountStyle: CSSProperties = {
     ...styles.tnum,
     width: columnWidth,
-    fontSize: 12,
-    fontWeight: '500',
+    fontWeight: 500,
+    color: theme.tableRowHeaderText,
     paddingLeft: 5,
+    // The cells row already insets 5px; the rest of the chip inset lines the
+    // totals up with the figures inside the category amount chips below.
+    paddingRight: AMOUNT_CHIP_INSET - CELLS_ROW_INSET,
     textAlign: 'right',
   };
 
@@ -314,7 +330,7 @@ function ExpenseGroupCells({
         flexDirection: 'row',
         justifyContent: 'flex-end',
         alignItems: 'center',
-        paddingRight: 5,
+        paddingRight: CELLS_ROW_INSET,
       }}
     >
       <View

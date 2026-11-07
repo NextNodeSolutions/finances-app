@@ -6,8 +6,10 @@ import { Button } from '@actual-app/components/button';
 import { useResponsive } from '@actual-app/components/hooks/useResponsive';
 import { SvgDotsHorizontalTriple } from '@actual-app/components/icons/v1';
 import { theme } from '@actual-app/components/theme';
+import { elevation, motion, radius } from '@actual-app/components/tokens';
 import { View } from '@actual-app/components/view';
 
+import { colorTransition } from '#components/reports/chart-theme';
 import { useContextMenu } from '#hooks/useContextMenu';
 import { useIsInViewport } from '#hooks/useIsInViewport';
 import { useNavigate } from '#hooks/useNavigate';
@@ -72,13 +74,13 @@ export function ReportCard({
     <View
       ref={setCardElement}
       style={{
-        backgroundColor: theme.tableBackground,
-        borderBottomLeftRadius: 2,
-        borderBottomRightRadius: 2,
+        backgroundColor: theme.cardBackground,
+        border: `1px solid ${theme.hairline}`,
+        borderRadius: radius.lg,
         width: '100%',
         height: '100%',
-        boxShadow: '0 2px 6px rgba(0, 0, 0, .15)',
-        transition: 'box-shadow .25s',
+        boxShadow: elevation.card,
+        transition: colorTransition,
         ...(isEditing
           ? {
               '& .recharts-surface:hover': {
@@ -86,7 +88,8 @@ export function ReportCard({
                 ':active': { cursor: 'grabbing' },
               },
               ':active': { cursor: 'grabbing' },
-              filter: 'grayscale(1)',
+              borderStyle: 'dashed',
+              borderColor: theme.hairlineStrong,
             }
           : {
               '& .recharts-surface:hover': {
@@ -94,8 +97,12 @@ export function ReportCard({
               },
             }),
         ':hover': {
-          ...(to ? { boxShadow: '0 4px 6px rgba(0, 0, 0, .15)' } : null),
-          ...(isEditing ? { cursor: 'move', filter: 'grayscale(0)' } : null),
+          ...(to
+            ? { boxShadow: elevation.raised, borderColor: theme.hairlineStrong }
+            : null),
+          ...(isEditing
+            ? { cursor: 'move', borderColor: theme.pageTextSubdued }
+            : null),
         },
         ...(to ? null : containerProps),
         ...style,
@@ -113,12 +120,13 @@ export function ReportCard({
       <Layout {...layoutProps}>
         <Button
           variant="bare"
-          onPress={() => navigate(to, { state: { goBack: true } })}
+          onPress={() => navigate(to)}
           style={{
             height: '100%',
             width: '100%',
             background: 'transparent',
             padding: 0,
+            borderRadius: radius.lg,
             textAlign: 'left',
             overflow: 'visible',
           }}
@@ -204,7 +212,7 @@ function Layout({
         height: '100%',
         '& .hover-visible': {
           opacity: 0,
-          transition: 'opacity .25s',
+          transition: `opacity ${motion.base} ${motion.ease}`,
         },
         '&:hover .hover-visible': {
           opacity: 1,
@@ -216,8 +224,8 @@ function Layout({
           className={['hover-visible', NON_DRAGGABLE_AREA_CLASS_NAME].join(' ')}
           style={{
             position: 'absolute',
-            top: 7,
-            right: 3,
+            top: 12,
+            right: 12,
             zIndex: 1,
           }}
         >
@@ -241,9 +249,12 @@ function Layout({
             }}
           >
             <SvgDotsHorizontalTriple
-              width={15}
-              height={15}
-              style={{ transform: 'rotateZ(90deg)' }}
+              width={14}
+              height={14}
+              style={{
+                transform: 'rotateZ(90deg)',
+                color: theme.pageTextLight,
+              }}
             />
           </Button>
         </View>

@@ -1,19 +1,13 @@
 // @ts-strict-ignore
 import React, { useState } from 'react';
 import type { CSSProperties } from 'react';
-import { useTranslation } from 'react-i18next';
 
-import {
-  SvgCheveronLeft,
-  SvgCheveronRight,
-} from '@actual-app/components/icons/v1';
-import { SvgCalendar } from '@actual-app/components/icons/v2';
 import { styles } from '@actual-app/components/styles';
 import { theme } from '@actual-app/components/theme';
+import { motion, radius } from '@actual-app/components/tokens';
 import { View } from '@actual-app/components/view';
 import * as monthUtils from '@actual-app/core/shared/months';
 
-import { Link } from '#components/common/Link';
 import { useLocale } from '#hooks/useLocale';
 import { useResizeObserver } from '#hooks/useResizeObserver';
 
@@ -35,7 +29,6 @@ export const MonthPicker = ({
   onSelect,
 }: MonthPickerProps) => {
   const locale = useLocale();
-  const { t } = useTranslation();
   const [hoverId, setHoverId] = useState(null);
   const [targetMonthCount, setTargetMonthCount] = useState(12);
 
@@ -90,42 +83,6 @@ export const MonthPicker = ({
           justifyContent: 'center',
         }}
       >
-        <Link
-          variant="button"
-          buttonVariant="bare"
-          onPress={() => onSelect(currentMonth)}
-          style={{
-            padding: '3px 3px',
-            marginRight: '12px',
-          }}
-        >
-          <View title={t('Today')}>
-            <SvgCalendar
-              style={{
-                width: 16,
-                height: 16,
-              }}
-            />
-          </View>
-        </Link>
-        <Link
-          variant="button"
-          buttonVariant="bare"
-          onPress={() => onSelect(monthUtils.prevMonth(startMonth))}
-          style={{
-            padding: '3px 3px',
-            marginRight: '12px',
-          }}
-        >
-          <View title={t('Previous month')}>
-            <SvgCheveronLeft
-              style={{
-                width: 16,
-                height: 16,
-              }}
-            />
-          </View>
-        </Link>
         {range.map((month, idx) => {
           const monthName = monthUtils.format(month, 'MMM', locale);
           const selected =
@@ -151,67 +108,29 @@ export const MonthPicker = ({
           return (
             <View
               key={month}
-              data-testid={selected ? 'selected-budget-month' : undefined}
-              data-month={selected ? month : undefined}
-              style={{
-                alignItems: 'center',
-                padding: '3px 3px',
-                width: size === 'big' ? '35px' : '20px',
-                textAlign: 'center',
-                userSelect: 'none',
-                cursor: 'default',
-                borderRadius: 2,
-                border: 'none',
-                ...(!isMonthBudgeted && {
-                  textDecoration: 'line-through',
-                  color: theme.pageTextSubdued,
-                }),
-                ...styles.smallText,
-                ...(selected && {
-                  backgroundColor: theme.buttonPrimaryBackground,
-                  color: theme.buttonPrimaryText,
-                }),
-                ...((hovered || selected) && {
-                  borderRadius: 0,
-                  cursor: 'pointer',
-                }),
-                ...(hoverId !== null &&
-                  !hovered &&
-                  selected && {
-                    filter: 'brightness(65%)',
-                  }),
-                ...(hovered &&
-                  !selected && {
-                    backgroundColor: theme.buttonBareBackgroundHover,
-                  }),
-                ...(!hovered &&
-                  !selected &&
-                  current && {
-                    backgroundColor: theme.buttonBareBackgroundHover,
-                    filter: 'brightness(120%)',
-                  }),
-                ...(hovered &&
-                  selected &&
-                  current && {
-                    filter: 'brightness(120%)',
-                  }),
-                ...(hovered &&
-                  selected && {
-                    backgroundColor: theme.buttonPrimaryBackground,
-                  }),
-                ...((idx === firstSelectedIndex ||
-                  (idx === hoverId && !selected)) && {
-                  borderTopLeftRadius: 2,
-                  borderBottomLeftRadius: 2,
-                }),
-                ...((idx === lastSelectedIndex ||
-                  (idx === lastHoverId && !selected)) && {
-                  borderTopRightRadius: 2,
-                  borderBottomRightRadius: 2,
-                }),
-                ...(current && { fontWeight: 'bold' }),
-              }}
+              role="button"
+              aria-pressed={selected}
+              aria-label={monthUtils.format(month, 'MMMM yyyy', locale)}
+              style={getMonthCellStyle({
+                width: size === 'big' ? 35 : 20,
+                isSelected: selected,
+                isHovered: hovered,
+                isCurrent: current,
+                isBudgeted: isMonthBudgeted,
+                isRangeStart:
+                  idx === firstSelectedIndex || (idx === hoverId && !selected),
+                isRangeEnd:
+                  idx === lastSelectedIndex ||
+                  (idx === lastHoverId && !selected),
+              })}
+              tabIndex={0}
               onClick={() => onSelect(month)}
+              onKeyDown={event => {
+                if (event.key === 'Enter' || event.key === ' ') {
+                  event.preventDefault();
+                  onSelect(month);
+                }
+              }}
               onMouseEnter={() => setHoverId(idx)}
               onMouseLeave={() => setHoverId(null)}
             >
@@ -220,13 +139,15 @@ export const MonthPicker = ({
                 {showYearHeader && (
                   <View
                     style={{
+                      ...styles.tnum,
                       position: 'absolute',
-                      top: -16,
+                      top: -17,
                       left: 0,
                       fontSize: 10,
-                      fontWeight: 'bold',
+                      fontWeight: 500,
+                      letterSpacing: '0.04em',
                       color: isMonthBudgeted
-                        ? theme.pageText
+                        ? theme.pageTextLight
                         : theme.pageTextSubdued,
                     }}
                   >
@@ -237,32 +158,74 @@ export const MonthPicker = ({
             </View>
           );
         })}
-        <Link
-          variant="button"
-          buttonVariant="bare"
-          onPress={() => onSelect(monthUtils.nextMonth(startMonth))}
-          style={{
-            padding: '3px 3px',
-            marginLeft: '12px',
-          }}
-        >
-          <View title={t('Next month')}>
-            <SvgCheveronRight
-              style={{
-                width: 16,
-                height: 16,
-              }}
-            />
-          </View>
-        </Link>
-        {/*Keep range centered*/}
-        <span
-          style={{
-            width: '22px',
-            marginLeft: '12px',
-          }}
-        />
       </View>
     </View>
   );
 };
+
+type MonthCellState = {
+  width: number;
+  isSelected: boolean;
+  isHovered: boolean;
+  isCurrent: boolean;
+  isBudgeted: boolean;
+  isRangeStart: boolean;
+  isRangeEnd: boolean;
+};
+
+function getMonthCellBackground({
+  isSelected,
+  isHovered,
+}: Pick<MonthCellState, 'isSelected' | 'isHovered'>) {
+  if (isSelected) {
+    return isHovered
+      ? theme.buttonPrimaryBackgroundHover
+      : theme.buttonPrimaryBackground;
+  }
+  return isHovered ? theme.buttonBareBackgroundHover : 'transparent';
+}
+
+// Selected months read as one ink pill; the hovered range previews the
+// next selection; today carries a hairline ring.
+function getMonthCellStyle({
+  width,
+  isSelected,
+  isHovered,
+  isCurrent,
+  isBudgeted,
+  isRangeStart,
+  isRangeEnd,
+}: MonthCellState): CSSProperties {
+  const isInRange = isSelected || isHovered;
+  const startRadius = !isInRange || isRangeStart ? radius.sm : 0;
+  const endRadius = !isInRange || isRangeEnd ? radius.sm : 0;
+
+  return {
+    alignItems: 'center',
+    justifyContent: 'center',
+    width,
+    height: 24,
+    textAlign: 'center',
+    userSelect: 'none',
+    cursor: 'pointer',
+    fontSize: 12,
+    fontWeight: isCurrent ? 600 : 500,
+    color: isBudgeted ? theme.pageTextLight : theme.pageTextSubdued,
+    ...(!isBudgeted && {
+      textDecoration: 'line-through',
+      textDecorationThickness: 1,
+    }),
+    ...(isHovered && { color: theme.pageText }),
+    ...(isSelected && { color: theme.buttonPrimaryText }),
+    backgroundColor: getMonthCellBackground({ isSelected, isHovered }),
+    boxShadow:
+      isCurrent && !isInRange
+        ? 'inset 0 0 0 1px ' + theme.hairlineStrong
+        : 'none',
+    borderTopLeftRadius: startRadius,
+    borderBottomLeftRadius: startRadius,
+    borderTopRightRadius: endRadius,
+    borderBottomRightRadius: endRadius,
+    transition: `background-color ${motion.fast} ${motion.ease}, color ${motion.fast} ${motion.ease}`,
+  };
+}

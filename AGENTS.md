@@ -10,7 +10,7 @@ This guide provides comprehensive information for AI agents (like Cursor) workin
 - **Community Docs**: Documentation is part of the monorepo at `packages/docs/`. Published at https://actualbudget.org/docs
 - **License**: MIT
 - **Primary Language**: TypeScript (with React)
-- **Build System**: Yarn 4 workspaces (monorepo)
+- **Build System**: pnpm 12 workspaces (monorepo)
 
 ## Quick Start Commands
 
@@ -18,28 +18,28 @@ This guide provides comprehensive information for AI agents (like Cursor) workin
 
 ```bash
 # Type checking (ALWAYS run before committing)
-yarn typecheck
+pnpm typecheck
 
 # Linting and formatting (with auto-fix)
-yarn lint:fix
+pnpm lint:fix
 
 # Run all tests
-yarn test
+pnpm test
 
 # Start development server (browser)
-yarn start
+pnpm start
 
 # Start with sync server
-yarn start:server-dev
+pnpm start:server-dev
 
 # Start desktop app development
-yarn start:desktop
+pnpm start:desktop
 ```
 
 ### Important Rules
 
-- **ALWAYS run yarn commands from the root directory** - never run them in child workspaces
-- Use `yarn workspace <workspace-name> run <command>` for workspace-specific tasks
+- **ALWAYS run pnpm commands from the root directory** - never run them in child workspaces
+- Use `pnpm --filter <workspace-name> run <command>` for workspace-specific tasks
 - Tests run once and exit by default (using `vitest --run`)
 
 ### ⚠️ PR titles must start with `[AI]`
@@ -60,10 +60,10 @@ The project uses **[lage](https://microsoft.github.io/lage/)** (a task runner fo
 
 ```bash
 # Run all tests across all packages
-yarn test                    # Equivalent to: lage test --continue
+pnpm test                    # Equivalent to: lage test --continue
 
 # Run tests without cache (for debugging/CI)
-yarn test:debug              # Equivalent to: lage test --no-cache --continue
+pnpm test:debug              # Equivalent to: lage test --no-cache --continue
 ```
 
 Configuration is in `lage.config.js` at the project root.
@@ -83,10 +83,10 @@ The core application logic that runs on any platform.
 
   ```bash
   # Run all loot-core tests
-  yarn workspace @actual-app/core run test
+  pnpm --filter @actual-app/core run test
 
   # Or run tests across all packages using lage
-  yarn test
+  pnpm test
   ```
 
 #### 2. **desktop-client** (`packages/desktop-client/` - aliased as `@actual-app/web`)
@@ -100,16 +100,16 @@ The React-based UI for web and desktop.
 
   ```bash
   # Development
-  yarn workspace @actual-app/web start:browser
+  pnpm --filter @actual-app/web start:browser
 
   # Build
-  yarn workspace @actual-app/web build
+  pnpm --filter @actual-app/web build
 
   # E2E tests
-  yarn workspace @actual-app/web e2e
+  pnpm --filter @actual-app/web e2e
 
   # Visual regression tests
-  yarn workspace @actual-app/web vrt
+  pnpm --filter @actual-app/web vrt
   ```
 
 #### 3. **desktop-electron** (`packages/desktop-electron/`)
@@ -129,13 +129,13 @@ Public API for programmatic access to Actual.
 
   ```bash
   # Build
-  yarn workspace @actual-app/api build
+  pnpm --filter @actual-app/api build
 
   # Run tests
-  yarn workspace @actual-app/api test
+  pnpm --filter @actual-app/api test
 
   # Or use lage to run all tests
-  yarn test
+  pnpm test
   ```
 
 #### 5. **sync-server** (`packages/sync-server/` - aliased as `@actual-app/sync-server`)
@@ -146,7 +146,7 @@ Synchronization server for multi-device support.
 - Currently transitioning to TypeScript (mostly JavaScript)
 - Commands:
   ```bash
-  yarn workspace @actual-app/sync-server start
+  pnpm --filter @actual-app/sync-server start
   ```
 
 #### 6. **component-library** (`packages/component-library/` - aliased as `@actual-app/components`)
@@ -186,9 +186,9 @@ Documentation website built with Docusaurus.
 - Built with Docusaurus 3
 - Commands:
   ```bash
-  yarn workspace docs start
-  yarn workspace docs build
-  yarn start:docs  # From root
+  pnpm --filter docs start
+  pnpm --filter docs build
+  pnpm start:docs  # From root
   ```
 
 ## Development Workflow
@@ -208,32 +208,32 @@ The project uses **lage** for running tests across all workspaces efficiently.
 
 ```bash
 # Run all tests across all packages (using lage)
-yarn test
+pnpm test
 
 # Run tests without cache (for debugging)
-yarn test:debug
+pnpm test:debug
 
 # Run tests for a specific package
-yarn workspace @actual-app/core run test
+pnpm --filter @actual-app/core run test
 ```
 
 **E2E Tests (Playwright)**
 
 ```bash
 # Run E2E tests for web
-yarn e2e
+pnpm e2e
 
 # Desktop Electron E2E (includes full build)
-yarn e2e:desktop
+pnpm e2e:desktop
 
 # Visual regression tests
-yarn vrt
+pnpm vrt
 
 # Visual regression in Docker (consistent environment)
-yarn vrt:docker
+pnpm vrt:docker
 
 # Run E2E tests for a specific package
-yarn workspace @actual-app/web e2e
+pnpm --filter @actual-app/web e2e
 ```
 
 **Testing Best Practices:**
@@ -256,7 +256,7 @@ TypeScript configuration uses:
 ### 4. Internationalization (i18n)
 
 Use the `Trans` component (and translated strings) for user-facing text.
-Regenerate i18n files with `yarn generate:i18n`.
+Regenerate i18n files with `pnpm generate:i18n`.
 
 ### 5. Financial Number Typography
 
@@ -366,7 +366,12 @@ describe('ComponentName', () => {
   matching relative symlink here
 - `/tsconfig.json` - Root TypeScript configuration
 - `/.cursorignore`, `/.gitignore` - Ignored files
-- `/yarn.lock` - Dependency lockfile (Yarn 4)
+- `/pnpm-workspace.yaml` - Workspace list and pnpm settings: the `catalog:`
+  holding the one version of every dependency shared by several workspaces
+  (`catalogMode: strict`), `allowBuilds` (the only packages allowed to run
+  install scripts), `overrides`, and `patchedDependencies` (patches live in
+  `/patches/`)
+- `/pnpm-lock.yaml` - Dependency lockfile
 
 ### Documentation
 
@@ -409,40 +414,40 @@ describe('ComponentName', () => {
 
 ```bash
 # Run all tests across all packages (recommended)
-yarn test
+pnpm test
 
 # E2E test for a specific file
-yarn workspace @actual-app/web run playwright test accounts.test.ts --browser=chromium
+pnpm --filter @actual-app/web run playwright test accounts.test.ts --browser=chromium
 ```
 
 ### Building for Production
 
 ```bash
 # Browser build
-yarn build:browser
+pnpm build:browser
 
 # Desktop build
-yarn build:desktop
+pnpm build:desktop
 
 # API build
-yarn build:api
+pnpm build:api
 
 # Sync server build
-yarn build:server
+pnpm build:server
 ```
 
 ### Type Checking Specific Packages
 
-TypeScript uses project references. Run `yarn typecheck` from root to check all packages.
+TypeScript uses project references. Run `pnpm typecheck` from root to check all packages.
 
 ### Debugging Tests
 
 ```bash
 # Run tests in debug mode (without parallelization)
-yarn test:debug
+pnpm test:debug
 
 # Run specific E2E test with headed browser
-yarn workspace @actual-app/web run playwright test --headed --debug accounts.test.ts
+pnpm --filter @actual-app/web run playwright test --headed --debug accounts.test.ts
 ```
 
 ### Working with Icons
@@ -453,14 +458,14 @@ Icons in `packages/component-library/src/icons/` are auto-generated. Don't manua
 
 ### Type Errors
 
-1. Run `yarn typecheck` to see all type errors
+1. Run `pnpm typecheck` to see all type errors
 2. Check if types are imported correctly
 3. Look for existing type definitions in `packages/loot-core/src/types/`
 4. Use `satisfies` instead of `as` for type narrowing
 
 ### Linter Errors
 
-Run `yarn lint` to check. All rules — including the custom `actual/*` rules
+Run `pnpm lint` to check. All rules — including the custom `actual/*` rules
 (`no-untranslated-strings`, `prefer-trans-over-t`, `prefer-logger-over-console`,
 `typography`, …) — are defined in [`.oxlintrc.json`](.oxlintrc.json).
 
@@ -483,9 +488,9 @@ Run `yarn lint` to check. All rules — including the custom `actual/*` rules
 ### Build Failures
 
 1. Clean build artifacts: `rm -rf packages/*/dist packages/*/lib-dist packages/*/build`
-2. Reinstall dependencies: `yarn install`
+2. Reinstall dependencies: `pnpm install`
 3. Check Node.js version (requires >=22)
-4. Check Yarn version (requires ^4.9.1)
+4. Check pnpm version (requires >=12.8.1)
 
 ## Testing Patterns
 
@@ -507,7 +512,7 @@ Run `yarn lint` to check. All rules — including the custom `actual/*` rules
 ### Visual Regression Tests (VRT)
 
 - Snapshots stored per test file in `*-snapshots/` directories
-- Use Docker for consistent environment: `yarn vrt:docker`
+- Use Docker for consistent environment: `pnpm vrt:docker`
 
 ## Additional Resources
 
@@ -542,22 +547,22 @@ When performing code reviews (especially for LLM agents): **see [CODE_REVIEW_GUI
 
 ```bash
 # List all workspaces
-yarn workspaces list
+pnpm ls -r --depth -1
 
 # Run command in specific workspace
-yarn workspace <workspace-name> run <command>
+pnpm --filter <workspace-name> run <command>
 
 # Run command in all workspaces
-yarn workspaces foreach --all run <command>
+pnpm -r run <command>
 
 # Install production dependencies only (for server deployment)
-yarn install:server
+pnpm install:server
 ```
 
 ## Environment Requirements
 
 - **Node.js**: >=22
-- **Yarn**: ^4.9.1 (managed by packageManager field)
+- **pnpm**: >=12.8.1 (pinned by the `packageManager` field)
 - **Browser Targets**: Electron >= 35.0, modern browsers (see browserslist)
 
 ## Migration Notes
@@ -576,24 +581,24 @@ When working with older code, follow the newer patterns described in this guide.
 
 | Service             | Command                 | Port | Required                      |
 | ------------------- | ----------------------- | ---- | ----------------------------- |
-| Web Frontend (Vite) | `yarn start`            | 3001 | Yes                           |
-| Sync Server         | `yarn start:server-dev` | 5006 | Optional (sync features only) |
+| Web Frontend (Vite) | `pnpm start`            | 3001 | Yes                           |
+| Sync Server         | `pnpm start:server-dev` | 5006 | Optional (sync features only) |
 
 All storage is **SQLite** (file-based via `better-sqlite3`). No external databases or services are needed.
 
 ### Running the app
 
-- `yarn start` builds the plugins-service worker, loot-core browser backend, and starts the Vite dev server on port **3001**.
-- `yarn start:server-dev` starts both the sync server (port 5006) and the web frontend together.
-- The Vite HMR dev server serves many unbundled modules. In constrained environments, the browser may hit `ERR_INSUFFICIENT_RESOURCES`. If that happens, use `yarn build:browser` followed by serving the built output from `packages/desktop-client/build/` with proper COOP/COEP headers (`Cross-Origin-Opener-Policy: same-origin`, `Cross-Origin-Embedder-Policy: require-corp`).
+- `pnpm start` builds the plugins-service worker, loot-core browser backend, and starts the Vite dev server on port **3001**.
+- `pnpm start:server-dev` starts both the sync server (port 5006) and the web frontend together.
+- The Vite HMR dev server serves many unbundled modules. In constrained environments, the browser may hit `ERR_INSUFFICIENT_RESOURCES`. If that happens, use `pnpm build:browser` followed by serving the built output from `packages/desktop-client/build/` with proper COOP/COEP headers (`Cross-Origin-Opener-Policy: same-origin`, `Cross-Origin-Embedder-Policy: require-corp`).
 
 ### Lint, test, typecheck
 
 Standard commands documented in `package.json` scripts and the Quick Start section above:
 
-- `yarn lint` / `yarn lint:fix` (uses oxlint + oxfmt)
-- `yarn test` (lage across all workspaces)
-- `yarn typecheck` (tsgo + lage typecheck)
+- `pnpm lint` / `pnpm lint:fix` (uses oxlint + oxfmt)
+- `pnpm test` (lage across all workspaces)
+- `pnpm typecheck` (tsgo + lage typecheck)
 
 ### Testing and previewing the app
 
@@ -601,8 +606,8 @@ When running the app for manual testing or demos, use **"View demo"** on the ini
 
 ### Gotchas
 
-- The `engines` field requires **Node.js >=22** and **Yarn ^4.9.1**. The `.nvmrc` specifies `v24.18.1`.
-- Pre-commit hook runs `nano-staged` (oxfmt + oxlint, configured in `.nano-staged.json`) via Husky. Run `yarn prepare` once after install to set up hooks.
+- The `engines` field requires **Node.js >=22** and **pnpm >=12.8.1**. The `.nvmrc` specifies `v24.18.1`.
+- Pre-commit hook runs `nano-staged` (oxfmt + oxlint, configured in `.nano-staged.json`) via Husky. Run `pnpm prepare` once after install to set up hooks.
 - Lage caches test results in `.lage/`. If tests behave unexpectedly, clear with `rm -rf .lage`.
 - Native modules (`better-sqlite3`, `bcrypt`) require build tools (`gcc`, `make`, `python3`). These are pre-installed in the Cloud VM.
-- All yarn commands must be run from the repository root, never from child workspaces.
+- All pnpm commands must be run from the repository root, never from child workspaces.

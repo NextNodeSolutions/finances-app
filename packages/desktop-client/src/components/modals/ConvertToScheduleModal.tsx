@@ -7,6 +7,7 @@ import { useResponsive } from '@actual-app/components/hooks/useResponsive';
 import { InitialFocus } from '@actual-app/components/initial-focus';
 import { styles } from '@actual-app/components/styles';
 import { theme } from '@actual-app/components/theme';
+import { radius } from '@actual-app/components/tokens';
 import { View } from '@actual-app/components/view';
 
 import { Modal, ModalCloseButton, ModalHeader } from '#components/common/Modal';
@@ -49,7 +50,7 @@ export function ConvertToScheduleModal({
                 marginTop: 10,
                 padding: 10,
                 backgroundColor: theme.warningBackground,
-                borderRadius: 4,
+                borderRadius: radius.md,
               }}
             >
               <Trans count={daysUntilTransaction}>

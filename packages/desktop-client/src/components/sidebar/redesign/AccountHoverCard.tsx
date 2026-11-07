@@ -10,7 +10,7 @@ import { SpaceBetween } from '@actual-app/components/space-between';
 import { styles } from '@actual-app/components/styles';
 import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
-import { spacing } from '@actual-app/components/tokens';
+import { motion, radius, spacing } from '@actual-app/components/tokens';
 import { Tooltip } from '@actual-app/components/tooltip';
 import { View } from '@actual-app/components/view';
 import type { AccountEntity } from '@actual-app/core/types/models';
@@ -47,24 +47,41 @@ export function AccountHoverCard({
   return (
     <Tooltip
       content={
-        <View style={{ padding: spacing.md }}>
+        <View style={{ padding: `${spacing.xs}px ${spacing.xxs}px` }}>
           <SpaceBetween
-            gap={spacing.xs}
+            gap={spacing.sm}
             style={{
               justifyContent: 'space-between',
+              alignItems: 'center',
               '& .hover-visible': {
                 opacity: 0,
-                transition: 'opacity .25s',
+                transition: `opacity ${motion.base} ${motion.ease}`,
               },
-              '&:hover .hover-visible': {
+              '&:hover .hover-visible, & .hover-visible[data-focus-visible]': {
                 opacity: 1,
               },
             }}
           >
-            <Text style={{ fontWeight: 'bold' }}>{account.name}</Text>
+            <Text
+              style={{
+                fontSize: 13,
+                fontWeight: 600,
+                letterSpacing: '-0.005em',
+                color: theme.pageText,
+              }}
+            >
+              {account.name}
+            </Text>
             <Button
               aria-label={t('Toggle balance history')}
               variant="bare"
+              style={{
+                width: 22,
+                height: 22,
+                padding: 0,
+                borderRadius: radius.sm,
+                color: theme.pageTextLight,
+              }}
               onClick={() =>
                 setShowBalanceHistory(
                   showBalanceHistory === 'true' ? 'false' : 'true',
@@ -84,23 +101,24 @@ export function AccountHoverCard({
           {showBalanceHistory === 'true' && (
             <BalanceHistoryGraph
               accountId={account.id}
-              style={{ minWidth: 350, minHeight: 70 }}
+              style={{ minWidth: 350, minHeight: 70, marginTop: spacing.sm }}
             />
           )}
           {accountNote && (
             <Notes
               getStyle={() => ({
-                borderTop: `1px solid ${theme.tooltipBorder}`,
+                borderTop: `1px solid ${theme.hairline}`,
                 padding: 0,
-                paddingTop: spacing.sm,
-                marginTop: spacing.sm,
+                paddingTop: spacing.sm + spacing.xxs,
+                marginTop: spacing.sm + spacing.xxs,
+                color: theme.pageTextLight,
               })}
               notes={accountNote}
             />
           )}
         </View>
       }
-      style={{ ...styles.tooltip, borderRadius: '0px 5px 5px 0px' }}
+      style={{ ...styles.tooltip, padding: '8px 12px', marginLeft: spacing.xs }}
       placement="right top"
       triggerProps={{
         delay: 1000,

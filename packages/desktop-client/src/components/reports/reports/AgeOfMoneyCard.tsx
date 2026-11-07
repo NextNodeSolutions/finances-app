@@ -3,7 +3,6 @@ import { Trans, useTranslation } from 'react-i18next';
 
 import { Block } from '@actual-app/components/block';
 import { useResponsive } from '@actual-app/components/hooks/useResponsive';
-import { styles } from '@actual-app/components/styles';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 import { send } from '@actual-app/core/platform/client/connection';
@@ -11,6 +10,12 @@ import * as monthUtils from '@actual-app/core/shared/months';
 import type { AgeOfMoneyWidget } from '@actual-app/core/types/models';
 
 import { PrivacyFilter } from '#components/PrivacyFilter';
+import {
+  cardChartInset,
+  cardHeaderStyle,
+  cardHeadlineStyle,
+  cardSupportingStyle,
+} from '#components/reports/chart-theme';
 import { DateRange } from '#components/reports/DateRange';
 import { AgeOfMoneyGraph } from '#components/reports/graphs/AgeOfMoneyGraph';
 import { LoadingIndicator } from '#components/reports/LoadingIndicator';
@@ -105,7 +110,7 @@ export function AgeOfMoneyCard({
         onPointerEnter={onCardHover}
         onPointerLeave={onCardHoverEnd}
       >
-        <View style={{ flexDirection: 'row', padding: 20 }}>
+        <View style={cardHeaderStyle}>
           <View style={{ flex: 1 }}>
             <ReportCardName
               name={meta?.name || t('Age of Money')}
@@ -125,9 +130,8 @@ export function AgeOfMoneyCard({
             <View style={{ textAlign: 'right' }}>
               <Block
                 style={{
-                  ...styles.largeText,
-                  fontWeight: 500,
-                  marginBottom: 5,
+                  ...cardHeadlineStyle,
+                  marginBottom: 2,
                   color: getAgeColor(data.currentAge),
                 }}
               >
@@ -138,12 +142,7 @@ export function AgeOfMoneyCard({
                 </PrivacyFilter>
               </Block>
               {data.currentAge !== null && (
-                <Block
-                  style={{
-                    fontSize: 12,
-                    color: theme.pageTextSubdued,
-                  }}
-                >
+                <Block style={cardSupportingStyle}>
                   {getTrendIndicator(data.trend)}{' '}
                   {data.trend === 'up'
                     ? t('Improving')
@@ -172,7 +171,7 @@ export function AgeOfMoneyCard({
             data={data.graphData}
             compact
             showTooltip={!isEditing && !isNarrowWidth}
-            style={{ height: 'auto', flex: 1 }}
+            style={{ height: 'auto', flex: 1, ...cardChartInset }}
           />
         ) : (
           <LoadingIndicator />

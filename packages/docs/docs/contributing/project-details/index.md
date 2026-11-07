@@ -1,6 +1,6 @@
 # The Actual Project Structure
 
-Actual is made up of lots of different _packages_ organized as a monorepo using Yarn workspaces. This article covers how they all fit together to form the project you know as Actual.
+Actual is made up of lots of different _packages_ organized as a monorepo using pnpm workspaces. This article covers how they all fit together to form the project you know as Actual.
 
 All of our repositories can be found in the [Actual Budget](https://github.com/actualbudget) organization on GitHub, within that organization you will then find the repository containing the code for [Actual, Actual Server and the Docs](https://github.com/actualbudget/actual).
 
@@ -54,7 +54,7 @@ Synchronization server for multi-device support.
 - **Purpose**: Handles synchronization of budget data across multiple devices
 - **Technology**: Express-based server, currently transitioning to TypeScript (mostly JavaScript)
 - **Dependency**: Has a dependency on `@actual-app/web` (the desktop-client package)
-- **Deployment**: When you deploy Actual Server and run `yarn build:server` and `yarn install`, the Actual client is installed as a dependency
+- **Deployment**: When you deploy Actual Server and run `pnpm build:server` and `pnpm install`, the Actual client is installed as a dependency
 
 You can see this in the [package.json](https://github.com/actualbudget/actual/blob/master/packages/sync-server/package.json) file:
 
@@ -65,7 +65,7 @@ You can see this in the [package.json](https://github.com/actualbudget/actual/bl
   },
 ```
 
-The workspace reference ensures that changes to `@actual-app/web` are reflected in your server deployment. If you see any discrepancies, run `yarn build:server` to compile the latest.
+The workspace reference ensures that changes to `@actual-app/web` are reflected in your server deployment. If you see any discrepancies, run `pnpm build:server` to compile the latest.
 
 ### 6. component-library (`packages/component-library/` - aliased as `@actual-app/components`)
 
@@ -116,7 +116,7 @@ Documentation website built with Docusaurus.
 To run commands for a specific package, use:
 
 ```bash
-yarn workspace <workspace-name> run <command>
+pnpm --filter <workspace-name> run <command>
 ```
 
 For more information about development workflows, see the [Development Setup Guide](../development-setup.md).

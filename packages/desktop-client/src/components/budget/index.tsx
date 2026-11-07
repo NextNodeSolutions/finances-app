@@ -24,22 +24,23 @@ import {
 import { useCategories } from '#hooks/useCategories';
 import { useGlobalPref } from '#hooks/useGlobalPref';
 import { useLocalPref } from '#hooks/useLocalPref';
-import { useNavigate } from '#hooks/useNavigate';
 import { SheetNameProvider } from '#hooks/useSheetName';
 import { useSpreadsheet } from '#hooks/useSpreadsheet';
 import { useSyncedPref } from '#hooks/useSyncedPref';
 
+import { BudgetSkeleton } from './BudgetSkeleton';
 import { AutoSizingBudgetTable } from './DynamicBudgetTable';
 import * as envelopeBudget from './envelope/EnvelopeBudgetComponents';
 import { EnvelopeBudgetProvider } from './envelope/EnvelopeBudgetContext';
 import * as trackingBudget from './tracking/TrackingBudgetComponents';
 import { TrackingBudgetProvider } from './tracking/TrackingBudgetContext';
+import { useShowCategoryActivity } from './useShowCategoryActivity';
 import { prewarmAllMonths, prewarmMonth } from './util';
 
 export function Budget() {
   const currentMonth = monthUtils.currentMonth();
   const spreadsheet = useSpreadsheet();
-  const navigate = useNavigate();
+  const onShowActivity = useShowCategoryActivity();
   const [summaryCollapsed, setSummaryCollapsedPref] = useLocalPref(
     'budget.summaryCollapsed',
   );
@@ -120,32 +121,12 @@ export function Budget() {
     setSummaryCollapsedPref(!summaryCollapsed);
   };
 
-  const onApplyBudgetTemplatesInGroup = async categories => {
+  const onApplyBudgetTemplatesInGroup = (categories, month) => {
     applyBudgetAction.mutate({
-      month: startMonth,
+      month,
       type: 'apply-multiple-templates',
       args: {
         categories,
-      },
-    });
-  };
-
-  const onShowActivity = (categoryId, month) => {
-    const filterConditions = [
-      { field: 'category', op: 'is', value: categoryId, type: 'id' },
-      {
-        field: 'date',
-        op: 'is',
-        value: month,
-        options: { month: true },
-        type: 'date',
-      },
-    ];
-    void navigate('/accounts', {
-      state: {
-        goBack: true,
-        filterConditions,
-        categoryId,
       },
     });
   };
@@ -176,7 +157,18 @@ export function Budget() {
   };
 
   if (!initialized || !categoryGroups) {
-    return null;
+    return (
+      <View
+        style={{
+          ...styles.page,
+          paddingLeft: 8,
+          paddingRight: 8,
+          overflow: 'hidden',
+        }}
+      >
+        <BudgetSkeleton />
+      </View>
+    );
   }
 
   let table;
@@ -189,7 +181,6 @@ export function Budget() {
       >
         <AutoSizingBudgetTable
           type={budgetType}
-          prewarmStartMonth={startMonth}
           startMonth={startMonth}
           monthBounds={bounds}
           maxMonths={maxMonths}
@@ -218,7 +209,6 @@ export function Budget() {
       >
         <AutoSizingBudgetTable
           type={budgetType}
-          prewarmStartMonth={startMonth}
           startMonth={startMonth}
           monthBounds={bounds}
           maxMonths={maxMonths}
@@ -262,10 +252,6 @@ export function Budget() {
   );
 }
 
-export type BudgetSummaryProps = {
-  month: string;
-};
-
 export type CategoryMonthProps = {
   month: string;
   category: CategoryEntity;
@@ -282,7 +268,6 @@ export type CategoryGroupMonthProps = {
 };
 
 export type BudgetComponents = {
-  SummaryComponent: ComponentType<BudgetSummaryProps>;
   ExpenseCategoryComponent: ComponentType<CategoryMonthProps>;
   ExpenseGroupComponent: ComponentType<CategoryGroupMonthProps>;
   IncomeCategoryComponent: ComponentType<CategoryMonthProps>;
@@ -302,7 +287,6 @@ export function useBudgetComponents(): BudgetComponents {
 function useTrackingBudgetComponents(): BudgetComponents {
   return useMemo(
     () => ({
-      SummaryComponent: trackingBudget.BudgetSummary,
       ExpenseCategoryComponent: trackingBudget.ExpenseCategoryMonth,
       ExpenseGroupComponent: trackingBudget.ExpenseGroupMonth,
       IncomeCategoryComponent: trackingBudget.IncomeCategoryMonth,
@@ -317,7 +301,6 @@ function useTrackingBudgetComponents(): BudgetComponents {
 function useEnvelopeBudgetComponents(): BudgetComponents {
   return useMemo(
     () => ({
-      SummaryComponent: envelopeBudget.BudgetSummary,
       ExpenseCategoryComponent: envelopeBudget.ExpenseCategoryMonth,
       ExpenseGroupComponent: envelopeBudget.ExpenseGroupMonth,
       IncomeCategoryComponent: envelopeBudget.IncomeCategoryMonth,

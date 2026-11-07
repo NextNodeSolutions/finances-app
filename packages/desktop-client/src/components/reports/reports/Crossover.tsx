@@ -26,14 +26,19 @@ import { Link } from '#components/common/Link';
 import { EditablePageHeaderTitle } from '#components/EditablePageHeaderTitle';
 import { FinancialText } from '#components/FinancialText';
 import { Checkbox } from '#components/forms';
-import { MobileBackButton } from '#components/mobile/MobileBackButton';
 import { MobilePageHeader, Page, PageHeader } from '#components/Page';
 import { PrivacyFilter } from '#components/PrivacyFilter';
 import { AccountSelector } from '#components/reports/AccountSelector';
 import { CategorySelector } from '#components/reports/CategorySelector';
+import {
+  explainerStyle,
+  reportPanelStyle,
+} from '#components/reports/chart-theme';
 import { CrossoverGraph } from '#components/reports/graphs/CrossoverGraph';
 import { Header } from '#components/reports/Header';
 import { LoadingIndicator } from '#components/reports/LoadingIndicator';
+import { ReportBackButton } from '#components/reports/ReportBackButton';
+import { ReportMobileBackButton } from '#components/reports/ReportMobileBackButton';
 import { calculateTimeRange } from '#components/reports/reportRanges';
 import { createCrossoverSpreadsheet } from '#components/reports/spreadsheets/crossover-spreadsheet';
 import type { CrossoverData } from '#components/reports/spreadsheets/crossover-spreadsheet';
@@ -43,7 +48,6 @@ import { useCategories } from '#hooks/useCategories';
 import { useDashboardWidget } from '#hooks/useDashboardWidget';
 import { useFormat } from '#hooks/useFormat';
 import { useLocale } from '#hooks/useLocale';
-import { useNavigate } from '#hooks/useNavigate';
 import type { useSpreadsheet } from '#hooks/useSpreadsheet';
 import { addNotification } from '#notifications/notificationsSlice';
 import { useDispatch } from '#redux';
@@ -390,7 +394,6 @@ function CrossoverInner({ widget }: CrossoverInnerProps) {
   // Get target nest egg from spreadsheet data
   const targetNestEgg = displayData?.targetNestEgg ?? null;
 
-  const navigate = useNavigate();
   const { isNarrowWidth } = useResponsive();
 
   const title = widget?.meta?.name || t('Crossover Point');
@@ -429,12 +432,11 @@ function CrossoverInner({ widget }: CrossoverInnerProps) {
         isNarrowWidth ? (
           <MobilePageHeader
             title={title}
-            leftContent={
-              <MobileBackButton onPress={() => navigate('/reports')} />
-            }
+            leftContent={<ReportMobileBackButton />}
           />
         ) : (
           <PageHeader
+            leading={<ReportBackButton />}
             title={
               widget ? (
                 <EditablePageHeaderTitle
@@ -1033,23 +1035,29 @@ function CrossoverInner({ widget }: CrossoverInnerProps) {
         {/* Right content */}
         <View
           style={{
+            ...reportPanelStyle,
+            marginLeft: isNarrowWidth ? 20 : 10,
+            padding: 20,
             flex: 1,
           }}
         >
           {/* Header stats */}
-          <View
-            style={{
-              backgroundColor: theme.tableBackground,
-              padding: 20,
-              paddingTop: 10,
-              marginBottom: 10,
-            }}
-          >
-            <View style={{ textAlign: 'right' }}>
+          <View style={{ marginBottom: 12 }}>
+            <View
+              style={{
+                textAlign: 'right',
+                fontSize: 13,
+                lineHeight: '20px',
+                color: theme.pageTextLight,
+              }}
+            >
               <View
                 style={{
-                  ...styles.largeText,
-                  fontWeight: 400,
+                  ...styles.display,
+                  fontSize: 28,
+                  lineHeight: '34px',
+                  fontWeight: 300,
+                  color: theme.pageText,
                   marginBottom: 8,
                   whiteSpace: 'nowrap',
                 }}
@@ -1108,7 +1116,6 @@ function CrossoverInner({ widget }: CrossoverInnerProps) {
           {/* Graph area */}
           <View
             style={{
-              backgroundColor: theme.tableBackground,
               flexDirection: 'row',
               flex: '1 0 auto',
               minHeight: 400,
@@ -1117,7 +1124,6 @@ function CrossoverInner({ widget }: CrossoverInnerProps) {
             <View
               style={{
                 flex: 1,
-                padding: 10,
                 height: '100%',
               }}
             >
@@ -1129,14 +1135,7 @@ function CrossoverInner({ widget }: CrossoverInnerProps) {
           </View>
 
           {/* Description */}
-          <View
-            style={{
-              backgroundColor: theme.tableBackground,
-              marginTop: 10,
-              padding: 20,
-              userSelect: 'none',
-            }}
-          >
+          <View style={explainerStyle}>
             <Paragraph>
               <strong>
                 <Trans>What is the Crossover Point?</Trans>

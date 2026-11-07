@@ -12,6 +12,7 @@ import { useResponsive } from '@actual-app/components/hooks/useResponsive';
 import { styles } from '@actual-app/components/styles';
 import { TextOneLine } from '@actual-app/components/text-one-line';
 import { theme } from '@actual-app/components/theme';
+import { radius } from '@actual-app/components/tokens';
 import { View } from '@actual-app/components/view';
 import type { AccountEntity } from '@actual-app/core/types/models';
 import { css, cx } from '@emotion/css';
@@ -90,7 +91,7 @@ function AccountList({
       <View
         style={{
           overflow: 'auto',
-          padding: '5px 0',
+          padding: 4,
           ...(!embedded && { maxHeight: 175 }),
         }}
       >
@@ -235,7 +236,8 @@ function AccountItem({
   item,
   className,
   highlighted,
-  embedded,
+  // Kept out of the DOM props; items look the same embedded or not.
+  embedded: _embedded,
   ...props
 }: AccountItemProps) {
   const { isNarrowWidth } = useResponsive();
@@ -282,9 +284,9 @@ function AccountItem({
           color: highlighted
             ? theme.menuAutoCompleteItemTextHover
             : theme.menuAutoCompleteItemText,
-          padding: 4,
+          padding: '5px 10px',
           paddingLeft: 20,
-          borderRadius: embedded ? 4 : 0,
+          borderRadius: radius.sm,
           border: 'none',
           textAlign: 'left',
           font: 'inherit',

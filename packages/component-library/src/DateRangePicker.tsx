@@ -61,11 +61,10 @@ type DateRangePickerProps = {
 const NO_MAX = '9999-12-31';
 
 const sectionTitleStyle = {
-  fontWeight: 'bold',
+  fontWeight: 500,
   marginBottom: 8,
-  fontSize: 12,
-  textTransform: 'uppercase',
-  color: theme.pageTextSubdued,
+  fontSize: 11.5,
+  color: theme.menuItemTextHeader,
 } satisfies CSSProperties;
 
 export function DateRangePicker({
@@ -212,11 +211,11 @@ export function DateRangePicker({
         <View style={{ flexDirection: isNarrowWidth ? 'column' : 'row' }}>
           <View
             style={{
-              padding: 15,
+              padding: 16,
               ...(hasSidebar &&
                 (isNarrowWidth
-                  ? { borderBottom: `1px solid ${theme.tableBorder}` }
-                  : { borderRight: `1px solid ${theme.tableBorder}` })),
+                  ? { borderBottom: `1px solid ${theme.hairline}` }
+                  : { borderRight: `1px solid ${theme.hairline}` })),
             }}
           >
             {isDay ? (
@@ -244,7 +243,7 @@ export function DateRangePicker({
           </View>
 
           {hasSidebar && (
-            <View style={{ padding: 15, minWidth: 140, gap: 16 }}>
+            <View style={{ padding: 16, minWidth: 140, gap: 16 }}>
               {showGranularityToggle && (
                 <View>
                   <Text style={sectionTitleStyle}>{labels.selectBy}</Text>
@@ -290,6 +289,7 @@ export function DateRangePicker({
                           style={{
                             justifyContent: 'flex-start',
                             fontSize: 13,
+                            padding: '5px 10px',
                             // Match primary's 1px border so toggling the
                             // active preset doesn't shift the list.
                             ...(!isActive && {

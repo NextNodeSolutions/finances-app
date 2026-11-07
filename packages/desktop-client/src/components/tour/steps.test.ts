@@ -3,7 +3,12 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 import { getTourSteps } from './steps';
 import type { TourStepDeps } from './steps';
 
-const deps: TourStepDeps = { navigate: vi.fn(), budgetType: 'envelope' };
+const deps: TourStepDeps = {
+  navigate: vi.fn(),
+  budgetType: 'envelope',
+  isBankSyncOn: true,
+  isTagsOn: true,
+};
 
 describe('getTourSteps', () => {
   it('returns a tour that starts with a centered welcome step', () => {
@@ -39,6 +44,39 @@ describe('getTourSteps', () => {
       expect(summaryStep?.target).toBeTruthy();
     },
   );
+});
+
+describe('optional features', () => {
+  function getStepText(
+    stepId: string,
+    features: Pick<TourStepDeps, 'isBankSyncOn' | 'isTagsOn'>,
+  ): string {
+    const step = getTourSteps('budget-tour', { ...deps, ...features }).find(
+      ({ id }) => id === stepId,
+    );
+    return JSON.stringify(step?.content);
+  }
+
+  it('mentions linking a bank only while bank sync is on', () => {
+    expect(
+      getStepText('add-account', { isBankSyncOn: true, isTagsOn: true }),
+    ).toContain('link the account to your bank');
+    expect(
+      getStepText('add-account', { isBankSyncOn: false, isTagsOn: true }),
+    ).not.toContain('bank-sync');
+  });
+
+  it('mentions the tags page only while tags are on', () => {
+    expect(
+      getStepText('sidebar-navigation', { isBankSyncOn: true, isTagsOn: true }),
+    ).toContain('tags');
+    expect(
+      getStepText('sidebar-navigation', {
+        isBankSyncOn: true,
+        isTagsOn: false,
+      }),
+    ).not.toContain('tags');
+  });
 });
 
 // In test mode, monthUtils.currentMonth() returns '2017-01'

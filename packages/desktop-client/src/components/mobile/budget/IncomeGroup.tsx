@@ -16,14 +16,47 @@ import type { CategoryGroupEntity } from '@actual-app/core/types/models';
 import { css } from '@emotion/css';
 import { AutoTextSize } from 'auto-text-size';
 
+import {
+  AMOUNT_CHIP_INSET,
+  mobileCardStyle,
+  mobileFigureLabelStyle,
+} from '#components/mobile/utils';
 import { PrivacyFilter } from '#components/PrivacyFilter';
 import { CellValue } from '#components/spreadsheet/CellValue';
 import { useFormat } from '#hooks/useFormat';
 import { useSyncedPref } from '#hooks/useSyncedPref';
 import { envelopeBudget, trackingBudget } from '#spreadsheet/bindings';
 
-import { getColumnWidth, ROW_HEIGHT } from './BudgetTable';
+import {
+  getColumnWidth,
+  GROUP_NAME_BUTTON_LEFT_INSET,
+  ROW_HEIGHT,
+} from './BudgetTable';
 import { IncomeCategoryList } from './IncomeCategoryList';
+
+// Right inset of the row holding a group's column totals.
+const CELLS_ROW_INSET = 5;
+
+const incomeColumnLabelStyle: CSSProperties = {
+  ...mobileFigureLabelStyle,
+  marginBottom: 0,
+};
+
+function incomeGroupAmountStyle(columnWidth: string): CSSProperties {
+  return {
+    ...styles.tnum,
+    width: columnWidth,
+    justifyContent: 'center',
+    alignItems: 'flex-end',
+    paddingLeft: 5,
+    // The cells row already insets 5px; the rest of the chip inset lines the
+    // totals up with the figures inside the category amount chips below.
+    paddingRight: AMOUNT_CHIP_INSET - CELLS_ROW_INSET,
+    textAlign: 'right',
+    fontWeight: 500,
+    color: theme.tableRowHeaderText,
+  };
+}
 
 type IncomeGroupProps = {
   categoryGroup: CategoryGroupEntity;
@@ -72,18 +105,31 @@ export function IncomeGroup({
           flexDirection: 'row',
           alignItems: 'center',
           justifyContent: 'flex-end',
-          marginTop: 50,
-          marginBottom: 5,
-          marginRight: 15,
+          marginTop: 22,
+          marginBottom: 6,
+          marginRight: 21,
         }}
       >
         {budgetType === 'tracking' && (
-          <Label title={t('Budgeted')} style={{ width: columnWidth }} />
+          <Label
+            title={t('Budgeted')}
+            style={{ ...incomeColumnLabelStyle, width: columnWidth }}
+          />
         )}
-        <Label title={t('Received')} style={{ width: columnWidth }} />
+        <Label
+          title={t('Received')}
+          style={{ ...incomeColumnLabelStyle, width: columnWidth }}
+        />
       </View>
 
-      <Card style={{ marginTop: 0 }}>
+      <Card
+        style={{
+          ...mobileCardStyle,
+          marginTop: 0,
+          marginLeft: 8,
+          marginRight: 8,
+        }}
+      >
         <IncomeGroupHeader
           group={categoryGroup}
           month={month}
@@ -127,11 +173,11 @@ function IncomeGroupHeader({
         cursor: 'pointer',
         height: ROW_HEIGHT,
         borderBottomWidth: 1,
-        borderColor: theme.tableBorder,
+        borderColor: theme.hairline,
         flexDirection: 'row',
         alignItems: 'center',
-        paddingLeft: 5,
-        paddingRight: 5,
+        paddingLeft: 6,
+        paddingRight: 6,
         opacity: group.hidden ? 0.5 : undefined,
         backgroundColor: monthUtils.isCurrentMonth(month)
           ? theme.budgetHeaderCurrentMonth
@@ -202,6 +248,7 @@ function IncomeGroupName({
         variant="bare"
         style={{
           maxWidth: sidebarColumnWidth,
+          paddingLeft: GROUP_NAME_BUTTON_LEFT_INSET,
         }}
         onPress={() => onEdit(group.id)}
       >
@@ -218,6 +265,8 @@ function IncomeGroupName({
               width: sidebarColumnWidth,
               textAlign: 'left',
               ...styles.smallText,
+              fontWeight: 500,
+              color: theme.tableRowHeaderText,
             }}
             data-testid="category-group-name"
           >
@@ -225,8 +274,8 @@ function IncomeGroupName({
           </Text>
           <SvgCheveronRight
             style={{ flexShrink: 0, color: theme.tableTextSubdued }}
-            width={14}
-            height={14}
+            width={12}
+            height={12}
           />
         </View>
       </Button>
@@ -258,7 +307,7 @@ function IncomeGroupCells({ group }: IncomeGroupCellsProps) {
         flexDirection: 'row',
         justifyContent: 'flex-end',
         alignItems: 'center',
-        paddingRight: 5,
+        paddingRight: CELLS_ROW_INSET,
       }}
     >
       {budgeted && (
@@ -275,16 +324,7 @@ function IncomeGroupCells({ group }: IncomeGroupCellsProps) {
                   minFontSizePx={6}
                   maxFontSizePx={12}
                   mode="oneline"
-                  style={{
-                    ...styles.tnum,
-                    width: columnWidth,
-                    justifyContent: 'center',
-                    alignItems: 'flex-end',
-                    paddingLeft: 5,
-                    textAlign: 'right',
-                    fontSize: 12,
-                    fontWeight: '500',
-                  }}
+                  style={incomeGroupAmountStyle(columnWidth)}
                 >
                   {format(value, type)}
                 </AutoTextSize>
@@ -306,16 +346,7 @@ function IncomeGroupCells({ group }: IncomeGroupCellsProps) {
                 minFontSizePx={6}
                 maxFontSizePx={12}
                 mode="oneline"
-                style={{
-                  ...styles.tnum,
-                  width: columnWidth,
-                  justifyContent: 'center',
-                  alignItems: 'flex-end',
-                  paddingLeft: 5,
-                  textAlign: 'right',
-                  fontSize: 12,
-                  fontWeight: '500',
-                }}
+                style={incomeGroupAmountStyle(columnWidth)}
               >
                 {format(value, type)}
               </AutoTextSize>

@@ -1,26 +1,31 @@
-import React, { useLayoutEffect, useMemo, useRef, useState } from 'react';
-import type { KeyboardEvent } from 'react';
+import React, { useLayoutEffect, useRef, useState } from 'react';
+import type { KeyboardEvent, ReactNode } from 'react';
 
 import { styles } from '@actual-app/components/styles';
 import { theme } from '@actual-app/components/theme';
+import { spacing } from '@actual-app/components/tokens';
 import { View } from '@actual-app/components/view';
-import { q } from '@actual-app/core/shared/query';
 import type {
   CategoryEntity,
   CategoryGroupEntity,
 } from '@actual-app/core/types/models';
 
 import type { DropPosition } from '#components/sort';
-import { SchedulesProvider } from '#hooks/useCachedSchedules';
 import { useCategories } from '#hooks/useCategories';
 import { useGlobalPref } from '#hooks/useGlobalPref';
 import { useLocalPref } from '#hooks/useLocalPref';
+import type { useOverspentCategories } from '#hooks/useOverspentCategories';
 
 import { BudgetCategories } from './BudgetCategories';
-import { BudgetSummaries } from './BudgetSummaries';
+import type { NewBudgetItem } from './BudgetCategories';
+import { getCategoryColumnWidth } from './budgetMonths';
+import { BudgetToolbar } from './BudgetToolbar';
 import { BudgetTotals } from './BudgetTotals';
-import { MonthsProvider } from './MonthsContext';
+import { MonthColumnSummaries } from './MonthColumnSummaries';
+import { MonthsContext, MonthsProvider } from './MonthsContext';
 import type { MonthBounds } from './MonthsContext';
+import { useBudgetPanels } from './panels/useBudgetPanels';
+import { useMonthCrossfade } from './useMonthCrossfade';
 import {
   findSortDown,
   findSortUp,
@@ -30,7 +35,6 @@ import {
 
 type BudgetTableProps = {
   type: string;
-  prewarmStartMonth: string;
   startMonth: string;
   numMonths: number;
   monthBounds: MonthBounds;
@@ -56,12 +60,20 @@ type BudgetTableProps = {
   }) => void;
   onShowActivity: (id: CategoryEntity['id'], month?: string) => void;
   onBudgetAction: (month: string, type: string, args: unknown) => void;
+  /** The month details, the Over budget filter and ⇧T act on. */
+  focusedMonth: string;
+  onFocusMonth: (month: string) => void;
+  /** The focused month's overspent categories, for the filter. */
+  overspent: ReturnType<typeof useOverspentCategories>;
+  /** Compact per-month summaries above the columns (no rail beside). */
+  hasColumnSummaries: boolean;
+  /** Shown beside the table, under the toolbar: the month rail. */
+  aside?: ReactNode;
 };
 
 export function BudgetTable(props: BudgetTableProps) {
   const {
     type,
-    prewarmStartMonth,
     startMonth,
     numMonths,
     monthBounds,
@@ -75,17 +87,36 @@ export function BudgetTable(props: BudgetTableProps) {
     onReorderGroup,
     onShowActivity,
     onBudgetAction,
+    focusedMonth,
+    onFocusMonth,
+    overspent,
+    hasColumnSummaries,
+    aside,
   } = props;
+  const { openCategory } = useBudgetPanels();
+  const crossfadeRef = useMonthCrossfade(startMonth);
+  const [newItem, setNewItem] = useState<NewBudgetItem>(null);
+  const [isOverBudgetOnly, setIsOverBudgetOnly] = useState(false);
 
   const { data: { grouped: categoryGroups } = { grouped: [] } } =
     useCategories();
   const [collapsedGroupIds = [], setCollapsedGroupIdsPref] =
     useLocalPref('budget.collapsed');
-  const [showHiddenCategories, setShowHiddenCategoriesPef] = useLocalPref(
-    'budget.showHiddenCategories',
-  );
+  const [showHiddenCategories] = useLocalPref('budget.showHiddenCategories');
   const [categoryExpandedStatePref] = useGlobalPref('categoryExpandedState');
-  const categoryExpandedState = categoryExpandedStatePref ?? 0;
+  const categoryWidth = getCategoryColumnWidth(categoryExpandedStatePref ?? 0);
+  const overBudgetIds = new Set(
+    overspent.categories
+      .filter(
+        category =>
+          showHiddenCategories ||
+          !(
+            category.hidden ||
+            categoryGroups.find(group => group.id === category.group)?.hidden
+          ),
+      )
+      .map(category => category.id),
+  );
   const [editing, setEditing] = useState<{ id: string; cell: string } | null>(
     null,
   );
@@ -213,24 +244,9 @@ export function BudgetTable(props: BudgetTableProps) {
     }
   };
 
-  const onCollapse = (collapsedIds: string[]) => {
-    setCollapsedGroupIdsPref(collapsedIds);
-  };
-
-  const onToggleHiddenCategories = () => {
-    setShowHiddenCategoriesPef(!showHiddenCategories);
-  };
-
-  const toggleHiddenCategories = () => {
-    onToggleHiddenCategories();
-  };
-
-  const expandAllCategories = () => {
-    onCollapse([]);
-  };
-
-  const collapseAllCategories = () => {
-    onCollapse(categoryGroups.map(g => g.id));
+  const onAddCategory = (groupId: CategoryGroupEntity['id']) => {
+    setCollapsedGroupIdsPref(collapsedGroupIds.filter(id => id !== groupId));
+    setNewItem({ type: 'category', groupId });
   };
 
   const _onShowActivity = (id: string, month?: string) => {
@@ -243,95 +259,118 @@ export function BudgetTable(props: BudgetTableProps) {
     onShowActivity(id, month);
   };
 
-  const schedulesQuery = useMemo(() => q('schedules').select('*'), []);
-
   return (
-    <View
-      data-testid="budget-table"
-      style={{
-        flex: 1,
-        ...(styles.lightScrollbar && {
-          '& ::-webkit-scrollbar': {
-            backgroundColor: 'transparent',
-          },
-          '& ::-webkit-scrollbar-thumb:vertical': {
-            backgroundColor: theme.pageTextSubdued,
-            // changed from tableHeaderBackground. pageTextSubdued is always visible on pageBackground
-          },
-        }),
-      }}
-    >
+    <View style={{ flex: 1, minWidth: 0, minHeight: 0 }}>
+      <BudgetToolbar
+        onAddGroup={() => setNewItem({ type: 'group' })}
+        onAddCategory={onAddCategory}
+        overBudget={{
+          count: overBudgetIds.size,
+          isOn: isOverBudgetOnly,
+          onToggle: () => setIsOverBudgetOnly(!isOverBudgetOnly),
+        }}
+      />
       <View
         style={{
+          flex: 1,
+          minHeight: 0,
           flexDirection: 'row',
-          overflow: 'hidden',
-          flexShrink: 0,
-          // This is necessary to align with the table because the
-          // table has this padding to allow the shadow to show
-          paddingLeft: 5,
-          paddingRight: 5 + getScrollbarWidth(),
+          alignItems: 'stretch',
+          gap: spacing.lg,
         }}
       >
-        <View style={{ width: 200 + 100 * categoryExpandedState }} />
-        <MonthsProvider
-          startMonth={prewarmStartMonth}
-          numMonths={numMonths}
-          monthBounds={monthBounds}
-          type={type}
-        >
-          <BudgetSummaries />
-        </MonthsProvider>
-      </View>
-
-      <MonthsProvider
-        startMonth={startMonth}
-        numMonths={numMonths}
-        monthBounds={monthBounds}
-        type={type}
-      >
-        <BudgetTotals
-          toggleHiddenCategories={toggleHiddenCategories}
-          expandAllCategories={expandAllCategories}
-          collapseAllCategories={collapseAllCategories}
-        />
         <View
-          ref={scrollContainerRef}
-          data-testid="budget-table-scroll-container"
+          data-testid="budget-table"
           style={{
-            overflowY: 'scroll',
-            overflowAnchor: 'none',
             flex: 1,
-            paddingLeft: 5,
-            paddingRight: 5,
+            minWidth: 0,
+            minHeight: 0,
+            ...(styles.lightScrollbar && {
+              '& ::-webkit-scrollbar': {
+                backgroundColor: 'transparent',
+              },
+              '& ::-webkit-scrollbar-thumb:vertical': {
+                // A slim pill in the subdued table tone, inset from the gutter.
+                backgroundColor: theme.tableTextSubdued,
+                backgroundClip: 'padding-box',
+                border: '3px solid transparent',
+                borderRadius: 999,
+              },
+            }),
           }}
         >
-          <View
-            style={{
-              flexShrink: 0,
-            }}
-            onKeyDown={onKeyDown}
+          <MonthsProvider
+            startMonth={startMonth}
+            numMonths={numMonths}
+            monthBounds={monthBounds}
+            type={type}
           >
-            <SchedulesProvider query={schedulesQuery}>
-              <BudgetCategories
-                categoryGroups={categoryGroups}
-                editingCell={editing}
-                onEditMonth={onEditMonth}
-                onEditName={onEditName}
-                onSaveCategory={onSaveCategory}
-                onSaveGroup={onSaveGroup}
-                onDeleteCategory={onDeleteCategory}
-                onDeleteGroup={onDeleteGroup}
-                onReorderCategory={_onReorderCategory}
-                onReorderGroup={_onReorderGroup}
-                onBudgetAction={onBudgetAction}
-                onShowActivity={_onShowActivity}
-                onApplyBudgetTemplatesInGroup={onApplyBudgetTemplatesInGroup}
-                onSortCategories={onSortCategories}
-              />
-            </SchedulesProvider>
-          </View>
+            <View innerRef={crossfadeRef} style={{ flex: 1, minHeight: 0 }}>
+              {hasColumnSummaries && (
+                <MonthsContext.Consumer>
+                  {({ months }) => (
+                    <View
+                      style={{
+                        paddingLeft: 5,
+                        paddingRight: 5 + getScrollbarWidth(),
+                        paddingBottom: 6,
+                      }}
+                    >
+                      <MonthColumnSummaries
+                        months={months}
+                        budgetType={
+                          type === 'tracking' ? 'tracking' : 'envelope'
+                        }
+                        focusedMonth={focusedMonth}
+                        onFocusMonth={onFocusMonth}
+                        categoryWidth={categoryWidth}
+                      />
+                    </View>
+                  )}
+                </MonthsContext.Consumer>
+              )}
+              <BudgetTotals />
+              <View
+                ref={scrollContainerRef}
+                data-testid="budget-table-scroll-container"
+                style={{
+                  overflowY: 'scroll',
+                  overflowAnchor: 'none',
+                  flex: 1,
+                  paddingLeft: 5,
+                  paddingRight: 5,
+                }}
+              >
+                <View style={{ flexShrink: 0 }} onKeyDown={onKeyDown}>
+                  <BudgetCategories
+                    categoryGroups={categoryGroups}
+                    editingCell={editing}
+                    onEditMonth={onEditMonth}
+                    onEditName={onEditName}
+                    onSaveCategory={onSaveCategory}
+                    onSaveGroup={onSaveGroup}
+                    onDeleteCategory={onDeleteCategory}
+                    onDeleteGroup={onDeleteGroup}
+                    onReorderCategory={_onReorderCategory}
+                    onReorderGroup={_onReorderGroup}
+                    onBudgetAction={onBudgetAction}
+                    onShowActivity={_onShowActivity}
+                    onApplyBudgetTemplatesInGroup={
+                      onApplyBudgetTemplatesInGroup
+                    }
+                    onSortCategories={onSortCategories}
+                    newItem={newItem}
+                    onNewItemChange={setNewItem}
+                    visibleCategoryIds={isOverBudgetOnly ? overBudgetIds : null}
+                    onOpenDetails={id => openCategory(id, focusedMonth)}
+                  />
+                </View>
+              </View>
+            </View>
+          </MonthsProvider>
         </View>
-      </MonthsProvider>
+        {aside}
+      </View>
     </View>
   );
 }

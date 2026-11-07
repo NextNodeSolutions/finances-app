@@ -23,10 +23,10 @@ runs:
       with:
         node-version: 24
         package-manager-cache: false
-    - name: Install yarn
-      run: npm install -g yarn
+    - name: Install pnpm
+      working-directory: ${{ inputs.working-directory }}
+      run: npm install -g "$(node -p "require('./package.json').packageManager")"
       shell: bash
-      if: ${{ env.ACT }}
     - name: Get Node version
       id: get-node
       run: echo "version=$(node -v)" >> "$GITHUB_OUTPUT"
@@ -36,17 +36,25 @@ runs:
       if: ${{ inputs.cache == 'true' }}
       id: cache
       with:
-        path: ${{ format('{0}/**/node_modules', inputs.working-directory) }}
-        key: yarn-v1-${{ runner.os }}-${{ steps.get-node.outputs.version }}-${{ hashFiles(format('{0}/**/yarn.lock', inputs.working-directory)) }}
-    - name: Cache Yarn download cache
+        path: |
+          ${{ format('{0}/node_modules', inputs.working-directory) }}
+          ${{ format('{0}/packages/*/node_modules', inputs.working-directory) }}
+        key: pnpm-v1-${{ runner.os }}-${{ steps.get-node.outputs.version }}-${{ hashFiles(format('{0}/pnpm-lock.yaml', inputs.working-directory)) }}
+    - name: Get pnpm store path
+      id: pnpm-store
+      if: ${{ inputs.cache == 'true' && steps.cache.outputs.cache-hit != 'true' }}
+      working-directory: ${{ inputs.working-directory }}
+      run: echo "path=$(pnpm store path)" >> "$GITHUB_OUTPUT"
+      shell: bash
+    - name: Cache pnpm store
       uses: actions/cache@cdf6c1fa76f9f475f3d7449005a359c84ca0f306 # v5.0.3
       if: ${{ inputs.cache == 'true' && steps.cache.outputs.cache-hit != 'true' }}
       with:
-        path: ${{ format('{0}/.yarn/cache', inputs.working-directory) }}
-        key: yarn-dl-${{ runner.os }}-${{ steps.get-node.outputs.version }}-${{ hashFiles(format('{0}/**/yarn.lock', inputs.working-directory)) }}
+        path: ${{ steps.pnpm-store.outputs.path }}
+        key: pnpm-store-${{ runner.os }}-${{ steps.get-node.outputs.version }}-${{ hashFiles(format('{0}/pnpm-lock.yaml', inputs.working-directory)) }}
         restore-keys: |
-          yarn-dl-${{ runner.os }}-${{ steps.get-node.outputs.version }}-
-          yarn-dl-${{ runner.os }}-
+          pnpm-store-${{ runner.os }}-${{ steps.get-node.outputs.version }}-
+          pnpm-store-${{ runner.os }}-
     - name: Ensure Lage cache directory exists
       run: mkdir -p "$WORKING_DIRECTORY/node_modules/.cache/lage"
       shell: bash
@@ -62,12 +70,12 @@ runs:
           lage-${{ runner.os }}-${{ github.job }}-
     - name: Install
       working-directory: ${{ inputs.working-directory }}
-      run: yarn --immutable
+      run: pnpm install --frozen-lockfile
       shell: bash
       if: steps.cache.outputs.cache-hit != 'true'
     - name: Prune Lage cache
       working-directory: ${{ inputs.working-directory }}
-      run: yarn lage cache --prune 7
+      run: pnpm exec lage cache --prune 7
       shell: bash
       if: ${{ inputs.cache == 'true' }}
     - name: Download translations

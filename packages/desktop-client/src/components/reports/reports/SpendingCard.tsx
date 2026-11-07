@@ -1,8 +1,6 @@
 import React, { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
-import { Block } from '@actual-app/components/block';
-import { styles } from '@actual-app/components/styles';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 import * as monthUtils from '@actual-app/core/shared/months';
@@ -10,7 +8,13 @@ import type { SpendingWidget } from '@actual-app/core/types/models';
 
 import { FinancialText } from '#components/FinancialText';
 import { PrivacyFilter } from '#components/PrivacyFilter';
+import {
+  cardChartInset,
+  cardHeaderStyle,
+  cardHeadlineStyle,
+} from '#components/reports/chart-theme';
 import { DateRange } from '#components/reports/DateRange';
+import { DeltaLine } from '#components/reports/DeltaLine';
 import { SpendingGraph } from '#components/reports/graphs/SpendingGraph';
 import { LoadingIndicator } from '#components/reports/LoadingIndicator';
 import { ReportCard } from '#components/reports/ReportCard';
@@ -86,6 +90,15 @@ export function SpendingCard({
       data.intervalData[todayDay][selection] -
         data.intervalData[todayDay].compare,
     );
+  // How far this month's spending sits from the comparison, as a share of
+  // the comparison. Spending more is the bad side.
+  const isSpendingMore = (difference ?? 0) > 0;
+  const comparisonSpent =
+    data && Math.abs(data.intervalData[todayDay][selection]);
+  const differenceShare =
+    difference && comparisonSpent
+      ? Math.round((Math.abs(difference) / comparisonSpent) * 100)
+      : null;
 
   return (
     <ReportCard
@@ -100,7 +113,7 @@ export function SpendingCard({
         onPointerEnter={() => setIsCardHovered(true)}
         onPointerLeave={() => setIsCardHovered(false)}
       >
-        <View style={{ flexDirection: 'row', padding: 20 }}>
+        <View style={cardHeaderStyle}>
           <View style={{ flex: 1 }}>
             <ReportCardName
               name={meta?.name || t('Monthly Spending')}
@@ -124,34 +137,34 @@ export function SpendingCard({
             />
           </View>
           {data && (
-            <View style={{ textAlign: 'right' }}>
-              <Block
-                style={{
-                  ...styles.mediumText,
-                  fontWeight: 500,
-                  marginBottom: 5,
-                  color:
-                    difference === 0 || difference == null
-                      ? theme.reportsNumberNeutral
-                      : difference > 0
-                        ? theme.reportsNumberNegative
-                        : theme.reportsNumberPositive,
-                }}
-              >
+            <View style={{ alignItems: 'flex-end' }}>
+              <PrivacyFilter activationFilters={[!isCardHovered]}>
+                <FinancialText style={cardHeadlineStyle}>
+                  {(difference && difference > 0 ? '+' : '') +
+                    format(difference || 0, 'financial')}
+                </FinancialText>
+              </PrivacyFilter>
+              {differenceShare !== null && (
                 <PrivacyFilter activationFilters={[!isCardHovered]}>
-                  <FinancialText>
-                    {data &&
-                      (difference && difference > 0 ? '+' : '') +
-                        format(difference || 0, 'financial')}
-                  </FinancialText>
+                  <DeltaLine
+                    direction={isSpendingMore ? 'up' : 'down'}
+                    color={
+                      isSpendingMore
+                        ? theme.reportsNumberNegative
+                        : theme.reportsNumberPositive
+                    }
+                    style={{ marginTop: 2 }}
+                  >
+                    {format(differenceShare, 'percentage')}
+                  </DeltaLine>
                 </PrivacyFilter>
-              </Block>
+              )}
             </View>
           )}
         </View>
         {data ? (
           <SpendingGraph
-            style={{ flex: 1 }}
+            style={{ flex: 1, ...cardChartInset }}
             compact
             data={data}
             mode={spendingReportMode}

@@ -15,33 +15,51 @@ import { theme } from './theme';
 import {
   componentSizeControl,
   componentSizeText,
+  elevation,
+  motion,
+  radius,
   sizeResponsiveStyles,
   type ComponentSize,
 } from './tokens';
 
+// Inputs inset their text 2px less than buttons so a value lines up with
+// the label of the button beside it while the field still reads as wider.
+const INPUT_PADDING_X_OFFSET = 2;
+
+const mediumControl = componentSizeControl.medium.wide;
+
 export const baseInputStyle = {
   outline: 0,
-  backgroundColor: theme.tableBackground,
+  backgroundColor: theme.formInputBackground,
   color: theme.formInputText,
   margin: 0,
-  padding: 5,
-  borderRadius: 4,
+  padding: `${mediumControl.paddingY}px ${mediumControl.paddingX - INPUT_PADDING_X_OFFSET}px`,
+  borderRadius: radius.md,
   border: '1px solid ' + theme.formInputBorder,
+  transition: ['border-color', 'box-shadow', 'background-color']
+    .map(property => `${property} ${motion.base} ${motion.ease}`)
+    .join(', '),
+};
+
+// The focused field: sky border plus a soft 3px halo outside it.
+export const focusedInputStyle = {
+  borderColor: theme.formInputBorderSelected,
+  boxShadow: '0 0 0 3px ' + theme.formInputShadowSelected,
 };
 
 // Builds the padding/typography overrides for an explicit `size`,
-// varying by breakpoint via media queries (no hooks). Inputs use a
-// uniform padding on all sides, like today's default.
+// varying by breakpoint via media queries (no hooks). Medium matches the
+// default (size omitted) look.
 const getInputSizeStyles = (size: ComponentSize): Record<string, unknown> => {
   const control = componentSizeControl[size];
   const text = componentSizeText[size];
 
   const getGroupStyles = (group: keyof typeof control) => {
-    const { paddingY, minHeight } = control[group];
+    const { paddingY, paddingX, minHeight } = control[group];
     const { fontSize, lineHeight } = text[group];
 
     return {
-      padding: paddingY,
+      padding: `${paddingY}px ${paddingX - INPUT_PADDING_X_OFFSET}px`,
       ...(minHeight != null ? { minHeight } : null),
       fontSize,
       // Medium matches today's default look, which inherits line-height;
@@ -79,12 +97,12 @@ const buildInputClassName = (
     whiteSpace: 'nowrap',
     overflow: 'hidden',
     flexShrink: 0,
-    '&[data-focused]': {
-      border: '1px solid ' + theme.formInputBorderSelected,
-      boxShadow: '0 1px 1px ' + theme.formInputShadowSelected,
-    },
+    '&[data-hovered]': { borderColor: theme.hairlineStrong },
+    '&[data-focused]': focusedInputStyle,
     '&[data-disabled]': {
       color: theme.formInputTextPlaceholder,
+      backgroundColor: theme.buttonNormalDisabledBackground,
+      borderColor: theme.buttonNormalDisabledBorder,
     },
     '::placeholder': { color: theme.formInputTextPlaceholder },
     ...(size ? inputSizeStyles[size] : styles.smallText),
@@ -160,13 +178,12 @@ export function Input({
   );
 }
 
-// BigInput chrome: borderless with the ambient shadow instead. The
-// legacy look (size omitted) keeps today's exact values (padding 10,
-// fontSize 15); an explicit size swaps in the size tokens.
+// BigInput chrome: the regular hairline field resting on a faint shadow.
+// The legacy scale (size omitted) keeps padding 10 and fontSize 15; an
+// explicit size swaps in the size tokens.
 const bigInputChrome: Record<string, unknown> = {
-  border: 'none',
-  ...styles.shadow,
-  '&[data-focused]': { border: 'none', ...styles.shadow },
+  boxShadow: elevation.xs,
+  '&[data-focused]': focusedInputStyle,
 };
 
 const defaultBigInputClassName = buildInputClassName(undefined, {

@@ -1,10 +1,10 @@
-import { expect } from '@playwright/test';
 import type { Locator, Page } from '@playwright/test';
 
 import { MobileAccountPage } from './mobile-account-page';
 import { MobileAccountsPage } from './mobile-accounts-page';
 import { MobileBankSyncPage } from './mobile-bank-sync-page';
 import { MobileBudgetPage } from './mobile-budget-page';
+import { MobileOverviewPage } from './mobile-overview-page';
 import { MobilePayeesPage } from './mobile-payees-page';
 import { MobileReportsPage } from './mobile-reports-page';
 import { MobileRulesPage } from './mobile-rules-page';
@@ -12,94 +12,56 @@ import { MobileSchedulesPage } from './mobile-schedules-page';
 import { MobileTransactionEntryPage } from './mobile-transaction-entry-page';
 import { SettingsPage } from './settings-page';
 
-const NAVBAR_ROWS = 2;
-const NAV_LINKS_HIDDEN_BY_DEFAULT = ['Reports', 'Schedules', 'Settings'];
+// The bottom bar is one always-visible row; secondary pages sit in its
+// More sheet.
+export const NAVBAR_ROWS = 1;
 const ROUTES_BY_PAGE = {
+  Overview: '/overview',
   Budget: '/budget',
   Accounts: '/accounts',
   Transaction: '/transactions/new',
   Reports: '/reports',
   Schedules: '/schedules',
+  Payees: '/settings/payees',
+  Rules: '/settings/rules',
+  'Bank Sync': '/settings/bank-sync',
   Settings: '/settings',
 };
+type PageName = keyof typeof ROUTES_BY_PAGE;
+const PAGES_IN_MORE_SHEET: readonly PageName[] = [
+  'Reports',
+  'Schedules',
+  'Payees',
+  'Rules',
+  'Bank Sync',
+  'Settings',
+];
 
 export class MobileNavigation {
   readonly page: Page;
   readonly heading: Locator;
   readonly navbar: Locator;
-  readonly mainContentSelector: string;
-  readonly navbarSelector: string;
+  readonly moreButton: Locator;
+  readonly moreSheet: Locator;
 
   constructor(page: Page) {
     this.page = page;
     this.heading = page.getByRole('heading');
     this.navbar = page.locator('[data-navbar-state]');
-    this.mainContentSelector = '[role=main]';
-    this.navbarSelector = '[data-navbar-state]';
+    this.moreButton = this.navbar.getByRole('button', { name: 'More' });
+    this.moreSheet = page.getByRole('dialog', { name: 'More' });
   }
 
-  async dragNavbarUp() {
-    const mainContentBoundingBox = await this.page
-      .locator(this.mainContentSelector)
-      .boundingBox();
-
-    if (!mainContentBoundingBox) {
-      throw new Error('Unable to get bounding box of main content.');
+  async openMoreSheet() {
+    if (!(await this.moreSheet.isVisible())) {
+      await this.moreButton.click();
     }
-
-    const navbarBoundingBox = await this.page
-      .locator(this.navbarSelector)
-      .boundingBox();
-
-    if (!navbarBoundingBox) {
-      throw new Error('Unable to get bounding box of navbar.');
-    }
-
-    await this.page.dragAndDrop(this.navbarSelector, this.mainContentSelector, {
-      sourcePosition: { x: 1, y: 0 },
-      targetPosition: {
-        x: 1,
-        y: mainContentBoundingBox.height - navbarBoundingBox.height,
-      },
-    });
-  }
-
-  async dragNavbarDown() {
-    const boundingBox = await this.page
-      .locator(this.navbarSelector)
-      .boundingBox();
-
-    if (!boundingBox) {
-      throw new Error('Unable to get bounding box of navbar.');
-    }
-
-    await this.page.dragAndDrop(this.navbarSelector, this.navbarSelector, {
-      sourcePosition: { x: 1, y: 0 },
-      targetPosition: {
-        x: 1,
-        // Only scroll until bottom of screen i.e. bottom of first navbar row.
-        y: boundingBox.height / NAVBAR_ROWS,
-      },
-    });
-
-    await expect(this.navbar).not.toHaveAttribute('data-navbar-state', 'open');
-  }
-
-  async hasNavbarState(...states: string[]) {
-    if ((await this.navbar.count()) === 0) {
-      // No navbar on page.
-      return false;
-    }
-
-    const dataNavbarState = await this.navbar.getAttribute('data-navbar-state');
-    if (!dataNavbarState) {
-      throw new Error('Navbar does not have data-navbar-state attribute.');
-    }
-    return states.includes(dataNavbarState);
+    await this.moreSheet.waitFor();
+    return this.moreSheet;
   }
 
   async navigateToPage<T extends { waitFor: Locator['waitFor'] }>(
-    pageName: keyof typeof ROUTES_BY_PAGE,
+    pageName: PageName,
     pageModelFactory: () => T,
   ): Promise<T> {
     const pageInstance = pageModelFactory();
@@ -111,26 +73,22 @@ export class MobileNavigation {
 
     await this.navbar.waitFor();
 
-    const navbarStates = NAV_LINKS_HIDDEN_BY_DEFAULT.includes(pageName)
-      ? ['default', 'hidden']
-      : ['hidden'];
-
-    if (await this.hasNavbarState(...navbarStates)) {
-      await this.dragNavbarUp();
-    }
-
-    const link = this.navbar.getByRole('link', { name: pageName });
-    // Click via evaluate: the navbar uses react-spring transforms, so
-    // Playwright's viewport-stability check rejects mid-animation clicks.
-    await link.evaluate(el => (el as HTMLElement).click());
+    const linkContainer = PAGES_IN_MORE_SHEET.includes(pageName)
+      ? await this.openMoreSheet()
+      : this.navbar;
+    await linkContainer
+      .getByRole('link', { name: pageName, exact: true })
+      .click();
 
     await pageInstance.waitFor();
-
-    if (await this.hasNavbarState('open')) {
-      await this.dragNavbarDown();
-    }
-
     return pageInstance;
+  }
+
+  async goToOverviewPage() {
+    return await this.navigateToPage(
+      'Overview',
+      () => new MobileOverviewPage(this.page),
+    );
   }
 
   async goToBudgetPage() {
@@ -169,37 +127,31 @@ export class MobileNavigation {
   }
 
   async goToPayeesPage() {
-    const settingsPage = await this.goToSettingsPage();
-    await settingsPage.goToSection('Payees');
-
-    const payeesPage = new MobilePayeesPage(this.page);
-    await payeesPage.waitFor();
-    return payeesPage;
+    return await this.navigateToPage(
+      'Payees',
+      () => new MobilePayeesPage(this.page),
+    );
   }
 
   async goToSchedulesPage() {
-    return this.navigateToPage(
+    return await this.navigateToPage(
       'Schedules',
       () => new MobileSchedulesPage(this.page),
     );
   }
 
   async goToRulesPage() {
-    const settingsPage = await this.goToSettingsPage();
-    await settingsPage.goToSection('Rules');
-
-    const rulesPage = new MobileRulesPage(this.page);
-    await rulesPage.waitFor();
-    return rulesPage;
+    return await this.navigateToPage(
+      'Rules',
+      () => new MobileRulesPage(this.page),
+    );
   }
 
   async goToBankSyncPage() {
-    const settingsPage = await this.goToSettingsPage();
-    await settingsPage.goToSection('Bank Sync');
-
-    const bankSyncPage = new MobileBankSyncPage(this.page);
-    await bankSyncPage.waitFor();
-    return bankSyncPage;
+    return await this.navigateToPage(
+      'Bank Sync',
+      () => new MobileBankSyncPage(this.page),
+    );
   }
 
   async goToSettingsPage() {

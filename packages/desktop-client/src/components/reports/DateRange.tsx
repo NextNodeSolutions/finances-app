@@ -3,7 +3,6 @@ import type { ReactElement } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 
 import { Block } from '@actual-app/components/block';
-import { styles } from '@actual-app/components/styles';
 import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import * as monthUtils from '@actual-app/core/shared/months';
@@ -45,7 +44,7 @@ export function DateRange({
     endDate = d.parseISO(checkEnd);
   } else {
     return (
-      <Text style={{ ...styles.mediumText, color: theme.errorText }}>
+      <Text style={{ fontSize: 12, color: theme.errorText }}>
         <Trans>There was a problem loading your date range</Trans>
       </Text>
     );
@@ -92,5 +91,11 @@ export function DateRange({
     content = d.format(endDate, 'MMMM yyyy', { locale });
   }
 
-  return <Block style={{ color: theme.pageTextSubdued }}>{content}</Block>;
+  return (
+    <Block
+      style={{ fontSize: 12, lineHeight: '16px', color: theme.pageTextSubdued }}
+    >
+      {content}
+    </Block>
+  );
 }

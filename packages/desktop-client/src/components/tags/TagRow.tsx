@@ -5,8 +5,10 @@ import { Trans, useTranslation } from 'react-i18next';
 import { SvgArrowThinRight } from '@actual-app/components/icons/v1';
 import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
+import { motion } from '@actual-app/components/tokens';
 import type { TagEntity } from '@actual-app/core/types/models';
 
+import { pillStyle } from '#components/schedules/StatusBadge';
 import {
   Cell,
   CellButton,
@@ -199,19 +201,23 @@ export const TagRow = memo(
         <Cell width="auto" style={{ padding: '0 10px' }} plain>
           <CellButton
             style={{
-              borderRadius: 4,
-              padding: '3px 6px',
-              backgroundColor: theme.noticeBackground,
-              border: '1px solid ' + theme.noticeBackground,
-              color: theme.noticeTextDark,
-              fontSize: 12,
+              ...pillStyle,
+              gap: 6,
+              border: '1px solid transparent',
+              backgroundColor: 'transparent',
+              color: theme.pageTextLight,
               cursor: 'pointer',
               opacity: tag.hidden ? 0.5 : undefined,
-              ':hover': { backgroundColor: theme.noticeBackgroundLight },
+              transition: `background-color ${motion.base} ${motion.ease}, color ${motion.base} ${motion.ease}`,
+              ':hover': {
+                backgroundColor: theme.buttonNormalBackgroundHover,
+                borderColor: theme.hairlineStrong,
+                color: theme.pageText,
+              },
             }}
             onSelect={onShowActivity}
           >
-            <Text style={{ paddingRight: 5 }}>
+            <Text>
               <Trans>View Transactions</Trans>
             </Text>
             <SvgArrowThinRight style={{ width: 8, height: 8 }} />

@@ -22,9 +22,11 @@ import type { Modal as ModalType } from '#modals/modalsSlice';
 const SHEET_MAX_HEIGHT =
   'min(660px, calc(var(--visual-viewport-height) * 0.9))';
 
+// Sheet titles are engraved in the display serif, like modal titles.
 const titleStyle: CSSProperties = {
-  fontSize: 18,
-  fontWeight: 600,
+  ...styles.display,
+  fontSize: 21,
+  lineHeight: '28px',
   color: theme.pageTextDark,
   textAlign: 'center',
 };
@@ -35,8 +37,11 @@ type MobileSheetChildArgs = {
   isEditingTitle: boolean;
 };
 
+// Sheets opened from local state rather than the modal stack.
+type LocalSheetName = 'mobile-more';
+
 type MobileSheetProps = {
-  name: ModalType['name'];
+  name: ModalType['name'] | LocalSheetName;
   title: string;
   onTitleUpdate?: (newTitle: string) => string | undefined;
   isLoading?: boolean;
@@ -140,7 +145,7 @@ export function MobileSheet({
           <View
             style={{
               alignItems: 'center',
-              padding: `${spacing.xs}px ${spacing.lg}px ${spacing.sm}px`,
+              padding: `${spacing.xs}px ${spacing.lg}px ${spacing.md}px`,
               flexShrink: 0,
             }}
           >

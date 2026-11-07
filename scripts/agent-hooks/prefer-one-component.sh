@@ -3,7 +3,7 @@
 #
 # "Prefer one component per file" — surfaced as a soft warning for *newly
 # created* .tsx files only. Existing multi-component files are grandfathered
-# (skipped if already tracked by git), and this never touches `yarn lint`, so
+# (skipped if already tracked by git), and this never touches `pnpm lint`, so
 # react/no-multi-comp stays out of .oxlintrc.json.
 
 . "$(dirname "$0")/common.sh"

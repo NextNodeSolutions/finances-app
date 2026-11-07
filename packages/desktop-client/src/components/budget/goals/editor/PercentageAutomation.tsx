@@ -19,7 +19,7 @@ import {
   STACKED_FIELD_FLEX,
 } from '#components/budget/goals/editor/fieldLayout';
 import { FormField, FormLabel } from '#components/forms';
-import { TapField } from '#components/mobile/MobileForms';
+import { MOBILE_FIELD_HEIGHT, TapField } from '#components/mobile/MobileForms';
 import { PercentInput } from '#components/util/PercentInput';
 import { pushModal } from '#modals/modalsSlice';
 import { useDispatch } from '#redux';
@@ -111,6 +111,9 @@ export const PercentageAutomation = ({
           <PercentInput
             id="percent-field"
             key="percent-input"
+            style={
+              isNarrowWidth ? { minHeight: MOBILE_FIELD_HEIGHT } : undefined
+            }
             value={template.percent}
             onUpdatePercent={(percent: number) =>
               dispatch(

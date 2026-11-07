@@ -3,7 +3,6 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 
 import { Block } from '@actual-app/components/block';
-import { styles } from '@actual-app/components/styles';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 import * as monthUtils from '@actual-app/core/shared/months';
@@ -11,6 +10,7 @@ import type {
   AccountEntity,
   BalanceForecastWidget,
 } from '@actual-app/core/types/models';
+import { css } from '@emotion/css';
 import {
   Line,
   LineChart,
@@ -19,7 +19,18 @@ import {
   Tooltip,
 } from 'recharts';
 
+import { FinancialText } from '#components/FinancialText';
 import { PrivacyFilter } from '#components/PrivacyFilter';
+import {
+  cardChartInset,
+  cardHeaderStyle,
+  cardHeadlineStyle,
+  cardSupportingStyle,
+  chartActiveDot,
+  chartBaselineColor,
+  chartLineWidth,
+  chartTooltipSurface,
+} from '#components/reports/chart-theme';
 import { Container } from '#components/reports/Container';
 import { DateRange } from '#components/reports/DateRange';
 import { LoadingIndicator } from '#components/reports/LoadingIndicator';
@@ -161,7 +172,7 @@ export function BalanceForecastCard({
         onPointerEnter={onCardHover}
         onPointerLeave={onCardHoverEnd}
       >
-        <View style={{ flexDirection: 'row', padding: 20 }}>
+        <View style={cardHeaderStyle}>
           <View style={{ flex: 1 }}>
             <ReportCardName
               name={meta?.name || t('Balance Forecast')}
@@ -181,35 +192,31 @@ export function BalanceForecastCard({
             <View style={{ textAlign: 'right' }}>
               <Block
                 style={{
-                  ...styles.mediumText,
-                  fontWeight: 500,
-                  marginBottom: 5,
+                  marginBottom: 2,
                   color: hasNegativeEndingBalance
-                    ? theme.errorText
+                    ? theme.reportsNumberNegative
                     : theme.pageText,
                 }}
               >
                 <PrivacyFilter activationFilters={[!isCardHovered]}>
-                  <Trans>Ending</Trans>:{' '}
-                  {format(endingPoint.balance, 'financial')}
+                  <span style={cardSupportingStyle}>
+                    <Trans>Ending</Trans>:
+                  </span>{' '}
+                  <FinancialText style={cardHeadlineStyle}>
+                    {format(endingPoint.balance, 'financial')}
+                  </FinancialText>
                 </PrivacyFilter>
               </Block>
               <PrivacyFilter activationFilters={[!isCardHovered]}>
-                <Block style={{ fontSize: 12, color: theme.pageTextLight }}>
-                  {endingPoint.date}
-                </Block>
+                <Block style={cardSupportingStyle}>{endingPoint.date}</Block>
               </PrivacyFilter>
               {lowestPoint && lowestPoint.date !== endingPoint.date ? (
                 <PrivacyFilter activationFilters={[!isCardHovered]}>
-                  <Block
-                    style={{
-                      fontSize: 12,
-                      color: theme.pageTextLight,
-                      marginTop: 4,
-                    }}
-                  >
+                  <Block style={{ ...cardSupportingStyle, marginTop: 2 }}>
                     <Trans>Low</Trans>:{' '}
-                    {format(lowestPoint.balance, 'financial')}
+                    <FinancialText>
+                      {format(lowestPoint.balance, 'financial')}
+                    </FinancialText>
                   </Block>
                 </PrivacyFilter>
               ) : null}
@@ -233,7 +240,7 @@ export function BalanceForecastCard({
           </View>
         ) : forecastData && forecastData.dataPoints.length > 0 ? (
           <>
-            <Container style={{ height: 'auto', flex: 1 }}>
+            <Container style={{ height: 'auto', flex: 1, ...cardChartInset }}>
               {(width, height) => (
                 <ResponsiveContainer>
                   <LineChart
@@ -278,26 +285,16 @@ export function BalanceForecastCard({
                       content={({ active, payload }) => {
                         if (active && payload && payload.length) {
                           return (
-                            <div
-                              style={{
-                                zIndex: 1000,
-                                pointerEvents: 'none',
-                                borderRadius: 2,
-                                boxShadow: '0 1px 6px rgba(0, 0, 0, .20)',
-                                backgroundColor: theme.menuBackground,
-                                color: theme.menuItemText,
-                                padding: 10,
-                              }}
-                            >
+                            <div className={css(chartTooltipSurface)}>
                               <div style={{ marginBottom: 5 }}>
                                 <strong>{payload[0].payload.date}</strong>
                               </div>
-                              <div>
+                              <FinancialText as="div">
                                 {format(
                                   payload[0].value as number,
                                   'financial',
                                 )}
-                              </div>
+                              </FinancialText>
                             </div>
                           );
                         }
@@ -307,33 +304,27 @@ export function BalanceForecastCard({
                     {showsTodayReferenceLine && (
                       <ReferenceLine
                         x={todayReferenceDate}
-                        stroke={theme.reportsBlue}
-                        strokeDasharray="4 4"
+                        stroke={theme.accent}
+                        strokeDasharray="3 3"
                       />
                     )}
                     {hasNegativeBalance && (
-                      <ReferenceLine y={0} stroke={theme.pageTextSubdued} />
+                      <ReferenceLine y={0} stroke={chartBaselineColor} />
                     )}
                     <Line
                       type="monotone"
                       dataKey="balance"
                       stroke={`url(#${gradientId})`}
-                      strokeWidth={2}
+                      strokeWidth={chartLineWidth}
                       dot={false}
-                      activeDot={{ r: 4 }}
+                      activeDot={chartActiveDot}
                       opacity={isUpdatingForecast ? 0.45 : 1}
                     />
                   </LineChart>
                 </ResponsiveContainer>
               )}
             </Container>
-            <Block
-              style={{
-                padding: '0 20px 16px',
-                fontSize: 12,
-                color: theme.pageTextLight,
-              }}
-            >
+            <Block style={{ ...cardSupportingStyle, padding: '0 20px 16px' }}>
               {isTrackingBudgetForecast ? (
                 <Trans>
                   Forecast = starting balance + budgeted income - budgeted

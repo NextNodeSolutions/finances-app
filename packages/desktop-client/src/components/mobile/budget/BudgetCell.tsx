@@ -22,7 +22,7 @@ import { pushModal } from '#modals/modalsSlice';
 import { useDispatch } from '#redux';
 import type { SheetFields } from '#spreadsheet';
 
-import { getColumnWidth, PILL_STYLE } from './BudgetTable';
+import { getColumnWidth, PILL_CLASS_NAME, PILL_STYLE } from './BudgetTable';
 
 type BudgetCellProps<
   SheetFieldName extends SheetFields<'envelope-budget' | 'tracking-budget'>,
@@ -188,6 +188,7 @@ export function BudgetCell<
         }) || (
           <Button
             variant="bare"
+            className={PILL_CLASS_NAME}
             style={{
               ...PILL_STYLE,
               maxWidth: columnWidth,

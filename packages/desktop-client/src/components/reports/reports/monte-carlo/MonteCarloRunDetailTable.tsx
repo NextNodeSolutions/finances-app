@@ -7,7 +7,10 @@ import {
   SvgCheveronDown,
   SvgCheveronRight,
 } from '@actual-app/components/icons/v1';
-import { ModeButton } from '@actual-app/components/mode-button';
+import {
+  ModeButton,
+  ModeButtonGroup,
+} from '@actual-app/components/mode-button';
 import { styles } from '@actual-app/components/styles';
 import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
@@ -461,7 +464,7 @@ export function MonteCarloRunDetailTable({
       </View>
 
       {cashflowGraph != null && potBalancesGraph != null && (
-        <View style={{ flexDirection: 'row', gap: 5, marginBottom: 10 }}>
+        <ModeButtonGroup style={{ marginBottom: 10 }}>
           <ModeButton
             selected={chartView === 'cashflow'}
             onSelect={() => setChartView('cashflow')}
@@ -474,7 +477,7 @@ export function MonteCarloRunDetailTable({
           >
             <Trans>Pots</Trans>
           </ModeButton>
-        </View>
+        </ModeButtonGroup>
       )}
       {chartView === 'pots' && potBalancesGraph != null
         ? potBalancesGraph

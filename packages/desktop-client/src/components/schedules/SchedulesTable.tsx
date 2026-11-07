@@ -1,11 +1,10 @@
 // @ts-strict-ignore
-import React, { useMemo, useRef, useState } from 'react';
+import React, { useMemo, useRef } from 'react';
 import type { CSSProperties } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 
 import { Button } from '@actual-app/components/button';
 import { SvgDotsHorizontalTriple } from '@actual-app/components/icons/v1';
-import { SvgCheck } from '@actual-app/components/icons/v2';
 import { styles } from '@actual-app/components/styles';
 import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
@@ -26,14 +25,25 @@ import { useDateFormat } from '#hooks/useDateFormat';
 import { useFormat } from '#hooks/useFormat';
 import { usePayees } from '#hooks/usePayees';
 
+import { getRepeatsLabel } from './getRepeatsLabel';
+import type { ScheduleItemAction } from './panels/runScheduleAction';
+import { ScheduleSkeletonRows } from './ScheduleSkeletonRows';
 import { StatusBadge } from './StatusBadge';
+
+export type { ScheduleItemAction } from './panels/runScheduleAction';
+
 type SchedulesTableProps = {
   isLoading?: boolean;
   schedules: readonly ScheduleEntity[];
   statuses: ScheduleStatuses;
   filter: string;
+  /** Show completed schedules too; callers choose which ones to pass. */
   allowCompleted: boolean;
   onSelect: (id: ScheduleEntity['id']) => void;
+  /** The schedule whose details are open, highlighted in the table. */
+  selectedId?: ScheduleEntity['id'] | null;
+  /** Shown when no schedule passes the filters. */
+  emptyMessage?: string;
   style: CSSProperties;
   tableStyle?: CSSProperties;
 } & (
@@ -50,18 +60,15 @@ type SchedulesTableProps = {
     }
 );
 
-type CompletedScheduleItem = { id: 'show-completed' };
-type SchedulesTableItem = ScheduleEntity | CompletedScheduleItem;
-
-export type ScheduleItemAction =
-  | 'post-transaction'
-  | 'post-transaction-today'
-  | 'skip'
-  | 'complete'
-  | 'restart'
-  | 'delete';
-
 export const ROW_HEIGHT = 43;
+
+const amountQualifierStyle = {
+  ...styles.tnum,
+  textAlign: 'left',
+  color: theme.pageTextSubdued,
+  lineHeight: '1em',
+  marginRight: 6,
+} as const;
 
 export function ScheduleAmountCell({
   amount,
@@ -98,40 +105,25 @@ export function ScheduleAmountCell({
         textAlign: 'right',
         flexDirection: 'row',
         alignItems: 'center',
+        justifyContent: 'flex-end',
         padding: '0 5px',
       }}
       name="amount"
     >
       {isApprox && (
-        <View
-          style={{
-            textAlign: 'left',
-            color: theme.pageTextSubdued,
-            lineHeight: '1em',
-            marginRight: 10,
-          }}
-          title={cellText}
-        >
+        <View style={amountQualifierStyle} title={cellText}>
           ~
         </View>
       )}
       {isBetween && (
-        <View
-          style={{
-            textAlign: 'left',
-            color: theme.pageTextSubdued,
-            lineHeight: '1em',
-            marginRight: 10,
-          }}
-          title={cellText}
-        >
+        <View style={amountQualifierStyle} title={cellText}>
           ±
         </View>
       )}
       <FinancialText
         style={{
-          flex: 1,
-          color: num > 0 ? theme.noticeTextLight : theme.tableText,
+          minWidth: 0,
+          color: num > 0 ? theme.numberPositive : theme.tableText,
           whiteSpace: 'nowrap',
           overflow: 'hidden',
           textOverflow: 'ellipsis',
@@ -153,9 +145,11 @@ function ScheduleRow({
   minimal,
   statuses,
   dateFormat,
+  isSelected,
 }: {
   schedule: ScheduleEntity;
   dateFormat: string;
+  isSelected: boolean;
 } & Pick<
   SchedulesTableProps,
   'onSelect' | 'onAction' | 'minimal' | 'statuses'
@@ -213,19 +207,26 @@ function ScheduleRow({
       height={ROW_HEIGHT}
       inset={15}
       onClick={() => onSelect(schedule.id)}
+      aria-current={isSelected || undefined}
       style={{
         cursor: 'pointer',
-        backgroundColor: theme.tableBackground,
+        backgroundColor: isSelected
+          ? theme.tableRowBackgroundHighlight
+          : theme.tableBackground,
         color: theme.tableText,
-        ':hover': { backgroundColor: theme.tableRowBackgroundHover },
+        ':hover': {
+          backgroundColor: isSelected
+            ? theme.tableRowBackgroundHighlight
+            : theme.tableRowBackgroundHover,
+        },
       }}
     >
       <Field width="flex" name="name">
         <Text
           style={
             schedule.name == null
-              ? { color: theme.buttonNormalDisabledText }
-              : null
+              ? { color: theme.tableTextLight }
+              : { color: theme.pageText }
           }
           title={schedule.name ? schedule.name : ''}
         >
@@ -238,7 +239,7 @@ function ScheduleRow({
       <Field width="flex" name="account">
         <DisplayId type="accounts" id={schedule._account} />
       </Field>
-      <Field width={110} name="date">
+      <Field width={110} name="date" style={styles.tnum}>
         {schedule.next_date
           ? monthUtilFormat(schedule.next_date, dateFormat)
           : null}
@@ -248,12 +249,12 @@ function ScheduleRow({
       </Field>
       <ScheduleAmountCell amount={schedule._amount} op={schedule._amountOp} />
       {!minimal && (
-        <Field width={80} style={{ textAlign: 'center' }}>
-          {schedule._date &&
-            typeof schedule._date === 'object' &&
-            schedule._date.frequency && (
-              <SvgCheck style={{ width: 13, height: 13 }} />
-            )}
+        <Field
+          width={110}
+          name="repeats"
+          style={{ color: theme.tableTextLight }}
+        >
+          {getRepeatsLabel(schedule._date, t) ?? '—'}
         </Field>
       )}
       {!minimal && (
@@ -263,6 +264,7 @@ function ScheduleRow({
               ref={buttonRef}
               variant="bare"
               aria-label={t('Menu')}
+              style={{ color: theme.pageTextLight }}
               onPress={() => {
                 if (rowRef.current) {
                   const rect = buttonRef.current?.getBoundingClientRect();
@@ -298,6 +300,8 @@ export function SchedulesTable({
   filter,
   minimal,
   allowCompleted,
+  selectedId,
+  emptyMessage,
   style,
   onSelect,
   onAction,
@@ -307,7 +311,6 @@ export function SchedulesTable({
   const format = useFormat();
 
   const dateFormat = useDateFormat() || 'MM/dd/yyyy';
-  const [showCompleted, setShowCompleted] = useState(false);
 
   const { data: payees } = usePayees();
   const { data: accounts = [] } = useAccounts();
@@ -349,52 +352,15 @@ export function SchedulesTable({
     });
   }, [payees, accounts, schedules, filter, statuses, format, dateFormat]);
 
-  const items: readonly SchedulesTableItem[] = useMemo(() => {
-    const unCompletedSchedules = filteredSchedules.filter(s => !s.completed);
+  const items = allowCompleted
+    ? filteredSchedules
+    : filteredSchedules.filter(schedule => !schedule.completed);
 
-    if (!allowCompleted) {
-      return unCompletedSchedules;
-    }
-    if (showCompleted) {
-      return filteredSchedules;
-    }
-
-    const hasCompletedSchedule = filteredSchedules.find(s => s.completed);
-
-    if (!hasCompletedSchedule) return unCompletedSchedules;
-
-    return [...unCompletedSchedules, { id: 'show-completed' }];
-  }, [filteredSchedules, showCompleted, allowCompleted]);
-
-  function renderItem({ item }: { item: SchedulesTableItem }) {
-    if (item.id === 'show-completed') {
-      return (
-        <Row
-          height={ROW_HEIGHT}
-          inset={15}
-          style={{
-            cursor: 'pointer',
-            backgroundColor: 'transparent',
-            ':hover': { backgroundColor: theme.tableRowBackgroundHover },
-          }}
-          onClick={() => setShowCompleted(true)}
-        >
-          <Field
-            width="flex"
-            style={{
-              fontStyle: 'italic',
-              textAlign: 'center',
-              color: theme.tableText,
-            }}
-          >
-            <Trans>Show completed schedules</Trans>
-          </Field>
-        </Row>
-      );
-    }
+  function renderItem({ item }: { item: ScheduleEntity }) {
     return (
       <ScheduleRow
-        schedule={item as ScheduleEntity}
+        schedule={item}
+        isSelected={item.id === selectedId}
         {...{ statuses, dateFormat, onSelect, onAction, minimal }}
       />
     );
@@ -402,7 +368,7 @@ export function SchedulesTable({
 
   return (
     <View style={{ ...styles.tableContainer, ...tableStyle }}>
-      <TableHeader height={ROW_HEIGHT} inset={15}>
+      <TableHeader inset={15}>
         <Field width="flex">
           <Trans>Name</Trans>
         </Field>
@@ -422,20 +388,24 @@ export function SchedulesTable({
           <Trans>Amount</Trans>
         </Field>
         {!minimal && (
-          <Field width={80} style={{ textAlign: 'center' }}>
-            <Trans>Recurring</Trans>
+          <Field width={110}>
+            <Trans>Repeats</Trans>
           </Field>
         )}
         {!minimal && <Field width={40} />}
       </TableHeader>
       <Table
-        loading={isLoading}
         rowHeight={ROW_HEIGHT}
         backgroundColor="transparent"
         style={{ flex: 1, backgroundColor: 'transparent', ...style }}
-        items={items as ScheduleEntity[]}
+        items={isLoading ? [] : [...items]}
         renderItem={renderItem}
-        renderEmpty={filter ? t('No matching schedules') : t('No schedules')}
+        renderEmpty={
+          isLoading
+            ? () => <ScheduleSkeletonRows rowHeight={ROW_HEIGHT} />
+            : (emptyMessage ??
+              (filter ? t('No matching schedules') : t('No schedules')))
+        }
       />
     </View>
   );

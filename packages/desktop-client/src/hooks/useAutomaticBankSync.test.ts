@@ -52,6 +52,7 @@ describe('parseBankSyncInterval', () => {
 
 describe('isAutomaticSyncDue', () => {
   const base = {
+    isBankSyncOn: true,
     now: NOW,
     intervalMs: HOUR,
     lastAutomaticRun: undefined,
@@ -73,6 +74,11 @@ describe('isAutomaticSyncDue', () => {
 
   it('is not due when automatic syncing is disabled', () => {
     expect(isAutomaticSyncDue({ ...base, intervalMs: 0 })).toBe(false);
+  });
+
+  it('is not due while the bank sync feature is turned off', () => {
+    // Linked, overdue and online: only the feature switch holds it back.
+    expect(isAutomaticSyncDue({ ...base, isBankSyncOn: false })).toBe(false);
   });
 
   it('is not due when there are no linked accounts', () => {

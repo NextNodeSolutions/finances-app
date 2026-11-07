@@ -5,6 +5,7 @@ import { View } from '@actual-app/components/view';
 import { css } from '@emotion/css';
 
 import { FinancialText } from '#components/FinancialText';
+import { chartTooltipSurface } from '#components/reports/chart-theme';
 import { MonteCarloCashflowSwatch } from '#components/reports/graphs/MonteCarloCashflowSwatch';
 import type {
   MonteCarloCashflowDataPoint,
@@ -76,13 +77,7 @@ export function MonteCarloCashflowGraphTooltip({
   return (
     <div
       className={css({
-        zIndex: 1000,
-        pointerEvents: 'none',
-        borderRadius: 2,
-        boxShadow: '0 1px 6px rgba(0, 0, 0, .20)',
-        backgroundColor: theme.menuBackground,
-        color: theme.menuItemText,
-        padding: 10,
+        ...chartTooltipSurface,
       })}
     >
       <div style={{ marginBottom: 10 }}>

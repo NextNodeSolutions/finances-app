@@ -27,21 +27,38 @@ import { css } from '@emotion/css';
 
 import { useMoveAccountMutation, useSyncAndDownloadMutation } from '#accounts';
 import { isAccountFailedSync } from '#accounts/syncStatus';
+import { sync } from '#app/appSlice';
 import { makeAmountFullStyle } from '#components/budget/util';
-import { MOBILE_NAV_HEIGHT } from '#components/mobile/MobileNavTabs';
+import { MOBILE_NAV_INSET } from '#components/mobile/MobileNavTabs';
 import { PullToRefresh } from '#components/mobile/PullToRefresh';
+import {
+  mobileCardStyle,
+  mobileFigureLabelStyle,
+  mobileHeaderIconButtonStyle,
+} from '#components/mobile/utils';
 import { MobilePageHeader, Page } from '#components/Page';
 import { CellValue, CellValueText } from '#components/spreadsheet/CellValue';
 import { useAccounts } from '#hooks/useAccounts';
 import { useLocalPref } from '#hooks/useLocalPref';
 import { useNavigate } from '#hooks/useNavigate';
+import { useOptionalFeature } from '#hooks/useOptionalFeature';
 import { useSyncedPref } from '#hooks/useSyncedPref';
 import { replaceModal } from '#modals/modalsSlice';
 import { useDispatch, useSelector } from '#redux';
 import type { Binding, SheetFields } from '#spreadsheet';
 import * as bindings from '#spreadsheet/bindings';
 
-const ROW_HEIGHT = 60;
+const ROW_HEIGHT = 56;
+const SECTION_HEADER_HEIGHT = 44;
+const HEADLINE_HEADER_HEIGHT = 76;
+// Section labels sit on the same verticals as the account names and balances
+// in the card beneath them: card inset 12 + border 1 + row padding (8 + the
+// 12px sync dot slot on the left, 16 on the right).
+const SECTION_HEADER_PADDING = '12px 29px 0 33px';
+
+// "All accounts" leads the page as its one headline figure; the budget
+// sections read as quiet labels over their cards.
+type AccountHeaderVariant = 'headline' | 'section';
 
 // Virtual account id for the all-accounts transaction list (/accounts/all)
 export const ALL_ACCOUNTS_ID = 'all';
@@ -52,6 +69,7 @@ type AccountHeaderProps<SheetFieldName extends SheetFields<'account'>> = {
   amount: Binding<'account', SheetFieldName>;
   style?: CSSProperties;
   showCheveronDown?: boolean;
+  variant?: AccountHeaderVariant;
   onPress?: () => void;
 };
 
@@ -61,6 +79,7 @@ function AccountHeader<SheetFieldName extends SheetFields<'account'>>({
   amount,
   style = {},
   showCheveronDown = false,
+  variant = 'section',
   onPress,
 }: AccountHeaderProps<SheetFieldName>) {
   const { t } = useTranslation();
@@ -74,41 +93,75 @@ function AccountHeader<SheetFieldName extends SheetFields<'account'>>({
       aria-label={t('View {{name}} transactions', { name })}
       onPress={onPress ? onPress : () => navigate(`/accounts/${id}`)}
       style={{
-        height: ROW_HEIGHT,
+        height:
+          variant === 'headline'
+            ? HEADLINE_HEADER_HEIGHT
+            : SECTION_HEADER_HEIGHT,
         width: '100%',
-        padding: '0 18px',
+        padding: variant === 'headline' ? '0 20px' : SECTION_HEADER_PADDING,
+        alignItems: variant === 'headline' ? 'center' : 'flex-end',
         color: theme.pageTextLight,
         ...style,
       }}
-      // to match the feel of the other account buttons
       className={css([
         {
           '&[data-pressed], &[data-hovered]': {
             backgroundColor: 'transparent',
-            transform: 'translateY(1px)',
+          },
+          '&[data-pressed]': {
+            opacity: 0.7,
           },
         },
       ])}
     >
-      <View style={{ flex: 1, alignItems: 'center', flexDirection: 'row' }}>
-        <Text size="extra-large" data-testid="name">
+      <View
+        style={{
+          flex: 1,
+          alignItems: 'center',
+          flexDirection: 'row',
+          paddingBottom: variant === 'headline' ? 0 : 6,
+        }}
+      >
+        <Text
+          style={
+            variant === 'headline'
+              ? { fontSize: 15, fontWeight: 500, color: theme.pageText }
+              : mobileFigureLabelStyle
+          }
+          data-testid="name"
+        >
           {name}
         </Text>
         <Cheveron
           style={{
             flexShrink: 0,
-            color: theme.mobileHeaderTextSubdued,
-            marginLeft: 5,
+            color: theme.tableTextSubdued,
+            marginLeft: 4,
           }}
-          width={styles.text.fontSize}
-          height={styles.text.fontSize}
+          width={variant === 'headline' ? 13 : 11}
+          height={variant === 'headline' ? 13 : 11}
         />
       </View>
       <CellValue binding={amount} type="financial">
         {props => (
           <CellValueText<'account', SheetFieldName>
             {...props}
-            style={{ ...styles.text }}
+            style={
+              variant === 'headline'
+                ? {
+                    ...styles.display,
+                    fontSize: 30,
+                    lineHeight: '36px',
+                    fontWeight: 300,
+                    color: theme.pageText,
+                  }
+                : {
+                    fontSize: 12.5,
+                    fontWeight: 500,
+                    paddingBottom: 6,
+                    color: theme.pageTextLight,
+                  }
+            }
           />
         )}
       </CellValue>
@@ -164,7 +217,8 @@ function AccountListItem({
             backgroundColor: theme.tableBackground,
             border: 'none',
             borderRadius: 0,
-            paddingLeft: 8,
+            boxShadow: 'none',
+            padding: '0 16px 0 8px',
           }}
           data-testid="account-list-item"
           onPress={() => onSelect(account)}
@@ -183,20 +237,20 @@ function AccountListItem({
                   : isFailed
                     ? theme.sidebarItemBackgroundFailed
                     : theme.sidebarItemBackgroundPositive,
-                marginRight: '6px',
-                width: 8,
+                marginRight: 6,
+                width: 6,
                 flexShrink: 0,
-                height: 8,
-                borderRadius: 8,
+                height: 6,
+                borderRadius: 6,
                 opacity: isConnected ? 1 : 0,
               }}
             />
             <TextOneLine
               style={{
                 ...styles.text,
-                fontSize: 17,
-                fontWeight: 600,
-                color: isUpdated ? theme.mobileAccountText : theme.pillText,
+                fontSize: 15,
+                fontWeight: isUpdated ? 600 : 500,
+                color: isUpdated ? theme.mobileAccountText : theme.pageText,
               }}
               data-testid="account-name"
             >
@@ -208,9 +262,12 @@ function AccountListItem({
               <CellValueText<'account', 'balance'>
                 {...props}
                 style={{
-                  fontSize: 16,
+                  fontSize: 14,
+                  fontWeight: 500,
                   ...makeAmountFullStyle(props.value, {
-                    positiveColor: theme.numberPositive,
+                    // A balance in credit is the normal state, set in ink;
+                    // only a negative balance takes a colour.
+                    positiveColor: theme.pageText,
                     negativeColor: theme.numberNegative,
                     zeroColor: theme.numberNeutral,
                   }),
@@ -229,7 +286,7 @@ function EmptyMessage({ onAddAccount }: { onAddAccount: () => void }) {
   return (
     <View
       style={{
-        minHeight: `calc(100vh - ${MOBILE_NAV_HEIGHT}px - 140px)`,
+        minHeight: `calc(100vh - ${MOBILE_NAV_INSET} - 140px)`,
         alignItems: 'center',
         justifyContent: 'center',
         padding: 30,
@@ -237,14 +294,16 @@ function EmptyMessage({ onAddAccount }: { onAddAccount: () => void }) {
       }}
     >
       <SvgPiggyBank
-        width={70}
-        height={70}
-        style={{ color: theme.pageTextSubdued }}
+        width={44}
+        height={44}
+        style={{ color: theme.tableTextSubdued }}
       />
       <Text
         style={{
-          ...styles.largeText,
-          fontWeight: 600,
+          ...styles.display,
+          fontSize: 26,
+          lineHeight: '32px',
+          color: theme.pageText,
           textAlign: 'center',
         }}
       >
@@ -267,9 +326,11 @@ function EmptyMessage({ onAddAccount }: { onAddAccount: () => void }) {
       <Button
         variant="primary"
         style={{
-          padding: '12px 20px',
+          padding: '0 20px',
           fontSize: 15,
-          minHeight: styles.mobileMinHeight,
+          fontWeight: 500,
+          minHeight: 44,
+          borderRadius: 8,
           marginTop: 10,
         }}
         onPress={onAddAccount}
@@ -342,10 +403,10 @@ function AllAccountList({
             <Button
               variant="bare"
               aria-label={t('Add account')}
-              style={{ margin: 10 }}
+              style={mobileHeaderIconButtonStyle}
               onPress={onAddAccount}
             >
-              <SvgAdd width={20} height={20} />
+              <SvgAdd width={18} height={18} />
             </Button>
           }
         />
@@ -358,12 +419,18 @@ function AllAccountList({
         <PullToRefresh onRefresh={onSync}>
           <View
             aria-label={t('Account list')}
-            style={{ paddingBottom: MOBILE_NAV_HEIGHT }}
+            style={{ paddingBottom: MOBILE_NAV_INSET }}
           >
             <AccountHeader
               id={ALL_ACCOUNTS_ID}
               name={t('All accounts')}
               amount={getAllAccountsBalance()}
+              variant="headline"
+              style={{
+                borderRadius: 0,
+                borderBottom: `1px solid ${theme.hairline}`,
+                backgroundColor: theme.titlebarBackground,
+              }}
             />
             {onBudgetAccounts.length > 0 && (
               <AccountHeader
@@ -397,7 +464,7 @@ function AllAccountList({
                 name={t('Closed')}
                 onPress={onToggleClosedAccounts}
                 amount={getClosedAccountsBalance()}
-                style={{ marginTop: 30 }}
+                style={{ marginTop: 16 }}
                 showCheveronDown={showClosedAccounts}
               />
             )}
@@ -442,6 +509,8 @@ const AccountList = forwardRef<HTMLDivElement, AccountListProps>(
       state => state.account.accountsSyncing,
     );
     const updatedAccounts = useSelector(state => state.account.updatedAccounts);
+    // With bank sync off, no account shows a connection or sync state.
+    const [isBankSyncOn] = useOptionalFeature('bankSync');
 
     const moveAccount = useMoveAccountMutation();
 
@@ -459,10 +528,11 @@ const AccountList = forwardRef<HTMLDivElement, AccountListProps>(
             target={target}
             className={css({
               '&[data-drop-target]': {
-                height: 4,
-                backgroundColor: theme.tableBorderSeparator,
+                height: 2,
+                margin: '0 12px',
+                backgroundColor: theme.accent,
                 opacity: 1,
-                borderRadius: 4,
+                borderRadius: 2,
               },
             })}
           />
@@ -510,12 +580,10 @@ const AccountList = forwardRef<HTMLDivElement, AccountListProps>(
         dragAndDropHooks={dragAndDropHooks}
         ref={ref}
         style={{
+          ...mobileCardStyle,
           display: 'flex',
           flexDirection: 'column',
-          margin: '0 8px',
-          border: `1px solid ${theme.tableBorder}`,
-          borderRadius: 8,
-          overflow: 'hidden',
+          margin: '0 12px',
         }}
       >
         {account => (
@@ -524,9 +592,9 @@ const AccountList = forwardRef<HTMLDivElement, AccountListProps>(
             id={account.id}
             value={account}
             isUpdated={updatedAccounts && updatedAccounts.includes(account.id)}
-            isConnected={!!account.bank}
-            isPending={syncingAccountIds.includes(account.id)}
-            isFailed={isAccountFailedSync(account)}
+            isConnected={isBankSyncOn && !!account.bank}
+            isPending={isBankSyncOn && syncingAccountIds.includes(account.id)}
+            isFailed={isBankSyncOn && isAccountFailedSync(account)}
             getBalanceQuery={getBalanceBinding}
             onSelect={onOpenAccount}
           />
@@ -559,10 +627,17 @@ export function AccountsPage() {
     dispatch(replaceModal({ modal: { name: 'add-account', options: {} } }));
   }, [dispatch]);
 
+  // Pull to refresh downloads bank transactions only with bank sync on;
+  // otherwise it just syncs the budget.
+  const [isBankSyncOn] = useOptionalFeature('bankSync');
   const syncAndDownload = useSyncAndDownloadMutation();
   const onSync = useCallback(async () => {
-    syncAndDownload.mutate({});
-  }, [syncAndDownload]);
+    if (isBankSyncOn) {
+      syncAndDownload.mutate({});
+      return;
+    }
+    void dispatch(sync());
+  }, [dispatch, isBankSyncOn, syncAndDownload]);
 
   // Drill-downs (e.g. report activity) land on /accounts with filter
   // conditions in the location state; show them as filtered transactions.

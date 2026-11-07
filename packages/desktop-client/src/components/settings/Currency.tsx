@@ -9,9 +9,9 @@ import { css } from '@emotion/css';
 import { Checkbox } from '#components/forms';
 import { useSyncedPref } from '#hooks/useSyncedPref';
 
-import { SettingsGroup } from './SettingsGroup';
 import { SettingsRow } from './SettingsRow';
 
+/** The currency rows of the Formatting section. */
 export function CurrencySettings() {
   const { t } = useTranslation();
 
@@ -140,14 +140,12 @@ export function CurrencySettings() {
   }, [selectedCurrencyCode, spaceEnabled, t]);
 
   return (
-    <SettingsGroup
-      title={t('Currency')}
-      description={t(
-        'Currency settings affect how amounts are displayed throughout the application. Changing the currency also updates the number format, symbol position and whether decimal places are shown. These can be adjusted after the currency is set.',
-      )}
-    >
+    <>
       <SettingsRow
         title={t('Default currency')}
+        description={t(
+          'Currency settings affect how amounts are displayed throughout the application. Changing the currency also updates the number format, symbol position and whether decimal places are shown. These can be adjusted after the currency is set.',
+        )}
         control={
           <Select
             value={selectedCurrencyCode}
@@ -188,6 +186,6 @@ export function CurrencySettings() {
           }
         />
       )}
-    </SettingsGroup>
+    </>
   );
 }

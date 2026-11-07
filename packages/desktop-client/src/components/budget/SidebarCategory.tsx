@@ -4,20 +4,34 @@ import type { CSSProperties, Ref } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { Button } from '@actual-app/components/button';
-import { SvgCheveronDown } from '@actual-app/components/icons/v1';
+import {
+  SvgCheveronDown,
+  SvgInformationOutline,
+} from '@actual-app/components/icons/v1';
 import { TextOneLine } from '@actual-app/components/text-one-line';
 import { theme } from '@actual-app/components/theme';
+import { motion, radius } from '@actual-app/components/tokens';
 import { View } from '@actual-app/components/view';
 import type {
   CategoryEntity,
   CategoryGroupEntity,
 } from '@actual-app/core/types/models';
+import { css } from '@emotion/css';
 
 import { InputCell } from '#components/table';
 import { useContextMenu } from '#hooks/useContextMenu';
 import { useGlobalPref } from '#hooks/useGlobalPref';
 
 import { SidebarCategoryButtons } from './SidebarCategoryButtons';
+
+// Shown while the row is hovered or holds focus, and when it has focus
+// itself; transparent rather than removed so the keyboard still reaches it.
+const detailsButtonClassName = css({
+  opacity: 0,
+  transition: `opacity ${motion.base} ${motion.ease}`,
+  '[data-testid="row"]:hover &, [data-testid="row"]:focus-within &, &[data-focus-visible]':
+    { opacity: 1 },
+});
 
 type SidebarCategoryProps = {
   innerRef: Ref<HTMLDivElement>;
@@ -32,6 +46,8 @@ type SidebarCategoryProps = {
   onEditName: (id: CategoryEntity['id']) => void;
   onSave: (category: CategoryEntity) => void;
   onHideNewCategory?: () => void;
+  /** Opens the category's details panel; without it there is no Details. */
+  onOpenDetails?: (id: CategoryEntity['id']) => void;
 } & (
   | {
       editing: true;
@@ -57,6 +73,7 @@ export function SidebarCategory({
   onSave,
   onDelete,
   onHideNewCategory,
+  onOpenDetails,
 }: SidebarCategoryProps) {
   const { t } = useTranslation();
   const [categoryExpandedStatePref] = useGlobalPref('categoryExpandedState');
@@ -67,6 +84,11 @@ export function SidebarCategory({
   const { handleContextMenu } = useContextMenu({
     triggerRef,
     items: [
+      onOpenDetails && {
+        name: 'details',
+        text: t('Details'),
+        onClick: () => onOpenDetails(category.id),
+      },
       {
         name: 'rename',
         text: t('Rename'),
@@ -98,17 +120,26 @@ export function SidebarCategory({
       }}
       ref={triggerRef}
     >
-      <TextOneLine data-testid="category-name">{category.name}</TextOneLine>
+      <TextOneLine
+        data-testid="category-name"
+        style={{ color: theme.tableText }}
+      >
+        {category.name}
+      </TextOneLine>
       <View style={{ flexShrink: 0, marginLeft: 5 }}>
         <Button
           variant="bare"
           className="hover-visible"
-          style={{ color: 'currentColor', padding: 3 }}
+          style={{
+            color: theme.pageTextLight,
+            padding: 3,
+            borderRadius: radius.sm,
+          }}
           onPress={handleContextMenu}
         >
           <SvgCheveronDown
-            width={14}
-            height={14}
+            width={13}
+            height={13}
             style={{ color: 'currentColor' }}
           />
         </Button>
@@ -118,6 +149,29 @@ export function SidebarCategory({
         dragging={dragging}
         goalsShown={goalsShown}
       />
+      {onOpenDetails && !temporary && (
+        <Button
+          variant="bare"
+          className={detailsButtonClassName}
+          aria-label={t('Category details')}
+          onPress={() => onOpenDetails(category.id)}
+          style={{
+            flexShrink: 0,
+            width: 24,
+            height: 24,
+            marginLeft: 2,
+            padding: 0,
+            color: theme.pageTextLight,
+            borderRadius: radius.sm,
+          }}
+        >
+          <SvgInformationOutline
+            width={13}
+            height={13}
+            style={{ color: 'currentColor' }}
+          />
+        </Button>
+      )}
     </View>
   );
 
@@ -132,7 +186,7 @@ export function SidebarCategory({
         },
         ...(!dragging &&
           !dragPreview && {
-            '&:hover .hover-visible': {
+            '&:hover .hover-visible, &:focus-within .hover-visible': {
               display: 'flex',
             },
           }),
@@ -173,7 +227,7 @@ export function SidebarCategory({
           }
         }}
         onBlur={() => onEditName(null)}
-        style={{ paddingLeft: 13, ...(isLast && { borderBottomWidth: 0 }) }}
+        style={{ paddingLeft: 17, ...(isLast && { borderBottomWidth: 0 }) }}
         inputProps={{
           placeholder: temporary ? t('New category name') : '',
         }}

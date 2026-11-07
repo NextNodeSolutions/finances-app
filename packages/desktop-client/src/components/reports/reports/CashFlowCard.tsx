@@ -1,5 +1,4 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import type { SVGAttributes } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { theme } from '@actual-app/components/theme';
@@ -7,13 +6,16 @@ import { View } from '@actual-app/components/view';
 import { send } from '@actual-app/core/platform/client/connection';
 import * as monthUtils from '@actual-app/core/shared/months';
 import type { CashFlowWidget } from '@actual-app/core/types/models';
-import { Bar, BarChart, LabelList } from 'recharts';
 
 import { FinancialText } from '#components/FinancialText';
 import { PrivacyFilter } from '#components/PrivacyFilter';
-import { Change } from '#components/reports/Change';
-import { useRechartsAnimation } from '#components/reports/chart-theme';
-import { Container } from '#components/reports/Container';
+import {
+  cardChartInset,
+  cardHeaderStyle,
+  cardHeadlineStyle,
+  chartBarRadius,
+  chartBaselineColor,
+} from '#components/reports/chart-theme';
 import { DateRange } from '#components/reports/DateRange';
 import { LoadingIndicator } from '#components/reports/LoadingIndicator';
 import { ReportCard } from '#components/reports/ReportCard';
@@ -24,71 +26,19 @@ import { useReport } from '#components/reports/useReport';
 import { useFormat } from '#hooks/useFormat';
 
 import { defaultTimeFrame } from './CashFlow';
+import { CashFlowLegendRow } from './CashFlowLegendRow';
+import type { CashFlowEntry } from './CashFlowLegendRow';
 
-type CustomLabelProps = {
-  value?: number;
-  name: string;
-  position?: 'left' | 'right';
-  x?: number;
-  y?: number;
-  width?: number;
-  height?: number;
-};
+const BAR_WIDTH = 28;
+const BAR_OPACITY = 0.85;
+const barRadius = chartBarRadius.map(corner => `${corner}px`).join(' ');
 
-function CustomLabel({
-  value = 0,
-  name,
-  position = 'left',
-  x = 0,
-  y = 0,
-  width: barWidth = 0,
-  height: barHeight = 0,
-}: CustomLabelProps) {
-  const format = useFormat();
-
-  const valueLengthOffset = 20;
-
-  const yOffset = barHeight < 25 ? 105 : y;
-
-  const labelXOffsets = {
-    right: 6,
-    left: -valueLengthOffset + 1,
-  };
-
-  const valueXOffsets = {
-    right: 6,
-    left: -valueLengthOffset + 2,
-  };
-
-  const anchorValue: {
-    right: SVGAttributes<SVGTextElement>['textAnchor'];
-    left: SVGAttributes<SVGTextElement>['textAnchor'];
-  } = {
-    right: 'start',
-    left: 'end',
-  };
-
-  return (
-    <>
-      <text
-        x={x + barWidth + labelXOffsets[position]}
-        y={yOffset + 10}
-        textAnchor={anchorValue[position]}
-        fill={theme.tableText}
-      >
-        {name}
-      </text>
-      <FinancialText
-        as="text"
-        x={x + barWidth + valueXOffsets[position]}
-        y={yOffset + 26}
-        textAnchor={anchorValue[position]}
-        fill={theme.tableText}
-      >
-        <PrivacyFilter>{format(value, 'financial')}</PrivacyFilter>
-      </FinancialText>
-    </>
-  );
+// Bars share one scale; a negative flow (refunds above spending) draws none.
+function getBarHeightPercent(value: number, largestFlow: number): number {
+  if (largestFlow <= 0) {
+    return 0;
+  }
+  return (Math.max(value, 0) / largestFlow) * 100;
 }
 
 type CashFlowCardProps = {
@@ -105,7 +55,7 @@ export function CashFlowCard({
   onMetaChange,
 }: CashFlowCardProps) {
   const { t } = useTranslation();
-  const animationProps = useRechartsAnimation();
+  const format = useFormat();
   const [latestTransaction, setLatestTransaction] = useState<string>('');
   const [nameMenuOpen, setNameMenuOpen] = useState(false);
 
@@ -139,6 +89,22 @@ export function CashFlowCard({
   const expenses = -(graphData?.expense || 0);
   const income = graphData?.income || 0;
 
+  const flows: CashFlowEntry[] = [
+    {
+      key: 'income',
+      label: t('Income'),
+      value: income,
+      color: theme.reportsNumberPositive,
+    },
+    {
+      key: 'expenses',
+      label: t('Expenses'),
+      value: expenses,
+      color: theme.reportsNumberNegative,
+    },
+  ];
+  const largestFlow = Math.max(income, expenses);
+
   return (
     <ReportCard
       widgetId={widgetId}
@@ -152,7 +118,7 @@ export function CashFlowCard({
         onPointerEnter={onCardHover}
         onPointerLeave={onCardHoverEnd}
       >
-        <View style={{ flexDirection: 'row', padding: 20 }}>
+        <View style={cardHeaderStyle}>
           <View style={{ flex: 1 }}>
             <ReportCardName
               name={meta?.name || t('Cash Flow')}
@@ -171,58 +137,61 @@ export function CashFlowCard({
           {data && (
             <View style={{ textAlign: 'right' }}>
               <PrivacyFilter activationFilters={[!isCardHovered]}>
-                <Change amount={income - expenses} />
+                <FinancialText style={cardHeadlineStyle}>
+                  {format(income - expenses, 'financial-with-sign')}
+                </FinancialText>
               </PrivacyFilter>
             </View>
           )}
         </View>
 
         {data ? (
-          <Container style={{ height: 'auto', flex: 1 }}>
-            {(width, height) => (
-              <BarChart
-                responsive
-                width={width}
-                height={height}
-                data={[
-                  {
-                    income,
-                    expenses,
-                  },
-                ]}
-                margin={{
-                  top: 10,
-                  bottom: 0,
-                }}
-              >
-                <Bar
-                  dataKey="income"
-                  fill={theme.reportsNumberPositive}
-                  barSize={14}
-                  {...animationProps}
-                >
-                  <LabelList
-                    dataKey="income"
-                    position="left"
-                    content={<CustomLabel name={t('Income')} />}
-                  />
-                </Bar>
-
-                <Bar
-                  dataKey="expenses"
-                  fill={theme.reportsNumberNegative}
-                  barSize={14}
-                  {...animationProps}
-                >
-                  <LabelList
-                    dataKey="expenses"
-                    position="right"
-                    content={<CustomLabel name={t('Expenses')} />}
-                  />
-                </Bar>
-              </BarChart>
-            )}
-          </Container>
+          <View
+            style={{
+              flex: 1,
+              minHeight: 0,
+              flexDirection: 'row',
+              alignItems: 'flex-end',
+              justifyContent: 'space-between',
+              gap: 24,
+              ...cardChartInset,
+            }}
+          >
+            <View
+              aria-hidden="true"
+              style={{
+                alignSelf: 'stretch',
+                flexDirection: 'row',
+                alignItems: 'flex-end',
+                gap: 8,
+                borderBottom: `1px solid ${chartBaselineColor}`,
+              }}
+            >
+              {flows.map(flow => (
+                <View
+                  key={flow.key}
+                  style={{
+                    width: BAR_WIDTH,
+                    height: `${getBarHeightPercent(flow.value, largestFlow)}%`,
+                    borderRadius: barRadius,
+                    backgroundColor: flow.color,
+                    opacity: BAR_OPACITY,
+                  }}
+                />
+              ))}
+            </View>
+            <View
+              style={{ flexBasis: 200, flexShrink: 1, minWidth: 0, gap: 6 }}
+            >
+              {flows.map(flow => (
+                <CashFlowLegendRow
+                  key={flow.key}
+                  entry={flow}
+                  swatchOpacity={BAR_OPACITY}
+                />
+              ))}
+            </View>
+          </View>
         ) : (
           <LoadingIndicator />
         )}

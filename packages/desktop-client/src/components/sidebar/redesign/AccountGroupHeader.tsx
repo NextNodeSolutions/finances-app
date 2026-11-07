@@ -12,7 +12,7 @@ import { Input } from '@actual-app/components/input';
 import { styles } from '@actual-app/components/styles';
 import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
-import { radius, spacing } from '@actual-app/components/tokens';
+import { radius } from '@actual-app/components/tokens';
 import { View } from '@actual-app/components/view';
 import type {
   AccountEntity,
@@ -34,7 +34,16 @@ import { CollapseChevron } from './CollapseChevron';
 import { CountPill } from './CountPill';
 import { DragHandle } from './DragHandle';
 import { SidebarBalance } from './SidebarBalance';
-import { dropZoneStyle, groupLabelStyle } from './styles';
+import {
+  dropZoneStyle,
+  groupLabelStyle,
+  rowTransition,
+  TREE_COLUMN_GAP,
+  TREE_LEAD_COLUMN,
+  TREE_ROW_PADDING_LEFT,
+  TREE_ROW_PADDING_RIGHT,
+  treeFocusRing,
+} from './styles';
 import { SyncErrorRollup } from './SyncErrorRollup';
 import { useTreeItemEditing } from './treeItemEditing';
 import { treeKeys } from './treeKeys';
@@ -106,8 +115,8 @@ export function AccountGroupHeader({
       onAction={() => treeState?.toggleKey(key)}
       className={css({
         outline: 'none',
-        borderRadius: radius.sm,
-        marginBottom: spacing.xxs,
+        borderRadius: radius.md,
+        marginBottom: 1,
         ...(isDropZoneActive && dropZoneStyle),
         '&[data-dragging]': { opacity: 0.5 },
       })}
@@ -118,14 +127,19 @@ export function AccountGroupHeader({
             className={css({
               flexDirection: 'row',
               alignItems: 'center',
-              gap: spacing.xs,
-              paddingBlock: spacing.xs,
-              paddingLeft: spacing.xs,
-              paddingRight: spacing.sm,
-              borderRadius: radius.sm,
+              gap: TREE_COLUMN_GAP,
+              height: 28,
+              paddingLeft: TREE_ROW_PADDING_LEFT,
+              paddingRight: TREE_ROW_PADDING_RIGHT,
+              borderRadius: radius.md,
               cursor: 'pointer',
-              '[data-hovered] > &, [data-focus-visible] > &': {
+              transition: rowTransition,
+              '[data-hovered] > &': {
                 backgroundColor: theme.sidebarItemBackgroundHover,
+              },
+              '[data-focus-visible] > &': {
+                backgroundColor: theme.sidebarItemBackgroundHover,
+                ...treeFocusRing,
               },
             })}
           >
@@ -139,12 +153,18 @@ export function AccountGroupHeader({
               className={css({
                 display: 'flex',
                 alignItems: 'center',
-                padding: spacing.xxs,
+                justifyContent: 'center',
+                width: TREE_LEAD_COLUMN,
+                height: TREE_LEAD_COLUMN,
+                flexShrink: 0,
+                padding: 0,
                 border: 'none',
+                borderRadius: radius.sm,
                 background: 'none',
                 color: 'inherit',
                 cursor: 'pointer',
                 outline: 'none',
+                '&[data-focus-visible]': treeFocusRing,
               })}
             >
               <CollapseChevron isOpen={isExpanded} />
@@ -153,7 +173,7 @@ export function AccountGroupHeader({
               <InitialFocus>
                 <Input
                   aria-label={t('Group name')}
-                  style={{ flex: 1, padding: 0, fontSize: 12 }}
+                  style={{ flex: 1, padding: '2px 6px', fontSize: 12.5 }}
                   defaultValue={group.name}
                   onKeyDown={e => e.stopPropagation()}
                   onEnter={newGroupName => {
@@ -179,7 +199,7 @@ export function AccountGroupHeader({
                     group.id,
                     side === 'off',
                   )}
-                  style={{ fontSize: 11, color: groupLabelStyle.color }}
+                  style={{ fontWeight: 500, color: groupLabelStyle.color }}
                 />
               </>
             )}

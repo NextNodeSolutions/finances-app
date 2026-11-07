@@ -1,3 +1,5 @@
+export { Overview } from '#components/overview/index';
+
 export { Budget } from '#components/budget';
 
 export { Schedules } from '#components/schedules';

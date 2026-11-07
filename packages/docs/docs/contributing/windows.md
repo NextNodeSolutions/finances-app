@@ -7,15 +7,15 @@ Many of the build scripts are bash scripts and not natively invocable in Windows
 3. Install Node v22.x or greater.
 4. Clone this repo.
 5. Using Git Bash (run as administrator), change to the root of this repo.
-6. From inside the bash shell, run `yarn install`.
-7. From still inside the shell, run `yarn start:browser`.
+6. From inside the bash shell, run `pnpm install`.
+7. From still inside the shell, run `pnpm start:browser`.
 8. Open your browser to [http://localhost:3001](http://localhost:3001).
 
 ## How to Build the Electron App on Windows
 
 1. Follow steps 1 - 6 above.
-2. Run `yarn start`. If you get an error about bundle.desktop.js, just <Key mod="ctrl" k="c" /> and rerun `yarn start`.
-3. If you get an error from electron, run `yarn rebuild-electron` and rerun `yarn start`.
+2. Run `pnpm start`. If you get an error about bundle.desktop.js, just <Key mod="ctrl" k="c" /> and rerun `pnpm start`.
+3. If you get an error from electron, run `pnpm rebuild-electron` and rerun `pnpm start`.
 
 # Errors
 

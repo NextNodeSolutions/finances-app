@@ -172,7 +172,9 @@ const ActiveShapeMobile = ({
         x={cx}
         y={cy + chartOuterRadius * Math.sin(-RADIAN * 270) + 17}
         textAnchor="middle"
-        fill={fill}
+        fontSize={12}
+        fontWeight={500}
+        fill={theme.pageText}
       >
         {yAxis}
       </text>
@@ -182,7 +184,8 @@ const ActiveShapeMobile = ({
           x={cx + chartOuterRadius * Math.cos(-RADIAN * 240) - 30}
           y={ey}
           textAnchor="end"
-          fill={fill}
+          fontSize={12}
+          fill={theme.pageText}
         >
           {format(value, 'financial')}
         </FinancialText>
@@ -190,7 +193,7 @@ const ActiveShapeMobile = ({
           x={cx + chartOuterRadius * Math.cos(-RADIAN * 330) + 10}
           y={ey}
           textAnchor="start"
-          fill="#999"
+          fill={theme.pageTextSubdued}
         >
           {`${(percent * 100).toFixed(2)}%`}
         </text>
@@ -279,8 +282,15 @@ const ActiveShapeDesktop = ({
         stroke={fill}
         fill="none"
       />
-      <circle cx={ex} cy={ey} r={3} fill={fill} stroke="none" />
-      <text x={labelX} y={ey} textAnchor={textAnchor} fill={fill}>
+      <circle cx={ex} cy={ey} r={2.5} fill={fill} stroke="none" />
+      <text
+        x={labelX}
+        y={ey}
+        textAnchor={textAnchor}
+        fontSize={12}
+        fontWeight={500}
+        fill={theme.pageText}
+      >
         {yAxis}
       </text>
       <PrivacyFilter>
@@ -290,11 +300,18 @@ const ActiveShapeDesktop = ({
           y={ey}
           dy={18}
           textAnchor={textAnchor}
-          fill={fill}
+          fontSize={12}
+          fill={theme.pageTextLight}
         >
           {format(value, 'financial')}
         </FinancialText>
-        <text x={labelX} y={ey} dy={36} textAnchor={textAnchor} fill="#999">
+        <text
+          x={labelX}
+          y={ey}
+          dy={36}
+          textAnchor={textAnchor}
+          fill={theme.pageTextSubdued}
+        >
           {`(${(percent * 100).toFixed(2)}%)`}
         </text>
       </PrivacyFilter>
@@ -447,6 +464,8 @@ export function DonutGraph({
                   <Pie
                     dataKey={val => getVal(val)}
                     nameKey="name"
+                    stroke={theme.cardBackground}
+                    strokeWidth={1.5}
                     {...animationProps}
                     animationBegin={100}
                     data={adjustedGroupData}
@@ -514,6 +533,7 @@ export function DonutGraph({
                           endDate: data.endDate,
                           field: 'group',
                           id: item.id,
+                          name: item.name,
                           uncategorizedId: item.uncategorizedId,
                         });
                       }
@@ -524,6 +544,8 @@ export function DonutGraph({
                   <Pie
                     dataKey={val => getVal(val)}
                     nameKey="name"
+                    stroke={theme.cardBackground}
+                    strokeWidth={1.5}
                     {...animationProps}
                     animationBegin={100}
                     data={flatCategories}
@@ -597,6 +619,7 @@ export function DonutGraph({
                           endDate: data.endDate,
                           field: 'category',
                           id: item.id,
+                          name: item.name,
                           uncategorizedId: item.uncategorizedId,
                         });
                       }
@@ -624,6 +647,8 @@ export function DonutGraph({
                 <Pie
                   dataKey={val => getVal(val)}
                   nameKey={yAxis}
+                  stroke={theme.cardBackground}
+                  strokeWidth={1.5}
                   {...animationProps}
                   animationBegin={100}
                   data={data[splitData]?.map(item => ({ ...item })) ?? []}
@@ -690,6 +715,7 @@ export function DonutGraph({
                               endDate: data.endDate,
                               field: groupBy.toLowerCase(),
                               id: item.id,
+                              name: item.name,
                               uncategorizedId: item.uncategorizedId,
                             };
 

@@ -71,9 +71,9 @@ When making changes to Actual, follow this workflow:
 
 1. **Read relevant files**: Understand the current implementation before making changes.
 2. **Make focused, incremental changes**: Keep changes small and focused on a single feature or bugfix.
-3. **Run type checking**: Always run `yarn typecheck` before committing to catch type errors.
-4. **Run linting**: Run `yarn lint:fix` to ensure code follows style guidelines.
-5. **Run relevant tests**: Run tests for the code you've changed (`yarn test` for all tests, or workspace-specific commands).
+3. **Run type checking**: Always run `pnpm typecheck` before committing to catch type errors.
+4. **Run linting**: Run `pnpm lint:fix` to ensure code follows style guidelines.
+5. **Run relevant tests**: Run tests for the code you've changed (`pnpm test` for all tests, or workspace-specific commands).
 6. **Fix any issues**: Address any type errors, linter errors, or test failures before submitting your PR.
 
 For more details, see the [Development Setup Guide](./development-setup.md) and [Testing Guide](./testing.md).
@@ -109,7 +109,7 @@ When you open a PR please remember to do the following:
 
 ### Writing Good Release Notes
 
-Before creating your pull request, run the command `yarn generate:release-notes`. This will guide you through the steps necessary for creating a release note for your change. You will be asked the following questions:
+Before creating your pull request, run the command `pnpm generate:release-notes`. This will guide you through the steps necessary for creating a release note for your change. You will be asked the following questions:
 
 1. Comma-separated GitHub username(s) - your GitHub username, or if multiple people are involved, you can specify them all (e.g. `username1, username2`)
 2. Filename slug - a short descriptive slug used as `upcoming-release-notes/<slug>.md`. Auto-filled from your branch name (or PR title if one is detected).

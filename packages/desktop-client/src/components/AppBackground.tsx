@@ -3,6 +3,7 @@ import { animated, useTransition } from 'react-spring';
 
 import { Block } from '@actual-app/components/block';
 import { AnimatedLoading } from '@actual-app/components/icons/AnimatedLoading';
+import { styles } from '@actual-app/components/styles';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 import { css } from '@emotion/css';
@@ -19,9 +20,9 @@ export function AppBackground({ isLoading }: AppBackgroundProps) {
   const loadingText = useSelector(state => state.app.loadingText);
   const showLoading = isLoading || loadingText !== null;
   const transitions = useTransition(loadingText, {
-    from: { opacity: 0, transform: 'translateY(-100px)' },
-    enter: { opacity: 1, transform: 'translateY(0)' },
-    leave: { opacity: 0, transform: 'translateY(100px)' },
+    from: { opacity: 0 },
+    enter: { opacity: 1 },
+    leave: { opacity: 0 },
   });
 
   return (
@@ -43,10 +44,17 @@ export function AppBackground({ isLoading }: AppBackgroundProps) {
                 alignItems: 'center',
               })}
             >
-              <Block style={{ marginBottom: 20, fontSize: 18 }}>
+              <Block
+                style={{
+                  ...styles.display,
+                  marginBottom: 20,
+                  fontSize: 22,
+                  lineHeight: '28px',
+                }}
+              >
                 {loadingText}
               </Block>
-              <AnimatedLoading width={25} color={theme.pageText} />
+              <AnimatedLoading width={20} color={theme.pageTextLight} />
             </View>
           </animated.div>
         ))}

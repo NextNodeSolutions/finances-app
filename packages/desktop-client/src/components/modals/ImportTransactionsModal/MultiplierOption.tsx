@@ -22,9 +22,18 @@ export function MultiplierOption({
 }: MultiplierOptionProps) {
   const { t } = useTranslation();
   return (
-    <View style={{ flexDirection: 'row', gap: 10, height: 28 }}>
+    <View
+      style={{
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: 10,
+        height: 28,
+      }}
+    >
       <LabeledCheckbox
         id="add_multiplier"
+        // The input follows its label instead of the far edge of the column.
+        style={{ flex: '0 1 auto' }}
         checked={multiplierEnabled}
         onChange={onToggle}
       >

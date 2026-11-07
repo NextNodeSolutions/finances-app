@@ -12,10 +12,11 @@ export function SidebarFooter() {
 
   return (
     <View
+      data-testid="sidebar-footer"
       style={{
         flexShrink: 0,
         borderTop: `1px solid ${theme.sidebarBorder}`,
-        padding: spacing.sm,
+        padding: `${spacing.sm}px ${spacing.sm}px ${spacing.xs + spacing.xxs}px`,
       }}
     >
       <NavRow title={t('Settings')} Icon={SvgCog} to="/settings" />

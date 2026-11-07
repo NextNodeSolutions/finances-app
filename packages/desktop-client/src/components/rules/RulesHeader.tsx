@@ -1,8 +1,14 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 
-import { Cell, SelectCell, TableHeader } from '#components/table';
+import { Cell, Field, SelectCell, TableHeader } from '#components/table';
 import { useSelectedDispatch, useSelectedItems } from '#hooks/useSelected';
+
+import {
+  ARROW_COLUMN_WIDTH,
+  EDIT_COLUMN_WIDTH,
+  STAGE_COLUMN_WIDTH,
+} from './ruleTableColumns';
 
 export function RulesHeader() {
   const { t } = useTranslation();
@@ -19,8 +25,15 @@ export function RulesHeader() {
           dispatchSelected({ type: 'select-all', isRangeSelect: e.shiftKey })
         }
       />
-      <Cell value={t('Stage')} width={50} />
-      <Cell value={t('Rule')} width="flex" />
+      <Cell
+        value={t('Stage')}
+        width={STAGE_COLUMN_WIDTH}
+        valueStyle={{ paddingLeft: 10 }}
+      />
+      <Cell value={t('If')} width="flex" />
+      <Field width={ARROW_COLUMN_WIDTH} />
+      <Cell value={t('Then')} width="flex" />
+      <Field width={EDIT_COLUMN_WIDTH} />
     </TableHeader>
   );
 }

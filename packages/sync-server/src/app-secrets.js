@@ -9,6 +9,7 @@ import {
 } from './util/middlewares';
 import { isValidFileId } from './util/paths';
 
+/** @type {express.Express} */
 const app = express();
 
 export { app as handlers };

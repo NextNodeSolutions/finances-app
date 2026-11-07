@@ -8,13 +8,13 @@
   "scripts": {
     "sync:ios": "cap sync ios",
     "sync:android": "cap sync android",
-    "build:ios": "yarn sync:ios && xcodebuild -workspace ios/App/App.xcworkspace -scheme App -archivePath ./build/App.xcarchive archive CODE_SIGN_IDENTITY=\"\" CODE_SIGNING_REQUIRED=NO CODE_SIGNING_ALLOWED=NO",
-    "build:android": "yarn sync:android && cd android/ && ./gradlew assembleDebug && cp ./app/build/outputs/apk/debug/app-debug.apk ../build/",
-    "release:ios": "yarn sync:ios && cap build ios",
-    "release:android": "yarn sync:android && cap build android",
-    "build": "yarn build:ios && yarn build:android",
-    "start:ios": "yarn build:ios && cap run ios --live-reload --port 3001",
-    "start:android": "yarn build:android && cap run android --live-reload --port 3001"
+    "build:ios": "pnpm run sync:ios && xcodebuild -workspace ios/App/App.xcworkspace -scheme App -archivePath ./build/App.xcarchive archive CODE_SIGN_IDENTITY=\"\" CODE_SIGNING_REQUIRED=NO CODE_SIGNING_ALLOWED=NO",
+    "build:android": "pnpm run sync:android && cd android/ && ./gradlew assembleDebug && cp ./app/build/outputs/apk/debug/app-debug.apk ../build/",
+    "release:ios": "pnpm run sync:ios && cap build ios",
+    "release:android": "pnpm run sync:android && cap build android",
+    "build": "pnpm run build:ios && pnpm run build:android",
+    "start:ios": "pnpm run build:ios && cap run ios --live-reload --port 3001",
+    "start:android": "pnpm run build:android && cap run android --live-reload --port 3001"
   },
   "dependencies": {
     "@actual-app/web": "workspace:*",

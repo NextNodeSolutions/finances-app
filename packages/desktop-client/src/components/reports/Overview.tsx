@@ -22,8 +22,8 @@ import type {
   MarkdownWidget,
 } from '@actual-app/core/types/models';
 
-import { MOBILE_NAV_HEIGHT } from '#components/mobile/MobileNavTabs';
-import { MobilePageHeader, Page } from '#components/Page';
+import { MOBILE_NAV_INSET } from '#components/mobile/MobileNavTabs';
+import { Page } from '#components/Page';
 import { useAccounts } from '#hooks/useAccounts';
 import {
   useDashboardPages,
@@ -49,8 +49,9 @@ import {
   useUpdateDashboardWidgetsMutation,
 } from '#reports/mutations';
 
+import { reportPageGutter } from './chart-theme';
 import { NON_DRAGGABLE_AREA_CLASS_NAME } from './constants';
-import { DashboardHeader } from './DashboardHeader';
+import { DashboardRename } from './DashboardRename';
 import './overview.scss';
 import { DashboardSelector } from './DashboardSelector';
 import { LoadingIndicator } from './LoadingIndicator';
@@ -69,6 +70,18 @@ import { NetWorthCard } from './reports/NetWorthCard';
 import { SankeyCard } from './reports/SankeyCard';
 import { SpendingCard } from './reports/SpendingCard';
 import { SummaryCard } from './reports/SummaryCard';
+import { ReportsHeader } from './ReportsHeader';
+import { ReportsMobileHeader } from './ReportsMobileHeader';
+import { ReportsTabs } from './ReportsTabs';
+
+// Generous gutters between cards. With the page's own padding, the grid
+// padding puts the cards on the page title's gutter.
+const GRID_GAP: readonly [number, number] = [16, 16];
+const PAGE_PADDING = 10;
+const GRID_PADDING: readonly [number, number] = [
+  reportPageGutter - PAGE_PADDING,
+  12,
+];
 
 function getWidgetMinHeight(widget: DashboardWidgetEntity) {
   switch (widget.type) {
@@ -469,70 +482,38 @@ export function Overview({ dashboard }: OverviewProps) {
     <Page
       header={
         isNarrowWidth ? (
-          <View>
-            <MobilePageHeader
-              title={
-                <View
-                  style={{
-                    overflow: 'hidden',
-                    textOverflow: 'ellipsis',
-                    whiteSpace: 'nowrap',
-                  }}
-                >
-                  <Trans>Reports</Trans>: {dashboard.name}
-                </View>
-              }
-            />
-            <View
-              style={{
-                padding: '5px',
-                borderBottom: '1px solid ' + theme.pillBorder,
-                backgroundColor: theme.mobilePageBackground,
-              }}
-            >
-              <DashboardSelector
-                dashboards={dashboardPages}
-                currentDashboard={dashboard}
-              />
-            </View>
-          </View>
-        ) : (
-          <View
-            style={{
-              flexDirection: 'row',
-              justifyContent: 'space-between',
-              marginRight: 15,
-              alignItems: 'center',
-            }}
-          >
-            <DashboardHeader dashboard={dashboard} />
-
-            <View
-              style={{
-                flexDirection: 'row',
-                justifyContent: 'space-between',
-                gap: 5,
-                alignItems: 'stretch',
-              }}
-            >
-              {currentBreakpoint === 'desktop' && (
-                <>
-                  {/* Dashboard Selector */}
+          <ReportsMobileHeader
+            tabs={
+              <ReportsTabs
+                activeTab="dashboard"
+                dashboardTab={
                   <DashboardSelector
                     dashboards={dashboardPages}
                     currentDashboard={dashboard}
                   />
-
-                  <View
-                    style={{
-                      height: 'auto',
-                      borderLeft: `1.5px solid ${theme.pillBorderDark}`,
-                      borderRadius: 0.75,
-                      marginLeft: 7,
-                      marginRight: 7,
-                    }}
-                  />
-
+                }
+              />
+            }
+          />
+        ) : (
+          <ReportsHeader
+            tabs={
+              <>
+                <ReportsTabs
+                  activeTab="dashboard"
+                  dashboardTab={
+                    <DashboardSelector
+                      dashboards={dashboardPages}
+                      currentDashboard={dashboard}
+                    />
+                  }
+                />
+                <DashboardRename key={dashboard.id} dashboard={dashboard} />
+              </>
+            }
+            actions={
+              currentBreakpoint === 'desktop' && (
+                <>
                   <DialogTrigger>
                     <Button variant="primary" isDisabled={isImporting}>
                       <Trans>Add new widget</Trans>
@@ -681,9 +662,12 @@ export function Overview({ dashboard }: OverviewProps) {
                   <DialogTrigger>
                     <Button variant="bare" aria-label={t('Menu')}>
                       <SvgDotsHorizontalTriple
-                        width={15}
-                        height={15}
-                        style={{ transform: 'rotateZ(90deg)' }}
+                        width={14}
+                        height={14}
+                        style={{
+                          transform: 'rotateZ(90deg)',
+                          color: theme.pageTextLight,
+                        }}
                       />
                     </Button>
                     <Popover>
@@ -740,12 +724,12 @@ export function Overview({ dashboard }: OverviewProps) {
                     </Popover>
                   </DialogTrigger>
                 </>
-              )}
-            </View>
-          </View>
+              )
+            }
+          />
         )
       }
-      padding={10}
+      padding={PAGE_PADDING}
     >
       {isImporting ? (
         <LoadingIndicator message={t('Import is running...')} />
@@ -754,7 +738,7 @@ export function Overview({ dashboard }: OverviewProps) {
           <View
             data-testid="reports-overview"
             innerRef={containerRef}
-            style={{ userSelect: 'none', paddingBottom: MOBILE_NAV_HEIGHT }}
+            style={{ userSelect: 'none', paddingBottom: MOBILE_NAV_INSET }}
           >
             {isMounted && (
               <ReactGridLayout
@@ -763,6 +747,8 @@ export function Overview({ dashboard }: OverviewProps) {
                 gridConfig={{
                   cols: currentBreakpoint === 'desktop' ? 12 : 1,
                   rowHeight: 100,
+                  margin: GRID_GAP,
+                  containerPadding: GRID_PADDING,
                 }}
                 dragConfig={{
                   enabled: currentBreakpoint === 'desktop' && isEditing,

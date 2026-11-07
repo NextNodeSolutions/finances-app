@@ -4,10 +4,13 @@ import { Trans, useTranslation } from 'react-i18next';
 import { Input } from '@actual-app/components/input';
 import { Paragraph } from '@actual-app/components/paragraph';
 import { Select } from '@actual-app/components/select';
+import { styles } from '@actual-app/components/styles';
 import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
+import { elevation, radius, spacing } from '@actual-app/components/tokens';
 import { View } from '@actual-app/components/view';
 
+import { sectionHeadingStyle } from '#components/settings/SettingsGroup';
 import { MIN_CUSTOM_INTERVAL_MINUTES } from '#hooks/useAutomaticBankSync';
 import { useSyncedPref } from '#hooks/useSyncedPref';
 
@@ -92,19 +95,25 @@ export function AutomaticSyncSettings() {
   return (
     <View
       style={{
-        border: `1px solid ${theme.tableBorder}`,
-        borderRadius: 8,
-        padding: 16,
-        backgroundColor: theme.tableBackground,
-        gap: 12,
+        border: `1px solid ${theme.settingsCardBorder}`,
+        borderRadius: radius.lg,
+        padding: spacing.lg + spacing.xs,
+        backgroundColor: theme.settingsCardBackground,
+        boxShadow: elevation.card,
+        gap: spacing.md,
       }}
     >
-      <View style={{ gap: 4 }}>
-        <Text style={{ fontSize: 17, fontWeight: 600 }}>
+      <View style={{ gap: spacing.xs }}>
+        <Text style={sectionHeadingStyle}>
           <Trans>Automatic syncing</Trans>
         </Text>
         <Paragraph
-          style={{ fontSize: 15, color: theme.pageTextSubdued, margin: 0 }}
+          style={{
+            ...styles.smallText,
+            lineHeight: '18px',
+            color: theme.pageTextLight,
+            margin: 0,
+          }}
         >
           <Trans>
             Download new transactions from your linked accounts in the
@@ -123,7 +132,7 @@ export function AutomaticSyncSettings() {
           flexWrap: 'wrap',
         }}
       >
-        <label htmlFor="bank-sync-interval">
+        <label htmlFor="bank-sync-interval" style={{ fontWeight: 500 }}>
           <Trans>Sync accounts</Trans>
         </label>
         <Select
