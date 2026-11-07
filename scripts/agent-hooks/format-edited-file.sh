@@ -3,7 +3,7 @@
 #
 # Formats and lints just the single file the agent edited, so generated code
 # stays consistent with oxfmt/oxlint without relying on the agent remembering to
-# run `yarn lint:fix`. See AGENTS.md "Agent hooks".
+# run `pnpm lint:fix`. See AGENTS.md "Agent hooks".
 #
 # `--type-aware` is intentionally skipped here to keep the edit loop fast; the
 # type-aware pass still runs at commit time via nano-staged.
