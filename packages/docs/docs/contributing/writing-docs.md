@@ -189,7 +189,7 @@ in_app_notification: true
 
 Posts without it stay on the website only, so use it for announcements the whole community should see and leave it off how-to articles and other evergreen content.
 
-The feed itself is the generated file `packages/desktop-client/src/data/news.json`. CI regenerates and commits it on your pull request, so check that the entry for your post looks right there; you can also run `pnpm generate:news-feed` locally.
+The feed itself is the generated file `packages/desktop-client/src/data/news.json`. Run `pnpm generate:news-feed` and check that the entry for your post looks right there.
 
 ### Keyboard Shortcuts
 
@@ -272,13 +272,6 @@ Place the content inside the details-tags.
 ```
 
 </details>
-
-## How To Fix Spelling Errors
-
-As part of the build process, GitHub Actions runs a spell checker ([typos](https://github.com/crate-ci/typos)) on the documentation. If it finds any spelling error, it will be reported in the build output on GitHub. You must fix this by editing the file and correcting the spelling error.
-
-If the checker mistakes a word, you can allow it by adding it to the `[default.extend-words]` section of `/.github/actions/docs-spelling/typos.toml`, mapped to itself (for example `HSA = "HSA"`).
-This will prevent it from being reported as a spelling error in the future.
 
 ## Naming Standards
 
