@@ -4,8 +4,9 @@
   "type": "module",
   "scripts": {
     "tsx": "bin/tsx",
-    "test": "vitest --run",
-    "typecheck": "tsgo -b"
+    "test": "pnpm run test:unit",
+    "test:unit": "vitest --run && pnpm --workspace-root exec vitest --run --root bin",
+    "type-check": "pnpm --workspace-root run typecheck:root && tsgo -b"
   },
   "devDependencies": {
     "@octokit/rest": "catalog:",

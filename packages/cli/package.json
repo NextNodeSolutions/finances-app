@@ -28,8 +28,9 @@
   },
   "scripts": {
     "build": "vite build",
-    "test": "vitest --run",
-    "typecheck": "tsgo -b"
+    "test": "pnpm run test:unit",
+    "test:unit": "vitest --run",
+    "type-check": "tsgo -b"
   },
   "dependencies": {
     "@actual-app/api": "workspace:*",

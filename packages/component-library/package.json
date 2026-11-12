@@ -56,10 +56,11 @@
   },
   "scripts": {
     "generate:icons": "rm src/icons/*/*.tsx; cd src/icons && svgr --template template.ts --index-template index-template.ts --typescript --expand-props start -d . .",
-    "test": "ENV=web vitest --run -c vitest.web.config.ts",
+    "test": "pnpm run test:unit",
+    "test:unit": "ENV=web vitest --run -c vitest.web.config.ts",
     "start:storybook": "storybook dev -p 6006",
     "build:storybook": "storybook build",
-    "typecheck": "tsgo -b"
+    "type-check": "tsgo -b"
   },
   "dependencies": {
     "@emotion/css": "catalog:",

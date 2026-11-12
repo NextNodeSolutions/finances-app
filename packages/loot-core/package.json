@@ -187,10 +187,11 @@
   "scripts": {
     "build:node": "cross-env NODE_ENV=production vite build --config ./vite.desktop.config.mts",
     "watch:node": "cross-env NODE_ENV=development vite build --config ./vite.desktop.config.mts --watch",
-    "test": "npm-run-all -cp 'test:*'",
+    "test": "pnpm run test:integration",
+    "test:integration": "npm-run-all -cp test:node test:web",
     "test:node": "ENV=node vitest --run",
     "test:web": "ENV=web vitest --run -c vitest.web.config.ts",
-    "typecheck": "tsgo -b && tsc-strict",
+    "type-check": "tsgo -b && tsc-strict",
     "build": "tsgo -b",
     "prepack": "pnpm run build && node scripts/add-types-conditions.mts",
     "postpack": "node scripts/restore-package-json.mts"
