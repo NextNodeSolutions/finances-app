@@ -94,8 +94,3 @@ Run all pnpm commands from the repo root.
 6. Optionally Read one generated PNG to sanity-check it shows the intended UI,
    then commit the test + PNGs (commit messages need the `[AI]` prefix — see
    the committing-actual-changes skill).
-
-## Fallback without docker
-
-Commit only the test file; CI generates the snapshots when someone comments
-`/update-vrt` on the PR (`.github/workflows/vrt-update-generate.yml`).
