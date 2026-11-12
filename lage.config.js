@@ -3,9 +3,9 @@ const BUILD_OUTPUT_GLOBS = ['lib-dist/**', 'dist/**', 'build/**', '@types/**'];
 /** @type {import('lage').ConfigOptions} */
 module.exports = {
   pipeline: {
-    typecheck: {
+    'type-check': {
       type: 'npmScript',
-      dependsOn: ['^typecheck'],
+      dependsOn: ['^type-check'],
     },
     test: {
       type: 'npmScript',

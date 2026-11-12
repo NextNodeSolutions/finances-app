@@ -50,9 +50,11 @@
   },
   "scripts": {
     "build": "vite build && tsgo --emitDeclarationOnly && vite build --config vite.browser.config.mts",
-    "test": "vitest --run",
-    "e2e": "playwright test",
-    "typecheck": "tsgo -b && tsc-strict"
+    "test": "pnpm run test:integration",
+    "test:integration": "vitest --run",
+    "e2e": "pnpm run test:e2e",
+    "test:e2e": "pnpm --workspace-root run build:api && playwright test",
+    "type-check": "tsgo -b && tsc-strict"
   },
   "dependencies": {
     "@actual-app/core": "workspace:*",

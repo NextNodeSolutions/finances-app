@@ -157,12 +157,14 @@
     "build": "vite build",
     "build:browser": "vite build --mode=browser",
     "generate:i18n": "i18next",
-    "test": "vitest --run",
+    "test": "pnpm run test:unit",
+    "test:unit": "vitest --run",
     "validate:theme-catalog": "node --experimental-strip-types bin/validate-theme-catalog.mts",
-    "e2e": "npx playwright test --browser=chromium",
+    "e2e": "pnpm run test:e2e",
+    "test:e2e": "npx playwright test --browser=chromium",
     "vrt": "cross-env VRT=true npx playwright test --browser=chromium",
     "playwright": "playwright",
-    "typecheck": "tsgo -b && tsc-strict"
+    "type-check": "tsgo -b && tsc-strict"
   },
   "devDependencies": {
     "@actual-app/components": "workspace:*",

@@ -35,8 +35,9 @@
     "build:node": "vite build",
     "proto:generate": "./bin/generate-proto",
     "build": "pnpm run build:node && tsgo -b",
-    "test": "vitest --run",
-    "typecheck": "tsgo -b"
+    "test": "pnpm run test:unit",
+    "test:unit": "vitest --run",
+    "type-check": "tsgo -b"
   },
   "dependencies": {
     "@bufbuild/protobuf": "^2.16.0",

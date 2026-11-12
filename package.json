@@ -47,7 +47,7 @@
     "test": "lage test --continue",
     "test:debug": "lage test --no-cache --continue",
     "e2e": "pnpm --filter @actual-app/web run e2e",
-    "e2e:desktop": "pnpm run build:desktop --skip-exe-build --skip-translations && pnpm --filter desktop-electron run e2e",
+    "e2e:desktop": "pnpm --filter desktop-electron run e2e",
     "playwright": "pnpm --filter @actual-app/web run playwright",
     "vrt": "pnpm --filter @actual-app/web run vrt",
     "vrt:docker": "./bin/run-vrt",
@@ -57,7 +57,8 @@
     "lint:fix": "oxfmt . && oxlint --fix --type-aware --quiet",
     "knip": "knip",
     "install:server": "pnpm install --prod --frozen-lockfile --filter @actual-app/sync-server...",
-    "typecheck": "tsgo -p tsconfig.root.json --noEmit && lage typecheck",
+    "typecheck": "lage type-check",
+    "typecheck:root": "tsgo -p tsconfig.root.json --noEmit",
     "check:tsconfig-references": "workspaces-to-typescript-project-references --check",
     "sync:tsconfig-references": "workspaces-to-typescript-project-references",
     "prepare": "husky"

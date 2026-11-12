@@ -9,11 +9,13 @@
     "update-client": "bin/update-client",
     "build": "pnpm run build:dist && electron-builder",
     "build:dist": "tsgo && pnpm run copy-static-assets",
-    "test": "vitest --run",
-    "typecheck": "tsgo -b && tsc-strict",
+    "test": "pnpm run test:unit",
+    "test:unit": "vitest --run",
+    "type-check": "tsgo -b && tsc-strict",
     "copy-static-assets": "copyfiles --exclude 'build/**/*' **/*.html icons/**/* build/desktop-electron",
     "watch": "pnpm run build:dist && cross-env ACTUAL_DOCUMENT_DIR=\"../../data\" ACTUAL_DATA_DIR=\"../../data\" electron .",
-    "e2e": "npx playwright test"
+    "e2e": "pnpm run test:e2e",
+    "test:e2e": "pnpm --workspace-root run build:desktop --skip-exe-build --skip-translations && npx playwright test"
   },
   "dependencies": {
     "@actual-app/sync-server": "workspace:*",
